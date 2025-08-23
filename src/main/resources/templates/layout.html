@@ -1,23 +1,37 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
 <head>
     <meta charset="UTF-8">
     <title>Mi Aplicación</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+   
 </head>
+
 <body>
 
+    <div class="flex w-full h-[100vh] overflow-hidden">
+        <div  th:replace="~{header.html :: header}"></div>
 
-    <div th:replace="~{header.html :: header}"></div>
+        <div class="p-0 w-full overflow-y-scroll">
+            <main  layout:fragment="content">
+
+                <p>Contenido por defecto</p>
 
 
-    <main layout:fragment="content">
-     
-        <p>Contenido por defecto</p>
-    </main>
 
-    <div th:replace="~{footer.html :: footer}"></div>
+            </main>
 
+            <div th:replace="~{footer.html :: footer}"></div>
+
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
+
 </html>
