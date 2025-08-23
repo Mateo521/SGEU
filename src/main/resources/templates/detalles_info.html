@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<body>
+<main layout:fragment="content">
+    <h2>Formulario de Detalles</h2>
+
+    <form action="/detalles_info" method="post">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required name="nombre">
+        <br><br>
+
+        <label for="correo">Correo:</label>
+        <input type="email" id="correo" required name="correo">
+        <br><br>
+
+        <button type="submit">Enviar</button>
+    </form>
+</main>
+</body>
+</html>

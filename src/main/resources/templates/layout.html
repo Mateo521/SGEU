@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Aplicación</title>
+</head>
+<body>
+
+
+    <div th:replace="~{header.html :: header}"></div>
+
+
+    <main layout:fragment="content">
+     
+        <p>Contenido por defecto</p>
+    </main>
+
+    <div th:replace="~{footer.html :: footer}"></div>
+
+</body>
+</html>
