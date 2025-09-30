@@ -29,6 +29,11 @@ public class PrincipalController {
     }
     
 
+      @GetMapping("/leerqr")
+    public String leerqr() {
+        return "leerqr";
+    }
+
     
     @PostMapping("/detalles_info")
     public String recibirFormulario(@ModelAttribute DetallesInfo detallesInfo) {
