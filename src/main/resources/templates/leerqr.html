@@ -23,6 +23,16 @@
             <canvas id="canvas" style="display:none;"></canvas>
             <p>QR Code Data: <span id="qr-data">None</span></p>
 
+
+
+            <form action="/leerqr" method="post">
+                <label for="codidog">Texto leído:</label>
+                <input type="text" id="qr-data" required name="codigo">
+                <button type="submit">Enviar</button>
+            </form>
+
+            <p class="" id="retorno"></p>
+
             <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script>
 
 
@@ -33,6 +43,7 @@
                 const canvasElement = document.getElementById('canvas');
                 const canvas = canvasElement.getContext('2d');
                 const qrDataElement = document.getElementById('qr-data');
+                const retorno = document.getElementById("retorno");
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                     .then(function (stream) {
                         video.srcObject = stream;
@@ -55,12 +66,21 @@
                         });
 
                         if (code) {
-                            qrDataElement.textContent = code.data;
-                            // Optionally, stop scanning after a QR code is found
-                            // video.pause(); 
-                            // video.srcObject.getTracks().forEach(track => track.stop());
+                            qrDataElement.value = code.data;
+
+                            retorno.innerHTML = code.data;
+
+                            
+                        
+
+                            /*
+                                                        video.pause();
+                                                        video.srcObject.getTracks().forEach(track => track.stop());
+                            
+                            */
                         } else {
-                            qrDataElement.textContent = 'None';
+                            retorno.innerHTML = "N0ne";
+                            qrDataElement.value = 'None';
                         }
                     }
                     requestAnimationFrame(tick);

@@ -1,6 +1,6 @@
 package com.unsl.sgeu.controllers;
 import com.unsl.sgeu.models.DetallesInfo;
-
+import com.unsl.sgeu.models.LeerQR;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -34,6 +34,13 @@ public class PrincipalController {
         return "leerqr";
     }
 
+     @PostMapping("/leerqr")
+    public String recibirQR(@ModelAttribute LeerQR qr) {
+
+        System.out.println("Codigo leído: " + qr.getCodigo());
+
+        return "leerqr";  
+    }
     
     @PostMapping("/detalles_info")
     public String recibirFormulario(@ModelAttribute DetallesInfo detallesInfo) {
