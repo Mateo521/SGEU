@@ -22,7 +22,10 @@ public class PrincipalController {
         return "detalles_info";  
     }
 
-
+@GetMapping("/ieManual")
+    public String showManual() {
+        return "ieManual"; // busca plantilla ieManual.html en /templates si usas Thymeleaf
+    }
     @GetMapping("/")
     public String index() {
         return "index";
