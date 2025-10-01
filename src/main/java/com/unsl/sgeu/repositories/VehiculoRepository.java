@@ -7,6 +7,8 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
     // Buscar por patente
     Vehiculo findByPatente(String patente);
 
+
+
     // Buscar por código QR
     Vehiculo findByCodigoQr(String codigoQr);
 }

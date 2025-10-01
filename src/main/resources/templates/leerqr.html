@@ -16,38 +16,26 @@
                     Cargando cámara...</div>
             </div-->
 
-            <div class="p-2">
-                <video class="max-w-md size-full rounded-xl" id="video" width="640" height="480" autoplay>
-                </video>
-            </div>
-            <canvas id="canvas" style="display:none;"></canvas>
-            <p>QR Code Data: <span id="qr-data">None</span></p>
+
+            <video class="rounded-xl border-gray-600 border-4" id="video" width="400" height="300" autoplay></video>
 
 
+            <canvas id="canvas" hidden></canvas>
 
-            <form action="/leerqr" method="post">
-                <label for="codidog">Texto leído:</label>
-                <input type="text" id="qr-data" required name="codigo">
-                <button type="submit">Enviar</button>
-            </form>
-
-            <p class="" id="retorno"></p>
+            <p id="retorno"></p>
 
             <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script>
 
-
-
-
             <script>
-                const video = document.getElementById('video');
-                const canvasElement = document.getElementById('canvas');
-                const canvas = canvasElement.getContext('2d');
-                const qrDataElement = document.getElementById('qr-data');
+                const video = document.getElementById("video");
+                const canvasElement = document.getElementById("canvas");
+                const canvas = canvasElement.getContext("2d");
                 const retorno = document.getElementById("retorno");
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                     .then(function (stream) {
                         video.srcObject = stream;
-                        video.setAttribute('playsinline', true);
+                        video.setAttribute("playsinline", true);
                         video.play();
                         requestAnimationFrame(tick);
                     })
@@ -62,30 +50,49 @@
                         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                         const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
                         const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                            inversionAttempts: "dontInvert", // or "attemptBoth"
+                            inversionAttempts: "dontInvert",
                         });
 
                         if (code) {
-                            qrDataElement.value = code.data;
-
                             retorno.innerHTML = code.data;
 
-                            
-                        
 
-                            /*
-                                                        video.pause();
-                                                        video.srcObject.getTracks().forEach(track => track.stop());
-                            
-                            */
+                            fetch("/qr/leer", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ codigo: code.data })
+                            })
+                                .then(async res => {
+                                    if (!res.ok) {
+                                         
+                                        const errorMsg = await res.text();
+                                        document.getElementById("retorno").innerText = errorMsg;
+                                        return;
+                                    }
+
+                                    
+                                    const vehiculo = await res.json();
+
+                                    
+                                    document.getElementById("retorno").innerText =
+                                        `✅ Vehículo encontrado: ${vehiculo.patente} - ${vehiculo.modelo} (${vehiculo.color})`;
+                                })
+                                .catch(err => {
+                                    console.error("Error en fetch:", err);
+                                    document.getElementById("retorno").innerText = "⚠️ Error de conexión con el servidor";
+                                });
+
+
+                            // video.pause();
+                            // video.srcObject.getTracks().forEach(track => track.stop());
                         } else {
-                            retorno.innerHTML = "N0ne";
-                            qrDataElement.value = 'None';
+                            retorno.innerHTML = "Escaneando...";
                         }
                     }
                     requestAnimationFrame(tick);
                 }
             </script>
+
 
 
             <div class="flex flex-wrap gap-2 justify-center">
