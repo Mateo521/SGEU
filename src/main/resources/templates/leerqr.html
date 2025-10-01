@@ -27,10 +27,14 @@
             <script src="https://cdn.jsdelivr.net/npm/jsqr@1.1.0/dist/jsQR.min.js"></script>
 
             <script>
+
                 const video = document.getElementById("video");
                 const canvasElement = document.getElementById("canvas");
                 const canvas = canvasElement.getContext("2d");
                 const retorno = document.getElementById("retorno");
+
+                let scanning = true; 
+                let lastProcessedCode = null;
 
                 navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                     .then(function (stream) {
@@ -44,7 +48,7 @@
                     });
 
                 function tick() {
-                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    if (video.readyState === video.HAVE_ENOUGH_DATA && scanning) {
                         canvasElement.height = video.videoHeight;
                         canvasElement.width = video.videoWidth;
                         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
@@ -53,44 +57,96 @@
                             inversionAttempts: "dontInvert",
                         });
 
-                        if (code) {
-                            retorno.innerHTML = code.data;
+                        if (code && code.data !== lastProcessedCode) {
+                            lastProcessedCode = code.data;
+                            scanning = false; 
 
+                            retorno.innerHTML = `🔍 Procesando QR: ${code.data}`;
+                            console.log("QR detectado:", code.data);
 
-                            fetch("/qr/leer", {
+                            fetch("/leerqr/leer", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ codigo: code.data })
                             })
                                 .then(async res => {
-                                    if (!res.ok) {
-                                         
-                                        const errorMsg = await res.text();
-                                        document.getElementById("retorno").innerText = errorMsg;
+                                    console.log("Status de respuesta:", res.status);
+                                    console.log("URL llamada:", res.url);
+
+                                    const data = await res.json();
+
+                                    if (res.status === 404) {
+                                        retorno.innerHTML = `
+                        <div style="color: red; font-weight: bold;">
+                             ${data.mensaje}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="reiniciarEscaneo()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                🔄 Escanear otro QR
+                            </button>
+                        </div>
+                    `;
                                         return;
                                     }
 
-                                    
-                                    const vehiculo = await res.json();
+                                    if (!res.ok) {
+                                        retorno.innerHTML = `
+                        <div style="color: orange; font-weight: bold;">
+                             Error: ${data.mensaje}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="reiniciarEscaneo()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                 Escanear otro QR
+                            </button>
+                        </div>
+                    `;
+                                        return;
+                                    }
 
-                                    
-                                    document.getElementById("retorno").innerText =
-                                        `✅ Vehículo encontrado: ${vehiculo.patente} - ${vehiculo.modelo} (${vehiculo.color})`;
+                                    retorno.innerHTML = `
+                    <div style="color: green; font-weight: bold;">
+                         Vehículo encontrado
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <strong>Patente:</strong> ${data.patente}<br>
+                        <strong>Modelo:</strong> ${data.modelo}<br>
+                        <strong>Color:</strong> ${data.color}<br>
+                        <strong>DNI Dueño:</strong> ${data.dniDuenio}
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button onclick="reiniciarEscaneo()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            🔄 Escanear otro QR
+                        </button>
+                    </div>
+                `;
                                 })
                                 .catch(err => {
                                     console.error("Error en fetch:", err);
-                                    document.getElementById("retorno").innerText = "⚠️ Error de conexión con el servidor";
+                                    retorno.innerHTML = `
+                    <div style="color: red; font-weight: bold;">
+                        ⚠️ Error de conexión con el servidor
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button onclick="reiniciarEscaneo()" style="padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            🔄 Intentar de nuevo
+                        </button>
+                    </div>
+                `;
                                 });
-
-
-                            // video.pause();
-                            // video.srcObject.getTracks().forEach(track => track.stop());
-                        } else {
-                            retorno.innerHTML = "Escaneando...";
+                        } else if (scanning) {
+                            retorno.innerHTML = "Escaneando... Apunta la cámara hacia un código QR";
                         }
                     }
                     requestAnimationFrame(tick);
                 }
+
+               
+                function reiniciarEscaneo() {
+                    scanning = true;
+                    lastProcessedCode = null;
+                    retorno.innerHTML = "Escaneando... Apunta la cámara hacia un código QR";
+                }
+
             </script>
 
 
