@@ -6,6 +6,8 @@ import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
 import com.unsl.sgeu.repositories.PersonaRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
+import com.unsl.sgeu.services.VehiculoService;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,8 +25,8 @@ public class SgeuApplication {
     CommandLineRunner seedData(
             PersonaRepository personaRepo,
             VehiculoRepository vehiculoRepo,
-            EmpleadoRepository empleadoRepo
-    ) {
+            EmpleadoRepository empleadoRepo,
+            VehiculoService vehiculoService) {
         return args -> {
             // ===== Persona =====
             Long dni = 12345678L; // usá el tipo que tengas como @Id en Persona
@@ -39,15 +41,16 @@ public class SgeuApplication {
             });
 
             // ===== Vehículo (PK = patente) =====
-            String patente = "AB123CD";
+        
+            String patente = "AB321CD";
             vehiculoRepo.findById(patente).orElseGet(() -> {
                 Vehiculo v = new Vehiculo();
                 v.setPatente(patente);
-                v.setCodigoQr("qr-001");
-                v.setModelo("Etios");
-                v.setColor("Rojo");
+                v.setCodigoQr(vehiculoService.generarCodigoQrUnico(patente));  
+                v.setModelo("Ford");
+                v.setColor("Verde");
                 v.setTipo("Auto");
-                v.setDuenio(persona); // relación con la persona creada
+                v.setDuenio(persona);
                 return vehiculoRepo.save(v);
             });
 
