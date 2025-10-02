@@ -13,4 +13,7 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
 
     // Buscar empleados por cargo (ejemplo: "Administrador" o "Guardia")
     java.util.List<Empleado> findByCargo(String cargo);
+
+    // Buscar por ID
+    java.util.Optional<Empleado> findById(Long id);
 }

@@ -1,5 +1,7 @@
 package com.unsl.sgeu.services;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,23 +15,27 @@ public class EmpleadoServices {
     private EmpleadoRepository empleadoRepository;
 
     public boolean login(String nombreUsuario, String contrasenia) {
-        // Lógica de autenticación
         Empleado empleado = empleadoRepository.findByNombreUsuarioAndContrasenia(nombreUsuario, contrasenia);
         if (empleado == null) {
-            return false; // Usuario o contraseña incorrectos
+            return false; 
         }
-        return true; // Reemplazar con la lógica real
+        return true;
     }
 
     public String obtenerNombreEmpleado(Long id) {
-        // Lógica para obtener el nombre del empleado por su ID
-        return "Nombre del Empleado"; // Reemplazar con la lógica real
+        Optional<Empleado> empleado = empleadoRepository.findById(id);
+        if (empleado.isPresent()) {
+            return empleado.get().getNombre() + " " + empleado.get().getApellido();
+        }
+        return "Nombre no encontrado";
     }
 
-    // Otros métodos relacionados con empleados
-    public String obtenerCargoEmpleado(Long id) {
-        // Lógica para obtener el cargo del empleado por su ID
-        return "Cargo del Empleado"; // Reemplazar con la lógica real
+    public String obtenerCargoEmpleado(String nombreUsuario) {
+        Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
+        if (empleado != null) {
+            return empleado.getCargo();
+        }
+        return "Cargo no encontrado";
     }
 
 

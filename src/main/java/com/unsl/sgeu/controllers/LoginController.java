@@ -22,14 +22,19 @@ public class LoginController {
                         @RequestParam String contrasenia,
                         HttpSession session) {
         if (empleadoServices.login(nombreUsuario, contrasenia)) {
-            System.out.println("Usuario " + nombreUsuario + " ha iniciado sesión.");
+            String cargo = empleadoServices.obtenerCargoEmpleado(nombreUsuario);
+            String empleadoID = empleadoServices.obtenerNombreEmpleado((long) 1);
+            System.out.println("Usuario " + nombreUsuario + " ha iniciado sesión. Cargo: " + cargo);
+            System.out.println("Empleado ID: " + empleadoID);
             session.setAttribute("user", nombreUsuario);
             //return "redirect:/"; // te manda a index.html
-            return "redirect:/login?success=true";
+            return "redirect:/?success=true";
         } else {
             return "redirect:/login?error=true";
         }
     }
+
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

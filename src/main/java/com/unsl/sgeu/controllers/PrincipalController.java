@@ -1,6 +1,9 @@
 package com.unsl.sgeu.controllers;
 import com.unsl.sgeu.models.DetallesInfo;
 import com.unsl.sgeu.models.LeerQR;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -19,9 +22,12 @@ public class PrincipalController {
         return "detalles_info";  
     }
 
-
+    //Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
     @GetMapping("/")
-    public String index() {
+    public String index(HttpSession session) {
+        if (session.getAttribute("user") == null) {
+            return "redirect:/login";
+        }
         return "index";
     }
 
