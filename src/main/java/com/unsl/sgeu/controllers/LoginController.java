@@ -38,7 +38,7 @@ public class LoginController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        System.out.println("Usuario ha cerrado sesión.");
+        System.out.println("Usuario " + session.getAttribute("user") + " ha cerrado sesión.");
         session.invalidate();
         return "redirect:/login";
     }

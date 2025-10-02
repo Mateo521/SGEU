@@ -26,6 +26,7 @@ public class PrincipalController {
     @GetMapping("/")
     public String index(HttpSession session) {
         if (session.getAttribute("user") == null) {
+            System.out.println("Acceso no autorizado. Redirigiendo a login.");
             return "redirect:/login";
         }
         return "index";
