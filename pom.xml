@@ -54,6 +54,12 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- NUEVO: SEGURIDAD -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+  </dependency>
+
     <!-- NUEVO: PERSISTENCIA -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

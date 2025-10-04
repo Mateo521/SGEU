@@ -37,6 +37,16 @@ public class PrincipalController {
         return "login";
     }
 
+    @GetMapping("/register")
+    public String register() {
+        return "register";
+    }
+
+    @GetMapping("/ajustes")
+    public String ajustes() {
+        return "ajustes";
+    }
+
       @GetMapping("/leerqr")
     public String leerqr() {
         return "leerqr";
