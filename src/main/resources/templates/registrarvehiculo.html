@@ -39,16 +39,17 @@
                             <div class="text-center">
                                 <p class="font-semibold mb-3">Código QR generado:</p>
                                 <div class="bg-white p-4 rounded border-2 border-dashed border-gray-300 inline-block">
-                                    <img th:if="${imagenQR}" th:src="${imagenQR}" alt="Código QR del vehículo"
-                                        class="mx-auto" style="width: 200px; height: 200px;" />
+                                    <img th:attr="data-patente=${patente}, data-codigo=${codigoQR}" th:if="${imagenQR}"
+                                        th:src="${imagenQR}" alt="Código QR del vehículo" class="mx-auto"
+                                        style="width: 200px; height: 200px;" />
                                 </div>
 
                                 <!-- Botones de acción -->
                                 <div class="mt-4 space-x-2">
                                     <a th:if="${imagenQR}" th:href="${imagenQR}" download
                                         class="inline-flex gap-3 items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm transition-colors">
-                                      
-                                      
+
+
                                         <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
                                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                             viewBox="0 0 24 24">
@@ -295,32 +296,103 @@
                 class="text-white cursor-pointer bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Agregar
                 vehículo</button>
         </form-->
+            <script>
+                function imprimirQR() {
+                    const imagenQR = document.querySelector('.qr-image');
 
+                    if (imagenQR) {
+                        const patente = imagenQR.getAttribute('data-patente') || 'Sin patente';
+                        const codigoQR = imagenQR.getAttribute('data-codigo') || '';
+
+                        const ventanaImpresion = window.open('', '_blank', 'width=600,height=800');
+
+                        // Crear el contenido HTML
+                        const contenidoHTML = `
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Código QR - ${patente}</title>
+                    <style>
+                        body { 
+                            text-align: center; 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px;
+                            background: white;
+                        }
+                        .qr-container { 
+                            border: 2px solid #333; 
+                            padding: 20px; 
+                            margin: 20px auto; 
+                            max-width: 400px;
+                            background: white;
+                        }
+                        .qr-image { 
+                            width: 250px; 
+                            height: 250px; 
+                            margin: 10px auto;
+                            display: block;
+                        }
+                        .info { 
+                            margin: 10px 0; 
+                            font-size: 14px;
+                        }
+                        .patente { 
+                            font-size: 18px; 
+                            font-weight: bold; 
+                            color: #333;
+                        }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="qr-container">
+                        <h2>Sistema de Gestión de Estacionamiento Universitario</h2>
+                        <h3>Código QR del Vehículo</h3>
+                        <img src="${imagenQR.src}" 
+                             alt="Código QR" 
+                             class="qr-image">
+                        <div class="info patente">Patente: ${patente}</div>
+                        <div class="info">Código: ${codigoQR.substring(0, 30)}...</div>
+                        <div class="info">Fecha de emisión: ${new Date().toLocaleDateString('es-AR')}</div>
+                        <div class="info">Hora: ${new Date().toLocaleTimeString('es-AR')}</div>
+                    </div>
+                    
+                    <div class="no-print" style="margin-top: 20px;">
+                        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">
+                            🖨️ Imprimir
+                        </button>
+                        <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px; margin-left: 10px;">
+                            ❌ Cerrar
+                        </button>
+                    </div>
+                </body>
+            </html>
+        `;
+
+                        ventanaImpresion.document.write(contenidoHTML);
+                        ventanaImpresion.document.close();
+
+                        // Esperar a que cargue y luego preguntar si quiere imprimir
+                        ventanaImpresion.onload = function () {
+                            setTimeout(() => {
+                                if (ventanaImpresion.confirm('¿Desea imprimir el código QR ahora?')) {
+                                    ventanaImpresion.print();
+                                }
+                            }, 1000); // Dar tiempo para que cargue la imagen
+                        };
+
+                    } else {
+                        alert('No se encontró la imagen del código QR');
+                    }
+                }
+            </script>
     </main>
 
 
-    <script>
-        function imprimirQR() {
-            const imagenQR = document.querySelector('img[alt="Código QR del vehículo"]');
-            if (imagenQR) {
-                const patente = document.querySelector('[th\\:text="${patente}"]')?.textContent || 'Vehículo';
 
-                const ventanaImpresion = window.open('', '_blank');
-                ventanaImpresion.document.write(`
-                <html>
-                    <head><title>Código QR - ${patente}</title></head>
-                    <body style="text-align: center; font-family: Arial;">
-                        <h2>Código QR del Vehículo</h2>
-                        <img src="${imagenQR.src}" style="width: 300px; height: 300px;">
-                        <p>Patente: <strong>${patente}</strong></p>
-                    </body>
-                </html>
-            `);
-                ventanaImpresion.document.close();
-                ventanaImpresion.print();
-            }
-        }
-    </script>
 
 </body>
 
