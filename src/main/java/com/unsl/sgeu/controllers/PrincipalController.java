@@ -18,12 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class PrincipalController {
 
-    @GetMapping("/detalles_info")
-    public String info(Model model) {
-        model.addAttribute("detallesInfo", new DetallesInfo());
-        return "detalles_info";
-    }
-
     @GetMapping("/")
     public String index() {
         return "index";
@@ -33,13 +27,19 @@ public class PrincipalController {
     public String leerqr() {
         return "leerqr";
     }
-/* 
-    @PostMapping("/leerqr")
-    public ResponseEntity<String> recibirQR(@RequestBody LeerQR qr) {
-        System.out.println("Código leído: " + qr.getCodigo());
-        return ResponseEntity.ok("QR recibido correctamente: " + qr.getCodigo());
+
+    @GetMapping("/registrar-vehiculo")
+    public String registrarVehiculo() {
+        return "registrarvehiculo";  
     }
-*/
+
+    /*
+     * @PostMapping("/leerqr")
+     * public ResponseEntity<String> recibirQR(@RequestBody LeerQR qr) {
+     * System.out.println("Código leído: " + qr.getCodigo());
+     * return ResponseEntity.ok("QR recibido correctamente: " + qr.getCodigo());
+     * }
+     */
     @PostMapping("/detalles_info")
     public String recibirFormulario(@ModelAttribute DetallesInfo detallesInfo) {
 

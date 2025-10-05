@@ -60,4 +60,20 @@ public class VehiculoService {
             return vehiculoRepo.save(v);
         });
     }
+
+    public Vehiculo guardarVehiculo(Vehiculo vehiculo) {
+        
+        if (vehiculo.getCodigoQr() == null || vehiculo.getCodigoQr().isEmpty()) {
+            vehiculo.setCodigoQr(generarCodigoQR(vehiculo.getPatente()));
+        }
+        return vehiculoRepo.save(vehiculo);
+    }
+  public boolean existePatente(String patente) {
+        return vehiculoRepo.existsById(patente);
+    }
+
+  private String generarCodigoQR(String patente) {
+         
+        return "qr-" + generarCodigoQrUnico(patente);
+    }
 }

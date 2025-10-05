@@ -10,4 +10,6 @@ public interface PersonaRepository extends JpaRepository<Persona, Long> {
 
     // Buscar persona por teléfono
     Persona findByTelefono(String telefono);
+
+    boolean existsByDni(Long dni);
 }
