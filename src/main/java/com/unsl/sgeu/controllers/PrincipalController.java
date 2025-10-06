@@ -48,4 +48,13 @@ public class PrincipalController {
 
         return "detalles_info";
     }
+
+
+
+    
+
+@GetMapping("/ieManual")
+    public String showManual() {
+        return "ieManual"; }
+        
 }

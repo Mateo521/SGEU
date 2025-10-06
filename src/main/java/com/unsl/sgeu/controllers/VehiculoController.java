@@ -90,4 +90,24 @@ public class VehiculoController {
                 form.getColor(),
                 persona.getCategoria());
     }
+
+  @GetMapping("/search")
+    public String buscar(@RequestParam(value="q", required=false) String query,
+                         @RequestParam(value="category", required=false) String category,
+                         @ModelAttribute VehiculoFormDTO form,
+                         Model model) {
+        String patente = query;
+        boolean resultado;
+        if ("Entrada".equals(category)) {
+        //buscar vehiculo en la tabla
+        resultado = "1".equals(query);
+        } else{
+            resultado = "2".equals(query);
+        }
+        
+    model.addAttribute("category", category);
+    model.addAttribute("resultado", resultado);
+    model.addAttribute("patente", patente);
+        return "ieManual"; // tu vista (templates/ieManual.html)
+    }
 }
