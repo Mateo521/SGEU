@@ -10,6 +10,7 @@ import com.unsl.sgeu.services.VehiculoService;
 import com.unsl.sgeu.services.CategoriaService;
 import com.unsl.sgeu.services.VehiculoTipoService;
 import com.unsl.sgeu.services.PersonaVehiculoService;
+import com.unsl.sgeu.services.RegistroEstacionamientoService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,18 +29,21 @@ public class VehiculoController {
     private final CategoriaService categoriaService;
     private final VehiculoTipoService vehiculoTipoService;
     private final PersonaVehiculoService personaVehiculoService;
+    private final RegistroEstacionamientoService registroestacionamientoService;
 
     public VehiculoController(
             VehiculoService vehiculoService,
             PersonaService personaService,
             CategoriaService categoriaService,
             VehiculoTipoService vehiculoTipoService,
-            PersonaVehiculoService personaVehiculoService) {
+            PersonaVehiculoService personaVehiculoService,
+            RegistroEstacionamientoService registroestacionamientoService) {
         this.vehiculoService = vehiculoService;
         this.personaService = personaService;
         this.categoriaService = categoriaService;
         this.vehiculoTipoService = vehiculoTipoService;
         this.personaVehiculoService = personaVehiculoService;
+        this.registroestacionamientoService = registroestacionamientoService;
     }
     @GetMapping("/vehiculos/agregar")
     public String mostrarFormulario(Model model) {
@@ -168,18 +172,18 @@ public class VehiculoController {
     }
 
   @GetMapping("/search")
-    public String buscar(@RequestParam(value="q", required=false) String query,
+    public String buscar(@RequestParam(value="q", required=false) String patente,
                          @RequestParam(value="category", required=false) String category,
                          Model model) {
-        String patente = query;
+
         boolean resultado;
 
-        if ("Entrada".equals(category)) {
+        if ("Entrada".equals(category) && vehiculoService.existePatente(patente)) {
         //buscar vehiculo en la tabla
-        resultado = "1".equals(query);
-
-        } else{
-            resultado = "2".equals(query);
+            registroestacionamientoService.registrarEntrada(patente);
+            resultado = true;
+       } else{
+            resultado = false;
         }
         
     model.addAttribute("category", category);

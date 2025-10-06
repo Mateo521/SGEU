@@ -18,6 +18,9 @@ public class VehiculoService {
         this.qrCodeService = qrCodeService;
     }
 
+
+
+
     public Vehiculo buscarPorQr(String codigoQr) {
         return vehiculoRepo.findByCodigoQr(codigoQr);
     }
