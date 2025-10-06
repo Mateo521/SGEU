@@ -1,15 +1,16 @@
-
 package com.unsl.sgeu.repositories;
 
 import com.unsl.sgeu.models.Persona;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface PersonaRepository extends JpaRepository<Persona, Long> {
-    // Buscar persona por email
-    Persona findByEmail(String email);
 
-    // Buscar persona por teléfono
-    Persona findByTelefono(String telefono);
+    Optional<Persona> findByEmailIgnoreCase(String email);
 
-    boolean existsByDni(Long dni);
+    Optional<Persona> findByTelefono(String telefono);
+
+    // Si querés mantenerlo por legibilidad, aunque ya existe existsById:
+    boolean existsByDni(Long dni);  // opcional
 }

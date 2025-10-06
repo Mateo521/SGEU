@@ -49,7 +49,7 @@ public class VehiculoService {
         return vehiculoRepo.existsById(patente);
     }
     
-    private String generarCodigoQR(String patente) {
+    public String generarCodigoQR(String patente) {
         return "qr-" + generarCodigoQrUnico(patente);
     }
 

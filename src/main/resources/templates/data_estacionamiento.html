@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Estacionamientos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Dashboard de Estacionamientos</h1>
+            <p class="text-lg text-gray-600">Monitoreo en tiempo real de ocupación y estadísticas</p>
+            <div class="mt-2 text-sm text-gray-500">
+                Última actualización: <span id="lastUpdate"></span>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: FILTROS Y CONTROLES -->
+        <!-- ============================================ -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+                Filtros y Controles
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Estacionamiento</label>
+                    <select id="parkingSelect" class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all">
+                        <option value="all">📊 Todos los estacionamientos</option>
+                        <option value="1">🅿️ Estacionamiento Norte</option>
+                        <option value="2">🅿️ Estacionamiento Sur</option>
+                        <option value="3">🅿️ Estacionamiento Este</option>
+                        <option value="4">🅿️ Estacionamiento Oeste</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rango Temporal</label>
+                    <select id="timeRange" class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all">
+                        <option value="day">📅 Hoy</option>
+                        <option value="week">📆 Esta Semana</option>
+                        <option value="month">🗓️ Este Mes</option>
+                        <option value="year">📊 Este Año</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Usuario</label>
+                    <select id="userType" class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all">
+                        <option value="all">👥 Todos</option>
+                        <option value="docente">👨‍🏫 Docentes</option>
+                        <option value="nodocente">👔 No Docentes</option>
+                        <option value="estudiante">🎓 Estudiantes</option>
+                        <option value="visitante">👤 Visitantes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: MÉTRICAS PRINCIPALES -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Resumen General
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1: Ocupación Total -->
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-t-4 border-blue-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase">Ocupación Total</h3>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 mb-3" id="totalOccupancy">337 / 450</div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-3 overflow-hidden">
+                        <div class="h-3 rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-blue-600" id="occupancyBar" style="width: 75%"></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold text-blue-600" id="occupancyPercent">75% ocupado</span>
+                        <span class="text-xs text-gray-500" id="availableSpacesText">113 libres</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Espacios Disponibles -->
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-t-4 border-green-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase">Disponibles</h3>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 mb-2" id="availableSpaces">113</div>
+                    <div class="text-sm text-gray-600 mb-4">espacios libres</div>
+                    <div class="bg-green-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-600 mb-1">Distribución:</div>
+                        <div class="flex justify-between text-xs">
+                            <span class="font-medium">🚗 Autos: <span id="availableCars">85</span></span>
+                            <span class="font-medium">🏍️ Motos: <span id="availableBikes">28</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Distribución Vehículos -->
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-t-4 border-purple-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase">Vehículos</h3>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">
+                            🚗
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-gray-600">Autos</span>
+                                <span class="text-lg font-bold" id="carsCount">285</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" id="carsBar" style="width: 85%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500" id="carsPercent">85%</span>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-gray-600">Motos</span>
+                                <span class="text-lg font-bold" id="bikesCount">52</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-indigo-500 h-2 rounded-full" id="bikesBar" style="width: 15%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500" id="bikesPercent">15%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Tiempo Promedio -->
+                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-t-4 border-orange-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase">Tiempo Promedio</h3>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-gray-900 mb-2" id="avgTime">4h 35min</div>
+                    <div class="text-sm text-gray-600 mb-4">duración promedio</div>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Mínimo:</span>
+                            <span class="font-semibold" id="minTime">45min</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Máximo:</span>
+                            <span class="font-semibold" id="maxTime">11h 50min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: ALERTAS Y NOTIFICACIONES -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Alertas y Notificaciones
+            </h2>
+            <div class="space-y-4" id="alertsContainer">
+                <!-- Alerta Crítica -->
+                <div class="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 rounded-lg p-5 shadow-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-base font-bold text-red-900 mb-2">🚨 Vehículos con tiempo excedido (>12 horas)</h3>
+                            <div class="space-y-2 text-sm" id="exceededVehicles">
+                                <div class="bg-white rounded-md p-3 shadow-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-bold text-red-700">ABC123</span>
+                                            <span class="text-gray-600"> - Auto</span>
+                                        </div>
+                                        <span class="text-red-600 font-semibold">14h 30min</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">
+                                        👤 Estudiante • 📍 Estacionamiento Sur • ⏰ Ingresó: 01:30 AM
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-md p-3 shadow-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-bold text-red-700">XYZ789</span>
+                                            <span class="text-gray-600"> - Moto</span>
+                                        </div>
+                                        <span class="text-red-600 font-semibold">13h 15min</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">
+                                        👤 Visitante • 📍 Estacionamiento Norte • ⏰ Ingresó: 02:45 AM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerta Advertencia -->
+                <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 rounded-lg p-5 shadow-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-base font-bold text-yellow-900 mb-2">⚠️ Vehículos próximos al límite (10-12 horas)</h3>
+                            <div class="space-y-2 text-sm" id="warningVehicles">
+                                <div class="bg-white rounded-md p-3 shadow-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-bold text-yellow-700">DEF456</span>
+                                            <span class="text-gray-600"> - Auto</span>
+                                        </div>
+                                        <span class="text-yellow-600 font-semibold">11h 20min</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">
+                                        👨‍🏫 Docente • 📍 Estacionamiento Este • ⏰ Ingresó: 04:40 AM
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-md p-3 shadow-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="font-bold text-yellow-700">GHI789</span>
+                                            <span class="text-gray-600"> - Auto</span>
+                                        </div>
+                                        <span class="text-yellow-600 font-semibold">10h 45min</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">
+                                        👔 No Docente • 📍 Estacionamiento Oeste • ⏰ Ingresó: 05:15 AM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de Capacidad -->
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-lg p-5 shadow-md">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-base font-bold text-blue-900 mb-2">ℹ️ Información de Capacidad</h3>
+                            <div class="text-sm text-blue-800" id="capacityInfo">
+                                <p class="mb-1">• El <strong>Estacionamiento Oeste</strong> está al <strong>92%</strong> de su capacidad (solo 8 espacios disponibles)</p>
+                                <p>• El <strong>Estacionamiento Este</strong> tiene la mayor disponibilidad con <strong>35 espacios libres</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: ESTADO DE ESTACIONAMIENTOS -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Estado por Estacionamiento
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="parkingList">
+                <!-- Los estacionamientos se generarán dinámicamente -->
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: GRÁFICOS Y ESTADÍSTICAS -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                </svg>
+                Análisis y Estadísticas
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico 1 -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-purple-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                        Distribución por Tipo de Usuario
+                    </h3>
+                    <canvas id="userChart"></canvas>
+                    <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded mr-2"></div>
+                            <span>Docentes: <strong id="docentesTotal">126</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-purple-500 rounded mr-2"></div>
+                            <span>No Docentes: <strong id="noDocentesTotal">89</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-pink-500 rounded mr-2"></div>
+                            <span>Estudiantes: <strong id="estudiantesTotal">88</strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-orange-500 rounded mr-2"></div>
+                            <span>Visitantes: <strong id="visitantesTotal">34</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2 -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-blue-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        Ocupación Temporal (Hoy)
+                    </h3>
+                    <canvas id="timeChart"></canvas>
+                    <div class="mt-4 flex justify-between text-xs text-gray-600">
+                        <div>Hora Pico: <strong class="text-red-600">14:00 (95%)</strong></div>
+                        <div>Hora Valle: <strong class="text-green-600">06:00 (25%)</strong></div>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3 -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-indigo-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                        Comparativa Autos vs Motos
+                    </h3>
+                    <canvas id="vehicleChart"></canvas>
+                    <div class="mt-4 text-center text-sm text-gray-600">
+                        Ratio actual: <strong>5.5 autos por cada moto</strong>
+                    </div>
+                </div>
+
+                <!-- Gráfico 4 -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-green-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        Ocupación por Franja Horaria
+                    </h3>
+                    <canvas id="peakChart"></canvas>
+                    <div class="mt-4 text-xs text-gray-600">
+                        <div class="flex items-center justify-between mb-1">
+                            <span>🟢 Baja ocupación (&lt;50%)</span>
+                            <span>🟡 Media (50-75%)</span>
+                            <span>🔴 Alta (&gt;75%)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: TIEMPO DE PERMANENCIA -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Análisis de Permanencia
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6 border-t-4 border-orange-500">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución por Tiempo</h3>
+                        <canvas id="durationChart"></canvas>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Estadísticas de Permanencia</h3>
+                        <div class="space-y-4">
+                            <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 mb-1">0 - 3 horas</div>
+                                <div class="text-2xl font-bold text-green-700">124 vehículos</div>
+                                <div class="text-xs text-gray-500">36.8% del total</div>
+                            </div>
+                            <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 mb-1">3 - 6 horas</div>
+                                <div class="text-2xl font-bold text-blue-700">98 vehículos</div>
+                                <div class="text-xs text-gray-500">29.1% del total</div>
+                            </div>
+                            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 mb-1">6 - 9 horas</div>
+                                <div class="text-2xl font-bold text-yellow-700">82 vehículos</div>
+                                <div class="text-xs text-gray-500">24.3% del total</div>
+                            </div>
+                            <div class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4">
+                                <div class="text-sm text-gray-600 mb-1">9 - 12 horas</div>
+                                <div class="text-2xl font-bold text-orange-700">31 vehículos</div>
+                                <div class="text-xs text-gray-500">9.2% del total</div>
+                            </div>
+                            <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border-2 border-red-300">
+                                <div class="text-sm text-gray-600 mb-1">Más de 12 horas ⚠️</div>
+                                <div class="text-2xl font-bold text-red-700">2 vehículos</div>
+                                <div class="text-xs text-gray-500">0.6% del total</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCIÓN: TABLA DETALLADA -->
+        <!-- ============================================ -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-7 h-7 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+                Registro Detallado de Vehículos
+            </h2>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden border-t-4 border-gray-500">
+                <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <input type="text" id="searchInput" placeholder="Buscar por patente..." class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="time">Ordenar por tiempo</option>
+                            <option value="plate">Ordenar por patente</option>
+                            <option value="parking">Ordenar por estacionamiento</option>
+                            <option value="user">Ordenar por usuario</option>
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Total: <strong id="totalVehicles">337</strong> vehículos
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Patente</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tipo</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Usuario</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Estacionamiento</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hora Ingreso</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tiempo</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehicleTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Las filas se generarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // DATOS DE EJEMPLO
+        // ==========================================
+        const parkingData = [
+            {
+                id: 1,
+                name: 'Estacionamiento Norte',
+                current: 113,
+                max: 150,
+                cars: 95,
+                bikes: 18,
+                docentes: 45,
+                noDocentes: 30,
+                estudiantes: 28,
+                visitantes: 10
+            },
+            {
+                id: 2,
+                name: 'Estacionamiento Sur',
+                current: 87,
+                max: 120,
+                cars: 72,
+                bikes: 15,
+                docentes: 35,
+                noDocentes: 22,
+                estudiantes: 20,
+                visitantes: 10
+            },
+            {
+                id: 3,
+                name: 'Estacionamiento Este',
+                current: 45,
+                max: 80,
+                cars: 38,
+                bikes: 7,
+                docentes: 18,
+                noDocentes: 12,
+                estudiantes: 10,
+                visitantes: 5
+            },
+            {
+                id: 4,
+                name: 'Estacionamiento Oeste',
+                current: 92,
+                max: 100,
+                cars: 80,
+                bikes: 12,
+                docentes: 28,
+                noDocentes: 25,
+                estudiantes: 30,
+                visitantes: 9
+            }
+        ];
+
+        const vehicles = [
+            { plate: 'ABC123', type: 'Auto', user: 'Estudiante', parking: 'Sur', time: '14h 30min', entryTime: '01:30', hours: 14.5, status: 'exceeded' },
+            { plate: 'XYZ789', type: 'Moto', user: 'Visitante', parking: 'Norte', time: '13h 15min', entryTime: '02:45', hours: 13.25, status: 'exceeded' },
+            { plate: 'DEF456', type: 'Auto', user: 'Docente', parking: 'Este', time: '11h 20min', entryTime: '04:40', hours: 11.33, status: 'warning' },
+            { plate: 'GHI789', type: 'Auto', user: 'No Docente', parking: 'Oeste', time: '10h 45min', entryTime: '05:15', hours: 10.75, status: 'warning' },
+            { plate: 'JKL012', type: 'Moto', user: 'Estudiante', parking: 'Norte', time: '8h 30min', entryTime: '07:30', hours: 8.5, status: 'normal' },
+            { plate: 'MNO345', type: 'Auto', user: 'Docente', parking: 'Sur', time: '7h 30min', entryTime: '08:30', hours: 7.5, status: 'normal' },
+            { plate: 'PQR678', type: 'Auto', user: 'Estudiante', parking: 'Este', time: '6h 55min', entryTime: '09:05', hours: 6.92, status: 'normal' },
+            { plate: 'STU901', type: 'Moto', user: 'No Docente', parking: 'Oeste', time: '5h 40min', entryTime: '10:20', hours: 5.67, status: 'normal' },
+            { plate: 'VWX234', type: 'Auto', user: 'Visitante', parking: 'Norte', time: '4h 15min', entryTime: '11:45', hours: 4.25, status: 'normal' },
+            { plate: 'YZA567', type: 'Auto', user: 'Docente', parking: 'Sur', time: '3h 50min', entryTime: '12:10', hours: 3.83, status: 'normal' },
+            { plate: 'BCD890', type: 'Moto', user: 'Estudiante', parking: 'Este', time: '2h 30min', entryTime: '13:30', hours: 2.5, status: 'normal' },
+            { plate: 'EFG123', type: 'Auto', user: 'No Docente', parking: 'Oeste', time: '1h 45min', entryTime: '14:15', hours: 1.75, status: 'normal' }
+        ];
+
+        // ==========================================
+        // FUNCIONES DE RENDERIZADO
+        // ==========================================
+        
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleString('es-AR');
+        }
+
+        function renderParkingList() {
+            const list = document.getElementById('parkingList');
+            list.innerHTML = parkingData.map(p => {
+                const percent = Math.round((p.current / p.max) * 100);
+                const color = percent > 85 ? 'bg-red-500' : percent > 60 ? 'bg-yellow-500' : 'bg-green-500';
+                const textColor = percent > 85 ? 'text-red-600' : percent > 60 ? 'text-yellow-600' : 'text-green-600';
+                const bgColor = percent > 85 ? 'from-red-50 to-red-100' : percent > 60 ? 'from-yellow-50 to-yellow-100' : 'from-green-50 to-green-100';
+                const available = p.max - p.current;
+                
+                return `
+                    <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-t-4 ${percent > 85 ? 'border-red-500' : percent > 60 ? 'border-yellow-500' : 'border-green-500'}">
+                        <div class="bg-gradient-to-r ${bgColor} p-4 border-b">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-1">${p.name}</h3>
+                                    <p class="text-sm text-gray-600">Capacidad total: ${p.max} espacios</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold ${textColor}">${percent}%</div>
+                                    <div class="text-sm text-gray-600">${p.current}/${p.max}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4">
+                            <div class="mb-4">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Ocupación</span>
+                                    <span>${p.current} ocupados • ${available} disponibles</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                    <div class="${color} h-4 rounded-full transition-all duration-500 flex items-center justify-center" style="width: ${percent}%">
+                                        <span class="text-white text-xs font-bold">${percent}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div class="bg-purple-50 rounded-lg p-3">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-2xl">🚗</span>
+                                        <span class="text-lg font-bold text-purple-700">${p.cars}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600">Autos (${Math.round((p.cars/p.current)*100)}%)</div>
+                                </div>
+                                <div class="bg-indigo-50 rounded-lg p-3">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-2xl">🏍️</span>
+                                        <span class="text-lg font-bold text-indigo-700">${p.bikes}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-600">Motos (${Math.round((p.bikes/p.current)*100)}%)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-3 border-t border-gray-200">
+                                <div class="text-xs font-semibold text-gray-600 mb-2">Distribución por tipo de usuario:</div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="flex items-center">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">Docentes: <strong>${p.docentes}</strong></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">No docentes: <strong>${p.noDocentes}</strong></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">Estudiantes: <strong>${p.estudiantes}</strong></span>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">Visitantes: <strong>${p.visitantes}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderVehicleTable() {
+            const table = document.getElementById('vehicleTable');
+            table.innerHTML = vehicles.map(v => {
+                let statusBadge, statusText;
+                if (v.status === 'exceeded') {
+                    statusBadge = 'bg-red-100 text-red-800 border border-red-300';
+                    statusText = '🚨 Excedido';
+                } else if (v.status === 'warning') {
+                    statusBadge = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                    statusText = '⚠️ Advertencia';
+                } else {
+                    statusBadge = 'bg-green-100 text-green-800 border border-green-300';
+                    statusText = '✓ Normal';
+                }
+                
+                const rowClass = v.status === 'exceeded' ? 'bg-red-50' : v.status === 'warning' ? 'bg-yellow-50' : '';
+                
+                return `
+                    <tr class="hover:bg-gray-50 ${rowClass} transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${v.plate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.type === 'Auto' ? '🚗' : '🏍️'} ${v.type}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">
+                                ${v.user === 'Docente' ? '👨‍🏫' : v.user === 'No Docente' ? '👔' : v.user === 'Estudiante' ? '🎓' : '👤'} ${v.user}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.parking}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.entryTime}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold ${v.status === 'exceeded' ? 'text-red-600' : v.status === 'warning' ? 'text-yellow-600' : 'text-gray-900'}">${v.time}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBadge}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateSummaryCards() {
+            const totalCurrent = parkingData.reduce((acc, p) => acc + p.current, 0);
+            const totalMax = parkingData.reduce((acc, p) => acc + p.max, 0);
+            const totalCars = parkingData.reduce((acc, p) => acc + p.cars, 0);
+            const totalBikes = parkingData.reduce((acc, p) => acc + p.bikes, 0);
+            const totalAvailable = totalMax - totalCurrent;
+            const percent = Math.round((totalCurrent / totalMax) * 100);
+
+            document.getElementById('totalOccupancy').textContent = `${totalCurrent} / ${totalMax}`;
+            document.getElementById('occupancyBar').style.width = `${percent}%`;
+            document.getElementById('occupancyPercent').textContent = `${percent}% ocupado`;
+            document.getElementById('availableSpacesText').textContent = `${totalAvailable} libres`;
+            document.getElementById('availableSpaces').textContent = totalAvailable;
+            document.getElementById('carsCount').textContent = totalCars;
+            document.getElementById('bikesCount').textContent = totalBikes;
+            document.getElementById('carsPercent').textContent = `${Math.round((totalCars/totalCurrent)*100)}%`;
+            document.getElementById('bikesPercent').textContent = `${Math.round((totalBikes/totalCurrent)*100)}%`;
+            document.getElementById('carsBar').style.width = `${Math.round((totalCars/totalCurrent)*100)}%`;
+            document.getElementById('bikesBar').style.width = `${Math.round((totalBikes/totalCurrent)*100)}%`;
+            
+            // Espacios disponibles por tipo (estimación)
+            const availableCarsRatio = Math.round((totalCars/totalCurrent) * totalAvailable);
+            const availableBikesRatio = totalAvailable - availableCarsRatio;
+            document.getElementById('availableCars').textContent = availableCarsRatio;
+            document.getElementById('availableBikes').textContent = availableBikesRatio;
+
+            // Totales por usuario
+            const totalDocentes = parkingData.reduce((acc, p) => acc + p.docentes, 0);
+            const totalNoDocentes = parkingData.reduce((acc, p) => acc + p.noDocentes, 0);
+            const totalEstudiantes = parkingData.reduce((acc, p) => acc + p.estudiantes, 0);
+            const totalVisitantes = parkingData.reduce((acc, p) => acc + p.visitantes, 0);
+            
+            document.getElementById('docentesTotal').textContent = totalDocentes;
+            document.getElementById('noDocentesTotal').textContent = totalNoDocentes;
+            document.getElementById('estudiantesTotal').textContent = totalEstudiantes;
+            document.getElementById('visitantesTotal').textContent = totalVisitantes;
+            document.getElementById('totalVehicles').textContent = totalCurrent;
+        }
+
+        // ==========================================
+        // GRÁFICOS CON CHART.JS
+        // ==========================================
+        
+        // Gráfico de usuarios
+        const userCtx = document.getElementById('userChart').getContext('2d');
+        const totalUsers = parkingData.reduce((acc, p) => ({
+            docentes: acc.docentes + p.docentes,
+            noDocentes: acc.noDocentes + p.noDocentes,
+            estudiantes: acc.estudiantes + p.estudiantes,
+            visitantes: acc.visitantes + p.visitantes
+        }), { docentes: 0, noDocentes: 0, estudiantes: 0, visitantes: 0 });
+
+        new Chart(userCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Docentes', 'No Docentes', 'Estudiantes', 'Visitantes'],
+                datasets: [{
+                    data: [totalUsers.docentes, totalUsers.noDocentes, totalUsers.estudiantes, totalUsers.visitantes],
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico temporal
+        const timeCtx = document.getElementById('timeChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'line',
+            data: {
+                labels: ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+                datasets: [{
+                    label: 'Ocupación (%)',
+                    data: [25, 45, 68, 82, 95, 88, 72, 55, 35],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de vehículos
+        const vehicleCtx = document.getElementById('vehicleChart').getContext('2d');
+        const totalCars = parkingData.reduce((acc, p) => acc + p.cars, 0);
+        const totalBikes = parkingData.reduce((acc, p) => acc + p.bikes, 0);
+
+        new Chart(vehicleCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Autos', 'Motos'],
+                datasets: [{
+                    label: 'Cantidad',
+                    data: [totalCars, totalBikes],
+                    backgroundColor: ['#6366f1', '#8b5cf6'],
+                    borderRadius: 8,
+                    barThickness: 80
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de horas pico
+        const peakCtx = document.getElementById('peakChart').getContext('2d');
+        const peakData = [25, 35, 48, 65, 78, 88, 95, 92, 85, 70, 52, 38];
+        const peakColors = peakData.map(val => {
+            if (val < 50) return '#22c55e';
+            if (val < 75) return '#eab308';
+            return '#ef4444';
+        });
+
+        new Chart(peakCtx, {
+            type: 'bar',
+            data: {
+                labels: ['06-08', '08-10', '10-12', '12-14', '14-16', '16-18', '18-20', '20-22'],
+                datasets: [{
+                    label: 'Ocupación Promedio',
+                    data: [25, 48, 78, 88, 95, 85, 52, 35],
+                    backgroundColor: ['#22c55e', '#22c55e', '#eab308', '#ef4444', '#ef4444', '#ef4444', '#eab308', '#22c55e'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de duración
+        const durationCtx = document.getElementById('durationChart').getContext('2d');
+        new Chart(durationCtx, {
+            type: 'pie',
+            data: {
+                labels: ['0-3h', '3-6h', '6-9h', '9-12h', '>12h'],
+                datasets: [{
+                    data: [124, 98, 82, 31, 2],
+                    backgroundColor: ['#22c55e', '#3b82f6', '#eab308', '#f97316', '#ef4444'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // ==========================================
+        // EVENT LISTENERS Y FUNCIONALIDAD
+        // ==========================================
+        
+        // Filtros
+        document.getElementById('parkingSelect').addEventListener('change', function(e) {
+            const selected = e.target.value;
+            console.log('Estacionamiento seleccionado:', selected);
+            
+            if (selected === 'all') {
+                renderParkingList();
+                updateSummaryCards();
+            } else {
+                const filtered = parkingData.filter(p => p.id == selected);
+                const list = document.getElementById('parkingList');
+                list.innerHTML = filtered.map(p => {
+                    const percent = Math.round((p.current / p.max) * 100);
+                    const color = percent > 85 ? 'bg-red-500' : percent > 60 ? 'bg-yellow-500' : 'bg-green-500';
+                    const textColor = percent > 85 ? 'text-red-600' : percent > 60 ? 'text-yellow-600' : 'text-green-600';
+                    const bgColor = percent > 85 ? 'from-red-50 to-red-100' : percent > 60 ? 'from-yellow-50 to-yellow-100' : 'from-green-50 to-green-100';
+                    const available = p.max - p.current;
+                    
+                    return `
+                        <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-t-4 ${percent > 85 ? 'border-red-500' : percent > 60 ? 'border-yellow-500' : 'border-green-500'}">
+                            <div class="bg-gradient-to-r ${bgColor} p-4 border-b">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-900 mb-1">${p.name}</h3>
+                                        <p class="text-sm text-gray-600">Capacidad total: ${p.max} espacios</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-3xl font-bold ${textColor}">${percent}%</div>
+                                        <div class="text-sm text-gray-600">${p.current}/${p.max}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                        <span>Ocupación</span>
+                                        <span>${p.current} ocupados • ${available} disponibles</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                        <div class="${color} h-4 rounded-full transition-all duration-500 flex items-center justify-center" style="width: ${percent}%">
+                                            <span class="text-white text-xs font-bold">${percent}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="bg-purple-50 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-2xl">🚗</span>
+                                            <span class="text-lg font-bold text-purple-700">${p.cars}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">Autos (${Math.round((p.cars/p.current)*100)}%)</div>
+                                    </div>
+                                    <div class="bg-indigo-50 rounded-lg p-3">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-2xl">🏍️</span>
+                                            <span class="text-lg font-bold text-indigo-700">${p.bikes}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600">Motos (${Math.round((p.bikes/p.current)*100)}%)</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-3 border-t border-gray-200">
+                                    <div class="text-xs font-semibold text-gray-600 mb-2">Distribución por tipo de usuario:</div>
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <div class="flex items-center">
+                                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                            <span class="text-gray-700">Docentes: <strong>${p.docentes}</strong></span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                                            <span class="text-gray-700">No docentes: <strong>${p.noDocentes}</strong></span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                                            <span class="text-gray-700">Estudiantes: <strong>${p.estudiantes}</strong></span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                            <span class="text-gray-700">Visitantes: <strong>${p.visitantes}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Actualizar cards con datos del estacionamiento seleccionado
+                const p = filtered[0];
+                const percent = Math.round((p.current / p.max) * 100);
+                const available = p.max - p.current;
+                
+                document.getElementById('totalOccupancy').textContent = `${p.current} / ${p.max}`;
+                document.getElementById('occupancyBar').style.width = `${percent}%`;
+                document.getElementById('occupancyPercent').textContent = `${percent}% ocupado`;
+                document.getElementById('availableSpacesText').textContent = `${available} libres`;
+                document.getElementById('availableSpaces').textContent = available;
+                document.getElementById('carsCount').textContent = p.cars;
+                document.getElementById('bikesCount').textContent = p.bikes;
+                document.getElementById('carsPercent').textContent = `${Math.round((p.cars/p.current)*100)}%`;
+                document.getElementById('bikesPercent').textContent = `${Math.round((p.bikes/p.current)*100)}%`;
+                document.getElementById('carsBar').style.width = `${Math.round((p.cars/p.current)*100)}%`;
+                document.getElementById('bikesBar').style.width = `${Math.round((p.bikes/p.current)*100)}%`;
+            }
+        });
+
+        document.getElementById('timeRange').addEventListener('change', function(e) {
+            const range = e.target.value;
+            console.log('Rango temporal seleccionado:', range);
+            
+            // Aquí puedes actualizar los gráficos según el rango temporal
+            // Por ejemplo, cambiar las etiquetas y datos del gráfico temporal
+            let newLabels, newData;
+            
+            if (range === 'day') {
+                newLabels = ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+                newData = [25, 45, 68, 82, 95, 88, 72, 55, 35];
+            } else if (range === 'week') {
+                newLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+                newData = [78, 82, 85, 88, 90, 45, 30];
+            } else if (range === 'month') {
+                newLabels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+                newData = [75, 82, 88, 85];
+            } else if (range === 'year') {
+                newLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                newData = [65, 68, 75, 80, 85, 82, 78, 80, 83, 86, 88, 85];
+            }
+            
+            // Actualizar el título del gráfico
+            const chartTitle = document.querySelector('#timeChart').previousElementSibling;
+            const rangeText = range === 'day' ? 'Hoy' : range === 'week' ? 'Esta Semana' : range === 'month' ? 'Este Mes' : 'Este Año';
+            chartTitle.innerHTML = `
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                Ocupación Temporal (${rangeText})
+            `;
+        });
+
+        document.getElementById('userType').addEventListener('change', function(e) {
+            const type = e.target.value;
+            console.log('Tipo de usuario seleccionado:', type);
+            
+            // Filtrar tabla de vehículos
+            const table = document.getElementById('vehicleTable');
+            const filteredVehicles = type === 'all' ? vehicles : vehicles.filter(v => {
+                if (type === 'docente') return v.user === 'Docente';
+                if (type === 'nodocente') return v.user === 'No Docente';
+                if (type === 'estudiante') return v.user === 'Estudiante';
+                if (type === 'visitante') return v.user === 'Visitante';
+                return true;
+            });
+            
+            table.innerHTML = filteredVehicles.map(v => {
+                let statusBadge, statusText;
+                if (v.status === 'exceeded') {
+                    statusBadge = 'bg-red-100 text-red-800 border border-red-300';
+                    statusText = '🚨 Excedido';
+                } else if (v.status === 'warning') {
+                    statusBadge = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                    statusText = '⚠️ Advertencia';
+                } else {
+                    statusBadge = 'bg-green-100 text-green-800 border border-green-300';
+                    statusText = '✓ Normal';
+                }
+                
+                const rowClass = v.status === 'exceeded' ? 'bg-red-50' : v.status === 'warning' ? 'bg-yellow-50' : '';
+                
+                return `
+                    <tr class="hover:bg-gray-50 ${rowClass} transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${v.plate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.type === 'Auto' ? '🚗' : '🏍️'} ${v.type}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">
+                                ${v.user === 'Docente' ? '👨‍🏫' : v.user === 'No Docente' ? '👔' : v.user === 'Estudiante' ? '🎓' : '👤'} ${v.user}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.parking}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.entryTime}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold ${v.status === 'exceeded' ? 'text-red-600' : v.status === 'warning' ? 'text-yellow-600' : 'text-gray-900'}">${v.time}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBadge}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('totalVehicles').textContent = filteredVehicles.length;
+        });
+
+        // Búsqueda en tabla
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredVehicles = vehicles.filter(v => 
+                v.plate.toLowerCase().includes(searchTerm)
+            );
+            
+            const table = document.getElementById('vehicleTable');
+            table.innerHTML = filteredVehicles.map(v => {
+                let statusBadge, statusText;
+                if (v.status === 'exceeded') {
+                    statusBadge = 'bg-red-100 text-red-800 border border-red-300';
+                    statusText = '🚨 Excedido';
+                } else if (v.status === 'warning') {
+                    statusBadge = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                    statusText = '⚠️ Advertencia';
+                } else {
+                    statusBadge = 'bg-green-100 text-green-800 border border-green-300';
+                    statusText = '✓ Normal';
+                }
+                
+                const rowClass = v.status === 'exceeded' ? 'bg-red-50' : v.status === 'warning' ? 'bg-yellow-50' : '';
+                
+                return `
+                    <tr class="hover:bg-gray-50 ${rowClass} transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${v.plate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.type === 'Auto' ? '🚗' : '🏍️'} ${v.type}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">
+                                ${v.user === 'Docente' ? '👨‍🏫' : v.user === 'No Docente' ? '👔' : v.user === 'Estudiante' ? '🎓' : '👤'} ${v.user}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.parking}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.entryTime}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold ${v.status === 'exceeded' ? 'text-red-600' : v.status === 'warning' ? 'text-yellow-600' : 'text-gray-900'}">${v.time}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBadge}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('totalVehicles').textContent = filteredVehicles.length;
+        });
+
+        // Ordenamiento
+        document.getElementById('sortBy').addEventListener('change', function(e) {
+            const sortType = e.target.value;
+            let sortedVehicles = [...vehicles];
+            
+            if (sortType === 'time') {
+                sortedVehicles.sort((a, b) => b.hours - a.hours);
+            } else if (sortType === 'plate') {
+                sortedVehicles.sort((a, b) => a.plate.localeCompare(b.plate));
+            } else if (sortType === 'parking') {
+                sortedVehicles.sort((a, b) => a.parking.localeCompare(b.parking));
+            } else if (sortType === 'user') {
+                sortedVehicles.sort((a, b) => a.user.localeCompare(b.user));
+            }
+            
+            const table = document.getElementById('vehicleTable');
+            table.innerHTML = sortedVehicles.map(v => {
+                let statusBadge, statusText;
+                if (v.status === 'exceeded') {
+                    statusBadge = 'bg-red-100 text-red-800 border border-red-300';
+                    statusText = '🚨 Excedido';
+                } else if (v.status === 'warning') {
+                    statusBadge = 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+                    statusText = '⚠️ Advertencia';
+                } else {
+                    statusBadge = 'bg-green-100 text-green-800 border border-green-300';
+                    statusText = '✓ Normal';
+                }
+                
+                const rowClass = v.status === 'exceeded' ? 'bg-red-50' : v.status === 'warning' ? 'bg-yellow-50' : '';
+                
+                return `
+                    <tr class="hover:bg-gray-50 ${rowClass} transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-gray-900">${v.plate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.type === 'Auto' ? '🚗' : '🏍️'} ${v.type}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">
+                                ${v.user === 'Docente' ? '👨‍🏫' : v.user === 'No Docente' ? '👔' : v.user === 'Estudiante' ? '🎓' : '👤'} ${v.user}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.parking}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-600">${v.entryTime}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-semibold ${v.status === 'exceeded' ? 'text-red-600' : v.status === 'warning' ? 'text-yellow-600' : 'text-gray-900'}">${v.time}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusBadge}">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        });
+
+        // ==========================================
+        // INICIALIZACIÓN
+        // ==========================================
+        updateLastUpdate();
+        renderParkingList();
+        renderVehicleTable();
+        updateSummaryCards();
+        
+        // Actualizar cada 30 segundos
+        setInterval(() => {
+            updateLastUpdate();
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -3,24 +3,37 @@ package com.unsl.sgeu.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "empleado",
+       uniqueConstraints = {
+           @UniqueConstraint(name = "uq_empleado_usuario", columnNames = "nombre_usuario"),
+           @UniqueConstraint(name = "uq_empleado_correo",  columnNames = "correo")
+       })
 public class Empleado {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false, length = 255)
   private String nombre;
+
+  @Column(nullable = false, length = 255)
   private String apellido;
+
+  @Column(length = 255)
   private String correo;
 
-  @Column(name = "nombre_usuario", unique = true)
+  @Column(name = "nombre_usuario", nullable = false, length = 255)
   private String nombreUsuario;
 
+  @Column(nullable = false, length = 255)
   private String contrasenia;
 
-  private String cargo; // puede ser "administrador" o "guardia"
+  @Enumerated(EnumType.STRING)
+  @Column(name = "rol", nullable = false, length = 10) // valores: 'guardia' | 'admin'
+  private Rol rol = Rol.Guardia;
 
-  // Getters y setters
+  // Getters / Setters
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
 
@@ -39,6 +52,6 @@ public class Empleado {
   public String getContrasenia() { return contrasenia; }
   public void setContrasenia(String contrasenia) { this.contrasenia = contrasenia; }
 
-  public String getCargo() { return cargo; }
-  public void setCargo(String cargo) { this.cargo = cargo; }
+  public Rol getRol() { return rol; }
+  public void setRol(Rol rol) { this.rol = rol; }
 }
