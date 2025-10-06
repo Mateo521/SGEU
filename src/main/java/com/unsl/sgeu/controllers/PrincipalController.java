@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,10 +31,10 @@ public class PrincipalController {
     @GetMapping("/detalles_info")
     public String info(Model model) {
         model.addAttribute("detallesInfo", new DetallesInfo());
-        return "detalles_info";  
+        return "detalles_info";
     }
 
-    //Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
+    // Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
     @GetMapping("/")
     public String index(HttpSession session) {
         if (session.getAttribute("user") == null) {
@@ -45,7 +44,7 @@ public class PrincipalController {
         return "index";
     }
 
-    @GetMapping("/leerqr")
+   
 
     @GetMapping("/login")
     public String login() {
@@ -57,8 +56,6 @@ public class PrincipalController {
         return "register";
     }
 
-    
-
     @GetMapping("/usuarios")
     public String usuarios() {
         return "table-user";
@@ -69,14 +66,14 @@ public class PrincipalController {
         return "ajustes";
     }
 
-      @GetMapping("/leerqr")
+    @GetMapping("/leerqr")
     public String leerqr() {
         return "leerqr";
     }
 
     @GetMapping("/registrar-vehiculo")
     public String registrarVehiculo() {
-        return "registrarvehiculo";  
+        return "registrarvehiculo";
     }
 
     /*
