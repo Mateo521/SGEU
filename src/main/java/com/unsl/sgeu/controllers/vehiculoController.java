@@ -13,11 +13,14 @@ public class vehiculoController {
                          @RequestParam(value="category", required=false) String category,
                          Model model) {
 
-        if (query != null) {
-            // Si q = "1" → éxito, cualquier otro valor → error
-            boolean resultado = "1".equals(query) && "Entrada".equals(category);
-            model.addAttribute("resultado", resultado);
-            model.addAttribute("patente", query);
+        if ("Entrada".equals(category)) {
+        //buscar behiculo en la tabla
+        
+        
+        } else{
+
+
+
         }
 
         model.addAttribute("category", category);
