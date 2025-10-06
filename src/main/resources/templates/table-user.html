@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .status-indicator {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-hover:hover {
+            background-color: #f8fafc;
+            transform: scale(1.01);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="container mx-auto px-4 py-8 border-2 border-dashed border-gray-200 rounded-2xl">
+            <!-- Header -->
+            <div class="mb-8 fade-in">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-3">
+                            <div
+                                class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            Gestión de Empleados
+                        </h1>
+                        <p class="text-slate-500 mt-2">Sistema de Gestión de Estacionamiento - Usuarios</p>
+                    </div>
+                    <button onclick="location.href='/ajustes'"
+                        class="cursor-pointer bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 hover:scale-105 shadow-lg flex items-center gap-2 font-semibold">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Nuevo Empleado
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Buscar</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" id="searchInput" onkeyup="filterTable()"
+                                placeholder="Buscar por nombre, usuario o email..."
+                                class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Filtrar por Cargo</label>
+                        <select id="cargoFilter" onchange="filterTable()"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="">Todos</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Guardia">Guardia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Filtrar por Estado</label>
+                        <select id="statusFilter" onchange="filterTable()"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="">Todos</option>
+                            <option value="online">Conectado</option>
+                            <option value="offline">Desconectado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium">Total Empleados</p>
+                            <p class="text-3xl font-bold text-slate-800 mt-1" id="totalEmployees">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium">Conectados</p>
+                            <p class="text-3xl font-bold text-green-600 mt-1" id="onlineCount">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium">Administradores</p>
+                            <p class="text-3xl font-bold text-purple-600 mt-1" id="adminCount">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium">Guardias</p>
+                            <p class="text-3xl font-bold text-orange-600 mt-1" id="guardiaCount">0</p>
+                        </div>
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="employeeTable">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Estado</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Nombre Completo</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Usuario</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Cargo</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Email</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Estacionamiento</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100" id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal"
+            class="hidden fixed inset-0 z-50 modal-backdrop bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+                <div class="p-6 border-b border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Editar Empleado
+                        </h2>
+                        <button onclick="closeEditModal()"
+                            class="text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <form id="editForm" class="p-6 space-y-4">
+                    <input type="hidden" id="editId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Nombre</label>
+                            <input type="text" id="editNombre"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Apellido</label>
+                            <input type="text" id="editApellido"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Usuario</label>
+                        <input type="text" id="editUsuario"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Cargo</label>
+                        <select id="editCargo"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            required>
+                            <option value="Admin">Admin</option>
+                            <option value="Guardia">Guardia</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+                        <input type="email" id="editEmail"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Estacionamiento Asignado</label>
+                        <select id="editEstacionamiento"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            required>
+                            <option value="Estacionamiento Centro">Estacionamiento Centro</option>
+                            <option value="Estacionamiento Norte">Estacionamiento Norte</option>
+                            <option value="Estacionamiento Sur">Estacionamiento Sur</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit"
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold">
+                            Guardar Cambios
+                        </button>
+                        <button type="button" onclick="closeEditModal()"
+                            class="flex-1 bg-slate-100 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-200 transition-all duration-200 font-semibold">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Sample data
+            let employees = [
+                {
+                    id: 1,
+                    nombre: 'Juan',
+                    apellido: 'Pérez',
+                    usuario: 'jperez',
+                    cargo: 'Admin',
+                    email: 'juan.perez@sgeu.com',
+                    estacionamiento: 'Estacionamiento Centro',
+                    status: 'online'
+                },
+                {
+                    id: 2,
+                    nombre: 'María',
+                    apellido: 'González',
+                    usuario: 'mgonzalez',
+                    cargo: 'Guardia',
+                    email: 'maria.gonzalez@sgeu.com',
+                    estacionamiento: 'Estacionamiento Norte',
+                    status: 'online'
+                },
+                {
+                    id: 3,
+                    nombre: 'Carlos',
+                    apellido: 'Rodríguez',
+                    usuario: 'crodriguez',
+                    cargo: 'Guardia',
+                    email: 'carlos.rodriguez@sgeu.com',
+                    estacionamiento: 'Estacionamiento Sur',
+                    status: 'offline'
+                },
+                {
+                    id: 4,
+                    nombre: 'Ana',
+                    apellido: 'Martínez',
+                    usuario: 'amartinez',
+                    cargo: 'Admin',
+                    email: 'ana.martinez@sgeu.com',
+                    estacionamiento: 'Estacionamiento Centro',
+                    status: 'online'
+                },
+                {
+                    id: 5,
+                    nombre: 'Luis',
+                    apellido: 'Fernández',
+                    usuario: 'lfernandez',
+                    cargo: 'Guardia',
+                    email: 'luis.fernandez@sgeu.com',
+                    estacionamiento: 'Estacionamiento Norte',
+                    status: 'offline'
+                }
+            ];
+
+            function renderTable() {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+
+                employees.forEach(emp => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row-hover';
+
+                    const statusClass = emp.status === 'online' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600';
+                    const statusDot = emp.status === 'online' ? 'bg-green-500 status-indicator' : 'bg-slate-400';
+                    const statusText = emp.status === 'online' ? 'Conectado' : 'Desconectado';
+
+                    const cargoClass = emp.cargo === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-orange-100 text-orange-800';
+
+                    row.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full ${statusDot}"></span>
+                            <span class="text-xs font-medium px-2.5 py-1 rounded-full ${statusClass}">${statusText}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                                ${emp.nombre.charAt(0)}${emp.apellido.charAt(0)}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-800">${emp.nombre} ${emp.apellido}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-600 font-medium">${emp.usuario}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-xs font-medium px-3 py-1.5 rounded-full ${cargoClass}">${emp.cargo}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="text-slate-600">${emp.email}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <select onchange="changeEstacionamiento(${emp.id}, this.value)" class="pl-3 pr-8 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="Estacionamiento Centro" ${emp.estacionamiento === 'Estacionamiento Centro' ? 'selected' : ''}>Estacionamiento Centro</option>
+                            <option value="Estacionamiento Norte" ${emp.estacionamiento === 'Estacionamiento Norte' ? 'selected' : ''}>Estacionamiento Norte</option>
+                            <option value="Estacionamiento Sur" ${emp.estacionamiento === 'Estacionamiento Sur' ? 'selected' : ''}>Estacionamiento Sur</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <button onclick="editEmployee(${emp.id})" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button onclick="toggleStatus(${emp.id})" class="p-2 text-${emp.status === 'online' ? 'red' : 'green'}-600 hover:bg-${emp.status === 'online' ? 'red' : 'green'}-50 rounded-lg transition-all" title="${emp.status === 'online' ? 'Desconectar' : 'Conectar'}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z"/>
+                                </svg>
+                            </button>
+                            <button onclick="deleteEmployee(${emp.id})" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                    tbody.appendChild(row);
+                });
+
+                updateStats();
+            }
+
+            function updateStats() {
+                document.getElementById('totalEmployees').textContent = employees.length;
+                document.getElementById('onlineCount').textContent = employees.filter(e => e.status === 'online').length;
+                document.getElementById('adminCount').textContent = employees.filter(e => e.cargo === 'Admin').length;
+                document.getElementById('guardiaCount').textContent = employees.filter(e => e.cargo === 'Guardia').length;
+            }
+
+            function filterTable() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const cargoFilter = document.getElementById('cargoFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+
+                const rows = document.querySelectorAll('#tableBody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const matchesSearch = text.includes(searchTerm);
+                    const matchesCargo = !cargoFilter || text.includes(cargoFilter.toLowerCase());
+                    const matchesStatus = !statusFilter || text.includes(statusFilter === 'online' ? 'conectado' : 'desconectado');
+
+                    row.style.display = matchesSearch && matchesCargo && matchesStatus ? '' : 'none';
+                });
+            }
+
+            function changeEstacionamiento(id, newValue) {
+                const emp = employees.find(e => e.id === id);
+                if (emp) {
+                    emp.estacionamiento = newValue;
+                    showNotification('Estacionamiento actualizado correctamente', 'success');
+                }
+            }
+
+            function toggleStatus(id) {
+                const emp = employees.find(e => e.id === id);
+                if (emp) {
+                    emp.status = emp.status === 'online' ? 'offline' : 'online';
+                    renderTable();
+                    showNotification(`Usuario ${emp.status === 'online' ? 'conectado' : 'desconectado'}`, 'success');
+                }
+            }
+
+            function editEmployee(id) {
+                const emp = employees.find(e => e.id === id);
+                if (emp) {
+                    document.getElementById('editId').value = emp.id;
+                    document.getElementById('editNombre').value = emp.nombre;
+                    document.getElementById('editApellido').value = emp.apellido;
+                    document.getElementById('editUsuario').value = emp.usuario;
+                    document.getElementById('editCargo').value = emp.cargo;
+                    document.getElementById('editEmail').value = emp.email;
+                    document.getElementById('editEstacionamiento').value = emp.estacionamiento;
+                    document.getElementById('editModal').classList.remove('hidden');
+                }
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').classList.add('hidden');
+            }
+
+            function deleteEmployee(id) {
+                if (confirm('¿Está seguro de que desea eliminar este empleado?')) {
+                    employees = employees.filter(e => e.id !== id);
+                    renderTable();
+                    showNotification('Empleado eliminado correctamente', 'success');
+                }
+            }
+
+            function openAddModal() {
+                showNotification('Función de agregar empleado - Redirigir a formulario de registro', 'info');
+            }
+
+            document.getElementById('editForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const id = parseInt(document.getElementById('editId').value);
+                const emp = employees.find(e => e.id === id);
+
+                if (emp) {
+                    emp.nombre = document.getElementById('editNombre').value;
+                    emp.apellido = document.getElementById('editApellido').value;
+                    emp.usuario = document.getElementById('editUsuario').value;
+                    emp.cargo = document.getElementById('editCargo').value;
+                    emp.email = document.getElementById('editEmail').value;
+                    emp.estacionamiento = document.getElementById('editEstacionamiento').value;
+
+                    renderTable();
+                    closeEditModal();
+                    showNotification('Empleado actualizado correctamente', 'success');
+                }
+            });
+
+            function showNotification(message, type = 'success') {
+                const colors = {
+                    success: { bg: 'bg-green-50', border: 'border-green-500', text: 'text-green-800', icon: 'text-green-500' },
+                    error: { bg: 'bg-red-50', border: 'border-red-500', text: 'text-red-800', icon: 'text-red-500' },
+                    info: { bg: 'bg-blue-50', border: 'border-blue-500', text: 'text-blue-800', icon: 'text-blue-500' }
+                };
+
+                const color = colors[type] || colors.success;
+
+                const iconPaths = {
+                    success: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                    error: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                    info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                };
+
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 ${color.bg} border-l-4 ${color.border} ${color.text} p-4 rounded-lg shadow-lg z-50 max-w-md slide-in`;
+                notification.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 mr-3 ${color.icon}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPaths[type]}"/>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="font-semibold">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 ${color.icon} hover:opacity-70">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 5000);
+            }
+
+            // Export to CSV
+            function exportToCSV() {
+                const headers = ['Nombre', 'Apellido', 'Usuario', 'Cargo', 'Email', 'Estacionamiento', 'Estado'];
+                const rows = employees.map(emp => [
+                    emp.nombre,
+                    emp.apellido,
+                    emp.usuario,
+                    emp.cargo,
+                    emp.email,
+                    emp.estacionamiento,
+                    emp.status === 'online' ? 'Conectado' : 'Desconectado'
+                ]);
+
+                let csv = headers.join(',') + '\n';
+                rows.forEach(row => {
+                    csv += row.join(',') + '\n';
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'empleados_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                showNotification('Archivo CSV exportado correctamente', 'success');
+            }
+
+            // Export to JSON
+            function exportToJSON() {
+                const dataStr = JSON.stringify(employees, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'empleados_' + new Date().toISOString().split('T')[0] + '.json';
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                showNotification('Archivo JSON exportado correctamente', 'success');
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                // Ctrl/Cmd + K para buscar
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                }
+
+                // ESC para cerrar modal
+                if (e.key === 'Escape') {
+                    closeEditModal();
+                }
+            });
+
+            // Initialize
+            renderTable();
+        </script>
+    </main>
+</body>
+
+</html>
