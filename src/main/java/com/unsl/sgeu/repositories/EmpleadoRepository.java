@@ -1,22 +1,29 @@
 package com.unsl.sgeu.repositories;
 
-
 import com.unsl.sgeu.models.Empleado;
+import com.unsl.sgeu.models.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
-    // Buscar por nombre de usuario
+
+    // Buscar por nombre de usuario (exacto)
     Empleado findByNombreUsuario(String nombreUsuario);
 
-    // Buscar por nombre de usuario y contraseña
-    Empleado findByNombreUsuarioAndContrasenia(String nombreUsuario, String contrasenia);
+    // Variante segura (case-insensitive) y opcional
+    Optional<Empleado> findByNombreUsuarioIgnoreCase(String nombreUsuario);
 
-    // Buscar empleados por cargo (ejemplo: "Administrador" o "Guardia")
-    java.util.List<Empleado> findByCargo(String cargo);
+    // Login (ojo: en producción NO guardes contraseñas en texto plano)
+    Optional<Empleado> findByNombreUsuarioAndContrasenia(String nombreUsuario, String contrasenia);
 
-    // Buscar por ID
-    java.util.Optional<Empleado> findById(Long id);
+    // Filtrar por rol (admin/guardia)
+    List<Empleado> findByRol(Rol rol);
 
-    //Buscar todos los empleados
-    java.util.List<Empleado> findAll();
+    // Utilidades
+    boolean existsByNombreUsuario(String nombreUsuario);
+    Optional<Empleado> findByCorreoIgnoreCase(String correo);
+
+    
 }

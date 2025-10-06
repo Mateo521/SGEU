@@ -1,69 +1,90 @@
 package com.unsl.sgeu.services;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.unsl.sgeu.models.Empleado;
+import com.unsl.sgeu.models.Rol;
+import com.unsl.sgeu.repositories.EmpleadoRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.unsl.sgeu.models.Empleado;
-import com.unsl.sgeu.repositories.EmpleadoRepository;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmpleadoServices {
 
-    @Autowired
-    private EmpleadoRepository empleadoRepository;
+    private final EmpleadoRepository empleadoRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public EmpleadoServices(PasswordEncoder passwordEncoder) {
+    public EmpleadoServices(EmpleadoRepository empleadoRepository,
+                            PasswordEncoder passwordEncoder) {
+        this.empleadoRepository = empleadoRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    /* =====================  AUTH  ===================== */
+
     public boolean login(String nombreUsuario, String contrasenia) {
-        Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
-        if (empleado == null) {
-            return false; 
-        }
+        Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
+        if (opt.isEmpty()) return false;
+        Empleado empleado = opt.get();
         return passwordEncoder.matches(contrasenia, empleado.getContrasenia());
     }
 
-    public boolean register(String nombre, String apellido, String nombreUsuario, String contrasenia, String correo, String cargo) {
-        Empleado empleadoExistente = empleadoRepository.findByNombreUsuario(nombreUsuario);
-        if (empleadoExistente != null) {
-            return false; 
+    /** Registra con rol explícito (admin/guardia). */
+    public boolean register(String nombre,
+                            String apellido,
+                            String nombreUsuario,
+                            String contrasenia,
+                            String correo,
+                            Rol rol) {
+        if (empleadoRepository.existsByNombreUsuario(nombreUsuario)) {
+            return false; // usuario ya existe
         }
-        Empleado nuevoEmpleado = new Empleado();
-        nuevoEmpleado.setNombre(nombre);
-        nuevoEmpleado.setApellido(apellido);
-        nuevoEmpleado.setNombreUsuario(nombreUsuario);
-        String passwordEncriptada = passwordEncoder.encode(contrasenia);
-        nuevoEmpleado.setContrasenia(passwordEncriptada);
-        nuevoEmpleado.setCargo(cargo);
-        nuevoEmpleado.setCorreo(correo);
-        empleadoRepository.save(nuevoEmpleado);
+        Empleado nuevo = new Empleado();
+        nuevo.setNombre(nombre);
+        nuevo.setApellido(apellido);
+        nuevo.setNombreUsuario(nombreUsuario);
+        nuevo.setCorreo(correo);
+        nuevo.setContrasenia(passwordEncoder.encode(contrasenia));
+        nuevo.setRol(rol != null ? rol : Rol.guardia);
+
+        empleadoRepository.save(nuevo);
         return true;
     }
 
+    /** Overload: por compatibilidad si aún te llega "cargo" como String. */
+    public boolean register(String nombre,
+                            String apellido,
+                            String nombreUsuario,
+                            String contrasenia,
+                            String correo,
+                            String cargoStr) {
+        Rol rol = ("admin".equalsIgnoreCase(cargoStr)) ? Rol.admin : Rol.guardia;
+        return register(nombre, apellido, nombreUsuario, contrasenia, correo, rol);
+    }
+
+    /* =====================  QUERIES  ===================== */
+
     public String obtenerNombreEmpleado(Long id) {
-        Optional<Empleado> empleado = empleadoRepository.findById(id);
-        if (empleado.isPresent()) {
-            return empleado.get().getNombre() + " " + empleado.get().getApellido();
-        }
-        return "Nombre no encontrado";
+        return empleadoRepository.findById(id)
+                .map(e -> e.getNombre() + " " + e.getApellido())
+                .orElse("Nombre no encontrado");
     }
 
-    public String obtenerCargoEmpleado(String nombreUsuario) {
-        Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
-        if (empleado != null) {
-            return empleado.getCargo();
-        }
-        return "Cargo no encontrado";
+    /** Devuelve el rol como String ("admin"/"guardia") */
+    public String obtenerRolEmpleado(String nombreUsuario) {
+        return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
+                .map(e -> e.getRol().name())
+                .orElse("Rol no encontrado");
     }
 
-    public Iterable<Empleado> listarEmpleados() {
+    public List<Empleado> listarEmpleados() {
         return empleadoRepository.findAll();
     }
+    public String obtenerNombrePorUsuario(String nombreUsuario) {
+    return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
+            .map(e -> e.getNombre() + " " + e.getApellido())
+            .orElse("Nombre no encontrado");
+}
 
-    
 }

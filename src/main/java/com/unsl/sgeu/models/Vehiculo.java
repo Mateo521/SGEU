@@ -5,60 +5,67 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "vehiculo")
 public class Vehiculo {
-    
+
     @Id
+    @Column(name = "patente", length = 15)
     private String patente;
-    
-    @Column(name = "codigo_qr", unique = true)
+
+    @Column(name = "codigo_qr", nullable = false, unique = true, length = 128)
     private String codigoQr;
-    
-    @Column(nullable = false)
-    private String color;
-    
-    @Column(nullable = false)
+
+    @Column(name = "modelo", length = 255)
     private String modelo;
-    
-    @Column(nullable = false)
-    private String tipo;
-    
-    @Column(name = "dni_duenio", nullable = false)
-    private Long dniDuenio;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dni_duenio", insertable = false, updatable = false)
-    private Persona duenio;
-    
-    // Constructores
+
+    @Column(name = "color", length = 40)
+    private String color;
+
+    // FK -> vehiculo_tipo.id_vehiculo_tipo
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_vehiculo_tipo", nullable = false)
+    private VehiculoTipo vehiculoTipo;
+
+    // ---------- Constructores ----------
     public Vehiculo() {}
-    
-    public Vehiculo(String patente, String codigoQr, String color, String modelo, String tipo, Long dniDuenio) {
+
+    public Vehiculo(String patente, String codigoQr, String modelo, String color, VehiculoTipo vehiculoTipo) {
         this.patente = patente;
         this.codigoQr = codigoQr;
-        this.color = color;
         this.modelo = modelo;
-        this.tipo = tipo;
-        this.dniDuenio = dniDuenio;
+        this.color = color;
+        this.vehiculoTipo = vehiculoTipo;
     }
-    
-    // Getters y Setters
+
+    // ---------- Getters / Setters ----------
     public String getPatente() { return patente; }
     public void setPatente(String patente) { this.patente = patente; }
-    
+
     public String getCodigoQr() { return codigoQr; }
     public void setCodigoQr(String codigoQr) { this.codigoQr = codigoQr; }
-    
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
-    
+
     public String getModelo() { return modelo; }
     public void setModelo(String modelo) { this.modelo = modelo; }
-    
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
-    
-    public Long getDniDuenio() { return dniDuenio; }
-    public void setDniDuenio(Long dniDuenio) { this.dniDuenio = dniDuenio; }
-    
-    public Persona getDuenio() { return duenio; }
-    public void setDuenio(Persona duenio) { this.duenio = duenio; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public VehiculoTipo getVehiculoTipo() { return vehiculoTipo; }
+    public void setVehiculoTipo(VehiculoTipo vehiculoTipo) { this.vehiculoTipo = vehiculoTipo; }
+
+    // ---------- Helpers para el controller ----------
+    /** Devuelve el id de tipo de vehículo sin exponer la entidad. */
+    @Transient
+    public Short getIdVehiculoTipo() {
+        return (vehiculoTipo != null) ? vehiculoTipo.getId() : null;
+    }
+
+    /** Setea el tipo por id creando un proxy ligero (evita fetch previo). */
+    public void setIdVehiculoTipo(Short idVehiculoTipo) {
+        if (idVehiculoTipo == null) {
+            this.vehiculoTipo = null;
+        } else {
+            VehiculoTipo vt = new VehiculoTipo();
+            vt.setId(idVehiculoTipo);
+            this.vehiculoTipo = vt;
+        }
+    }
 }

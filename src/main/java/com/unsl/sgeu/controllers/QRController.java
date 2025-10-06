@@ -13,41 +13,35 @@ import javax.annotation.PostConstruct;
 @RequestMapping("/leerqr")
 public class QRController {
 
-    private static final Logger logger = LoggerFactory.getLogger(QRController.class);
     private final VehiculoService vehiculoService;
+    private final PersonaVehiculoService personaVehiculoService;
 
-    public QRController(VehiculoService vehiculoService) {
+    public QRController(VehiculoService vehiculoService,
+                        PersonaVehiculoService personaVehiculoService) {
         this.vehiculoService = vehiculoService;
-        logger.info("QRController creado correctamente");
-    }
-
-    @PostConstruct
-    public void init() {
-        logger.info("QRController inicializado - Endpoint disponible en: /leerqr/leer");
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        logger.info("Endpoint de test llamado");
-        return ResponseEntity.ok("QRController funcionando correctamente");
+        this.personaVehiculoService = personaVehiculoService;
     }
 
     @PostMapping("/leer")
     public ResponseEntity<?> leerQR(@RequestBody Map<String, String> request) {
         String codigo = request.get("codigo");
-        logger.info("Recibida petición para leer QR: {}", codigo);
 
         Vehiculo v = vehiculoService.buscarPorQr(codigo);
-
         if (v == null) {
             return ResponseEntity.status(404).body(Map.of("mensaje", "Vehículo desconocido"));
         }
 
+        // dueños por la tabla N:M
+        var dnisDuenios = personaVehiculoService.obtenerDnisPorPatente(v.getPatente());
+        // opcional: nombres de dueños
+        // var personas = personaVehiculoService.obtenerPersonasPorPatente(v.getPatente());
+
         return ResponseEntity.ok(Map.of(
-                "mensaje", "✅ Vehículo encontrado",
-                "patente", v.getPatente(),
-                "modelo", v.getModelo(),
-                "color", v.getColor(),
-                "dniDuenio", v.getDuenio().getDni()));
+            "mensaje", "✅ Vehículo encontrado",
+            "patente", v.getPatente(),
+            "modelo", v.getModelo(),
+            "color",  v.getColor(),
+            "duenios", dnisDuenios  // o personas si querés devolver objeto completo
+        ));
     }
 }

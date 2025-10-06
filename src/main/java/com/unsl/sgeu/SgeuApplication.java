@@ -1,12 +1,18 @@
 package com.unsl.sgeu;
 
+import com.unsl.sgeu.models.Categoria;
 import com.unsl.sgeu.models.Empleado;
 import com.unsl.sgeu.models.Persona;
+import com.unsl.sgeu.models.Rol;
 import com.unsl.sgeu.models.Vehiculo;
+import com.unsl.sgeu.models.VehiculoTipo;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
 import com.unsl.sgeu.repositories.PersonaRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
+import com.unsl.sgeu.services.CategoriaService;
+import com.unsl.sgeu.services.PersonaVehiculoService;
 import com.unsl.sgeu.services.VehiculoService;
+import com.unsl.sgeu.services.VehiculoTipoService;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,55 +26,69 @@ public class SgeuApplication {
         SpringApplication.run(SgeuApplication.class, args);
     }
 
-    // Se ejecuta una vez al iniciar: crea datos de ejemplo si no existen
     @Bean
     CommandLineRunner seedData(
             PersonaRepository personaRepo,
             VehiculoRepository vehiculoRepo,
             EmpleadoRepository empleadoRepo,
-            VehiculoService vehiculoService) {
+            CategoriaService categoriaService,
+            VehiculoTipoService vehiculoTipoService,
+            PersonaVehiculoService personaVehiculoService,
+            VehiculoService vehiculoService
+    ) {
         return args -> {
-            // ===== Persona =====
-            Long dni = 12345678L; // usá el tipo que tengas como @Id en Persona
+            // ===== 1) Catálogo =====
+            Categoria catEstudiante = categoriaService.getOrCreateByNombre("estudiante");
+            VehiculoTipo tipoAuto   = vehiculoTipoService.getOrCreateByNombre("auto");
+
+            // ===== 2) Persona =====
+            Long dni = 12345678L;
             Persona persona = personaRepo.findById(dni).orElseGet(() -> {
                 Persona p = new Persona();
                 p.setDni(dni);
                 p.setNombre("Ana");
                 p.setTelefono("266-123456");
                 p.setEmail("ana@uni.edu");
-                p.setCategoria("alumno");
+                p.setCategoria(catEstudiante);
                 return personaRepo.save(p);
             });
+            if (persona.getCategoria() == null) {
+                persona.setCategoria(catEstudiante);
+                personaRepo.save(persona);
+            }
 
-            // ===== Vehículo (PK = patente) =====
-        
+            // ===== 3) Vehículo =====
             String patente = "AB321CD";
-            vehiculoRepo.findById(patente).orElseGet(() -> {
+            Vehiculo vehiculo = vehiculoRepo.findById(patente).orElseGet(() -> {
                 Vehiculo v = new Vehiculo();
                 v.setPatente(patente);
-                v.setCodigoQr(vehiculoService.generarCodigoQrUnico(patente));  
-                v.setModelo("Ford");
+                // Usa el nombre correcto de tu método de QR:
+                String qr = vehiculoService.generarCodigoQR(patente); // <--- si tu método se llama generarCodigoQR o generarCodigoQrUnico, cambialo aquí
+                v.setCodigoQr(qr);
+                v.setModelo("Ford Focus");
                 v.setColor("Verde");
-                v.setTipo("Auto");
-                v.setDuenio(persona);
+                v.setVehiculoTipo(tipoAuto); // o v.setIdVehiculoTipo(tipoAuto.getId());
                 return vehiculoRepo.save(v);
             });
 
-            // ===== Empleado =====
+            // ===== 4) Vincular Persona ↔ Vehículo =====
+            personaVehiculoService.vincular(persona.getDni(), vehiculo.getPatente());
+
+            // ===== 5) Empleado admin =====
             String user = "admin";
-            Empleado empleado = empleadoRepo.findByNombreUsuario(user);
-            if (empleado == null) {
+            Empleado admin = empleadoRepo.findByNombreUsuario(user);
+            if (admin == null) {
                 Empleado e = new Empleado();
                 e.setNombre("Gero");
                 e.setApellido("Arias");
                 e.setCorreo("gero@example.com");
                 e.setNombreUsuario(user);
-                e.setContrasenia("admin123"); // luego encriptamos
-                e.setCargo("Administrador");
+                e.setContrasenia("admin123"); // TODO: en producción encriptar
+                e.setRol(Rol.admin);          // <--- enum, no int
                 empleadoRepo.save(e);
             }
 
-            System.out.println("✅ Datos de ejemplo listos: Persona, Vehículo y Empleado.");
+            System.out.println("✅ Seed listo: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin.");
         };
     }
 }

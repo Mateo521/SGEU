@@ -1,299 +1,186 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <meta charset="UTF-8">
-    <title>SGEU - Inicio de Sesión</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body {
-            opacity: 0;
-            animation: fadeInScale 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        @keyframes fadeInScale {
-            0% {
-                opacity: 0;
-                filter: blur(10px);
-                transform: scale(0.98);
-            }
-
-            100% {
-                opacity: 1;
-                filter: blur(0px);
-                transform: scale(1);
-            }
-        }
-
-        body.blur-scale-out {
-            animation: blurScaleOut 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
-
-        @keyframes blurScaleOut {
-            0% {
-                opacity: 1;
-                filter: blur(0px);
-                transform: scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                filter: blur(20px);
-                transform: scale(0.95);
-            }
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .loading-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .spinner-container {
-            text-align: center;
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-        }
-
-        .loading-overlay.active .spinner-container {
-            transform: scale(1);
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(59, 130, 246, 0.2);
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .loading-dots span {
-            width: 8px;
-            height: 8px;
-            background: #3b82f6;
-            border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .loading-dots span:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-
-        .loading-dots span:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            80%,
-            100% {
-                transform: scale(0);
-                opacity: 0.5;
-            }
-
-            40% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>SGEU - Inicio de Sesión</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { opacity: 0; animation: fadeInScale 0.8s cubic-bezier(0.4,0,0.2,1) forwards; }
+    @keyframes fadeInScale { 0%{opacity:0;filter:blur(10px);transform:scale(0.98)} 100%{opacity:1;filter:blur(0);transform:scale(1)} }
+    body.blur-scale-out { animation: blurScaleOut 0.6s cubic-bezier(0.4,0,1,1) forwards; }
+    @keyframes blurScaleOut { 0%{opacity:1;filter:blur(0);transform:scale(1)} 100%{opacity:0;filter:blur(20px);transform:scale(0.95)} }
+    .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s}
+    .loading-overlay.active{opacity:1;pointer-events:all}
+    .spinner-container{text-align:center;transform:scale(.8);transition:transform .3s}
+    .loading-overlay.active .spinner-container{transform:scale(1)}
+    .spinner{width:60px;height:60px;border:4px solid rgba(59,130,246,.2);border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-dots{display:flex;justify-content:center;gap:8px;margin-top:12px}
+    .loading-dots span{width:8px;height:8px;background:#3b82f6;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
+    .loading-dots span:nth-child(1){animation-delay:-.32s}
+    .loading-dots span:nth-child(2){animation-delay:-.16s}
+    @keyframes bounce{0%,80%,100%{transform:scale(0);opacity:.5} 40%{transform:scale(1);opacity:1}}
+  </style>
 </head>
 
+<body>
 <div class="min-h-screen w-full flex items-center justify-center p-4 bg-red-100 bg-cover bg-center"
-    layout:fragment="content" style="background-image: url('/images/michael-fousert-a7WIJiOZDO0-unsplash.jpg');">
+     style="background-image: url('/images/michael-fousert-a7WIJiOZDO0-unsplash.jpg');">
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner-container">
-            <div class="spinner"></div>
-            <p class="text-white font-semibold text-lg">Iniciando sesión...</p>
-            <div class="loading-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p class="text-white font-semibold text-lg">Iniciando sesión...</p>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <section class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-xl p-8 sm:p-10 backdrop-blur-sm bg-opacity-95">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl mb-4 shadow-lg">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
         </div>
+        <h1 class="text-2xl font-bold text-slate-800 mb-2">Bienvenido</h1>
+        <p class="text-slate-500 text-sm">Sistema de Gestión de Estacionamiento</p>
+      </div>
+
+      <!-- Formulario de login -->
+      <form id="loginForm" th:action="@{/login}" method="post" class="space-y-6" autocomplete="on">
+        <!-- CSRF (si usás Spring Security) -->
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div>
+          <label for="nombreUsuario" class="block text-sm font-semibold text-slate-700 mb-2">
+            Nombre de Usuario
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <input type="text" id="nombreUsuario" name="nombreUsuario"
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-slate-400"
+                   placeholder="Ingrese su usuario" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div>
+          <label for="contrasenia" class="block text-sm font-semibold text-slate-700 mb-2">
+            Contraseña
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••"
+                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-slate-400"
+                   required autocomplete="current-password" />
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <input id="remember" type="checkbox"
+                 class="w-4 h-4 text-blue-600 bg-slate-50 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 transition-all duration-200" />
+          <label for="remember" class="ml-2 text-sm font-medium text-slate-600">
+            Mantener sesión iniciada
+          </label>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl">
+          Iniciar Sesión
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <p class="text-xs text-slate-500">
+          ¿Problemas para iniciar sesión? Contacte al administrador
+        </p>
+      </div>
     </div>
 
-    <section class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-xl p-8 sm:p-10 backdrop-blur-sm bg-opacity-95">
-            <div class="text-center mb-8">
-                <div
-                    class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl mb-4 shadow-lg">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold text-slate-800 mb-2">Bienvenido</h1>
-                <p class="text-slate-500 text-sm">Sistema de Gestión de Estacionamiento</p>
-            </div>
+    <div class="mt-6 text-center w-content bg-blue-400 rounded-lg p-2">
+      <p class="text-center text-sm text-white">SGEU © 2025</p>
+    </div>
+  </section>
 
+  <!-- Alerts -->
+  <script th:if="${param.error}">
+    const showAlert = () => {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg z-50 max-w-md';
+      alertDiv.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-6 h-6 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>
+            <p class="font-semibold">Error de autenticación</p>
+            <p class="text-sm">Usuario o contraseña incorrectos</p>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>`;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 3000);
+    };
+    showAlert();
+  </script>
 
-            <form id="loginForm" action="/login" method="post" class="space-y-6">
-                <div>
-                    <label for="nombreUsuario" class="block text-sm font-semibold text-slate-700 mb-2">
-                        Nombre de Usuario
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <input type="text" id="nombreUsuario" name="nombreUsuario"
-                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-slate-400"
-                            placeholder="Ingrese su usuario" required />
-                    </div>
-                </div>
+  <script th:if="${param.success}">
+    const showSuccessAlert = () => {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg z-50 max-w-md';
+      alertDiv.innerHTML = `
+        <div class="flex items-center">
+          <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div>
+            <p class="font-semibold">Inicio de sesión exitoso</p>
+            <p class="text-sm">Bienvenido al sistema</p>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-green-500 hover:text-green-700">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>`;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 5000);
+    };
+    showSuccessAlert();
+  </script>
 
+  <script>
+    const form = document.getElementById("loginForm");
+    const overlay = document.getElementById("loadingOverlay");
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      overlay.classList.add("active");
+      setTimeout(() => form.submit(), 600); // un poco más ágil
+    });
+  </script>
 
-                <div>
-                    <label for="contrasenia" class="block text-sm font-semibold text-slate-700 mb-2">
-                        Contraseña
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                        </div>
-                        <input type="password" id="contrasenia" name="contrasenia" placeholder="••••••••"
-                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-slate-400"
-                            required />
-                    </div>
-                </div>
-
-
-                <div class="flex items-center">
-                    <input id="remember" type="checkbox"
-                        class="w-4 h-4 text-blue-600 bg-slate-50 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 transition-all duration-200" />
-                    <label for="remember" class="ml-2 text-sm font-medium text-slate-600">
-                        Mantener sesión iniciada
-                    </label>
-                </div>
-
-
-                <button type="submit"
-                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transform transition-all duration-200 hover:scale-[1.02] shadow-lg hover:shadow-xl">
-                    Iniciar Sesión
-                </button>
-            </form>
-
-
-            <div class="mt-6 text-center">
-                <p class="text-xs text-slate-500">
-                    ¿Problemas para iniciar sesión? Contacte al administrador
-                </p>
-            </div>
-        </div>
-
-        <div class="mt-6 text-center w-content bg-blue-400 rounded-lg p-2">
-            <p class="text-center text-sm text-white">
-                SGEU © 2025
-
-            </p>
-        </div>
-    </section>
-
-    <script th:if="${param.error}">
-        const showAlert = () => {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
-            alertDiv.innerHTML = `
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div>
-                        <p class="font-semibold">Error de autenticación</p>
-                        <p class="text-sm">Usuario o contraseña incorrectos</p>
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-red-500 hover:text-red-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(alertDiv);
-            setTimeout(() => alertDiv.remove(), 3000);
-        };
-        showAlert();
-    </script>
-    <script th:if="${param.success}">
-        const showSuccessAlert = () => {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
-            alertDiv.innerHTML = `
-            <div class="flex items-center">
-                <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div>
-                    <p class="font-semibold">Inicio de sesión exitoso</p>
-                    <p class="text-sm">Bienvenido al sistema</p>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-green-500 hover:text-green-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        `;
-            document.body.appendChild(alertDiv);
-            setTimeout(() => alertDiv.remove(), 5000);
-        };
-        showSuccessAlert();
-    </script>
-    <script>
-        const form = document.getElementById("loginForm");
-        const overlay = document.getElementById("loadingOverlay");
-
-        form.addEventListener("submit", e => {
-            e.preventDefault();
-            overlay.classList.add("active");
-            setTimeout(() => {
-                form.submit();
-            }, 1000);
-        });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </div>
-
+</body>
 </html>

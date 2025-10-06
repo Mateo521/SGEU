@@ -113,19 +113,21 @@
 
                 <div class="grid md:grid-cols-2 md:gap-6">
                     <div class="relative z-0 w-full mb-5 group">
-                        <select th:field="*{categoria}" id="categoria"
+                        <select th:field="*{categoriaNombre}" id="categoriaNombre"
                             class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             required>
                             <option value="" disabled selected hidden></option>
-                            <option value="Docente">Docente</option>
-                            <option value="No Docente">No Docente</option>
-                            <option value="Alumno">Alumno</option>
-                            <option value="Visitante">Visitante</option>
+                            <option value="docente">Docente</option>
+                            <option value="no_docente">No Docente</option>
+                            <option value="estudiante">Alumno/Estudiante</option>
+                            <option value="visitante">Visitante</option>
                         </select>
-                        <label for="categoria"
+                        <label for="categoriaNombre"
                             class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Categoría</label>
+                            Categoría
+                        </label>
                     </div>
+
 
                     <div class="relative z-0 w-full mb-5 group">
                         <input type="number" min="10000000" th:field="*{dni}" id="dni"
@@ -191,18 +193,19 @@
                     </div>
 
                     <div class="relative z-0 w-full mb-5 group">
-                        <select th:field="*{tipo}" id="tipo"
+                        <select th:field="*{tipoNombre}" id="tipoNombre"
                             class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             required>
                             <option value="" disabled selected hidden></option>
-                            <option value="Auto">Auto</option>
-                            <option value="Moto">Moto</option>
-                            <option value="Otro">Otro</option>
+                            <option value="auto">Auto</option>
+                            <option value="moto">Moto</option>
                         </select>
-                        <label for="tipo"
+                        <label for="tipoNombre"
                             class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Tipo de vehículo</label>
+                            Tipo de vehículo
+                        </label>
                     </div>
+
                 </div>
 
                 <button type="submit"
