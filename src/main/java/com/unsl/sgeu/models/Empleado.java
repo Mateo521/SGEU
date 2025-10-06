@@ -31,7 +31,7 @@ public class Empleado {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "rol", nullable = false, length = 10) // valores: 'guardia' | 'admin'
-  private Rol rol = Rol.guardia;
+  private Rol rol = Rol.Guardia;
 
   // Getters / Setters
   public Long getId() { return id; }
