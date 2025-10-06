@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layout}">
 <body class="bg-gray-50">
-    <main layout:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <!-- Header -->
         <div class="mb-12">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">Ajustes</h1>
@@ -11,11 +11,13 @@
 
         <!-- Settings Grid -->
         <div class="space-y-6">
-            
+
             <!-- Sección de Registro -->
-            <section id="register-section" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
+            <section id="register-section"
+                class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
                 <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                         👤
                     </div>
                     <div class="flex-1">
@@ -23,31 +25,18 @@
                         <p class="text-sm text-gray-600">Gestiona el registro y onboarding de nuevos usuarios</p>
                     </div>
                 </div>
-                <div class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
+                <div
+                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
                     <div th:replace="register :: register-section"></div>
                 </div>
             </section>
 
-            <!-- Sección de Usuarios -->
-            <section id="users-section" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
-                <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-red-500 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-                        👥
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-1">Gestión de Usuarios</h2>
-                        <p class="text-sm text-gray-600">Administra usuarios existentes y sus permisos</p>
-                    </div>
-                </div>
-                <div class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
-                    Componente de gestión de usuarios
-                </div>
-            </section>
-
             <!-- Sección de Configuración -->
-            <section id="config-section" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
+            <section id="config-section"
+                class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
                 <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                         ⚙️
                     </div>
                     <div class="flex-1">
@@ -55,15 +44,18 @@
                         <p class="text-sm text-gray-600">Ajusta parámetros y preferencias del sistema</p>
                     </div>
                 </div>
-                <div class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
+                <div
+                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
                     Componente de configuración
                 </div>
             </section>
 
             <!-- Sección de Seguridad -->
-            <section id="security-section" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
+            <section id="security-section"
+                class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
                 <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                         🔒
                     </div>
                     <div class="flex-1">
@@ -71,15 +63,18 @@
                         <p class="text-sm text-gray-600">Configura opciones de seguridad y privacidad</p>
                     </div>
                 </div>
-                <div class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
+                <div
+                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
                     Componente de seguridad
                 </div>
             </section>
 
             <!-- Sección de Datos -->
-            <section id="data-section" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
+            <section id="data-section"
+                class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
                 <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
                         📊
                     </div>
                     <div class="flex-1">
@@ -87,17 +82,18 @@
                         <p class="text-sm text-gray-600">Importa, exporta y gestiona tus datos</p>
                     </div>
                 </div>
-                <div class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
+                <div
+                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
                     Componente de gestión de datos
                 </div>
             </section>
 
         </div>
-    <script th:if="${registerError}">
-        const showAlert = () => {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
-            alertDiv.innerHTML = `
+        <script th:if="${registerError}">
+            const showAlert = () => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
+                alertDiv.innerHTML = `
                 <div class="flex items-center">
                     <svg class="w-6 h-6 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -113,16 +109,16 @@
                     </button>
                 </div>
             `;
-            document.body.appendChild(alertDiv);
-            setTimeout(() => alertDiv.remove(), 3000);
-        };
-        showAlert();
-    </script>
-    <script th:if="${registerSuccess}">
-        const showSuccessAlert = () => {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
-            alertDiv.innerHTML = `
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 3000);
+            };
+            showAlert();
+        </script>
+        <script th:if="${registerSuccess}">
+            const showSuccessAlert = () => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
+                alertDiv.innerHTML = `
             <div class="flex items-center">
                 <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -138,11 +134,12 @@
                 </button>
             </div>
         `;
-            document.body.appendChild(alertDiv);
-            setTimeout(() => alertDiv.remove(), 5000);
-        };
-        showSuccessAlert();
-    </script>
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 5000);
+            };
+            showSuccessAlert();
+        </script>
     </main>
 </body>
+
 </html>

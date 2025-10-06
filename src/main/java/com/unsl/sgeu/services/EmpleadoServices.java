@@ -61,6 +61,9 @@ public class EmpleadoServices {
         return "Cargo no encontrado";
     }
 
+    public Iterable<Empleado> listarEmpleados() {
+        return empleadoRepository.findAll();
+    }
 
     
 }

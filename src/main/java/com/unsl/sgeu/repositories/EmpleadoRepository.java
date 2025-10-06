@@ -16,4 +16,7 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
 
     // Buscar por ID
     java.util.Optional<Empleado> findById(Long id);
+
+    //Buscar todos los empleados
+    java.util.List<Empleado> findAll();
 }

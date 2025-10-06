@@ -1,7 +1,7 @@
 package com.unsl.sgeu.controllers;
 import com.unsl.sgeu.models.DetallesInfo;
 import com.unsl.sgeu.models.LeerQR;
-
+import com.unsl.sgeu.services.EmpleadoServices;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
 public class PrincipalController {
+
+    private final EmpleadoServices empleadoServices;
+
+    PrincipalController(EmpleadoServices empleadoServices) {
+        this.empleadoServices = empleadoServices;
+    }
 
     @GetMapping("/detalles_info")
     public String info(Model model) {
@@ -40,6 +46,13 @@ public class PrincipalController {
     @GetMapping("/register")
     public String register() {
         return "register";
+    }
+
+    
+
+    @GetMapping("/usuarios")
+    public String usuarios() {
+        return "table-user";
     }
 
     @GetMapping("/ajustes")
