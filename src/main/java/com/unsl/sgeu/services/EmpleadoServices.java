@@ -44,7 +44,7 @@ public class EmpleadoServices {
         nuevo.setNombreUsuario(nombreUsuario);
         nuevo.setCorreo(correo);
         nuevo.setContrasenia(passwordEncoder.encode(contrasenia));
-        nuevo.setRol(rol != null ? rol : Rol.guardia);
+        nuevo.setRol(rol != null ? rol : Rol.Guardia);
 
         empleadoRepository.save(nuevo);
         return true;
@@ -57,7 +57,7 @@ public class EmpleadoServices {
                             String contrasenia,
                             String correo,
                             String cargoStr) {
-        Rol rol = ("admin".equalsIgnoreCase(cargoStr)) ? Rol.admin : Rol.guardia;
+        Rol rol = ("Administrador".equalsIgnoreCase(cargoStr)) ? Rol.Administrador : Rol.Guardia;
         return register(nombre, apellido, nombreUsuario, contrasenia, correo, rol);
     }
 

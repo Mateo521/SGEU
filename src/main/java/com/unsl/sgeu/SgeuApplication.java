@@ -84,7 +84,7 @@ public class SgeuApplication {
                 e.setCorreo("gero@example.com");
                 e.setNombreUsuario(user);
                 e.setContrasenia("admin123"); // TODO: en producción encriptar
-                e.setRol(Rol.admin);          // <--- enum, no int
+                e.setRol(Rol.Administrador);          // <--- enum, no int
                 empleadoRepo.save(e);
             }
 
