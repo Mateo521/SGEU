@@ -40,7 +40,7 @@
                                 <p class="font-semibold mb-3">Código QR generado:</p>
                                 <div class="bg-white p-4 rounded border-2 border-dashed border-gray-300 inline-block">
                                     <img th:attr="data-patente=${patente}, data-codigo=${codigoQR}" th:if="${imagenQR}"
-                                        th:src="${imagenQR}" alt="Código QR del vehículo" class="mx-auto"
+                                        th:src="${imagenQR}" alt="Código QR del vehículo" class="qr-image mx-auto"
                                         style="width: 200px; height: 200px;" />
                                 </div>
 
@@ -97,8 +97,7 @@
             </div>
 
             <!-- Formulario -->
-            <form th:action="@{/vehiculos/agregar}" th:object="${vehiculoForm}" method="post"
-                class="max-w-md mx-auto py-4">
+            <form th:action="@{/vehiculos/agregar}" th:object="${vehiculoForm}" method="post" class=" mx-auto py-4">
 
                 <!-- Datos de la Persona -->
                 <h2 class="text-xl font-semibold mb-4 text-gray-700">Datos del Propietario</h2>
@@ -361,11 +360,17 @@
                     </div>
                     
                     <div class="no-print" style="margin-top: 20px;">
-                        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px;">
-                            🖨️ Imprimir
+                        <button onclick="window.print()" style="display:inline-flex; gap:5px; align-items:center; padding: 10px 20px; font-size: 16px;">
+                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M16.444 18H19a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h2.556M17 11V5a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v6h10ZM7 15h10v4a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-4Z"/>
+</svg>
+ Imprimir
                         </button>
-                        <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px; margin-left: 10px;">
-                            ❌ Cerrar
+                        <button  onclick="window.close()" style="display:inline-flex; gap:5px; align-items:center; padding: 10px 20px; font-size: 16px; margin-left: 10px;">
+                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+</svg>
+ Cerrar
                         </button>
                     </div>
                 </body>
@@ -375,13 +380,13 @@
                         ventanaImpresion.document.write(contenidoHTML);
                         ventanaImpresion.document.close();
 
-                        // Esperar a que cargue y luego preguntar si quiere imprimir
+
                         ventanaImpresion.onload = function () {
                             setTimeout(() => {
                                 if (ventanaImpresion.confirm('¿Desea imprimir el código QR ahora?')) {
                                     ventanaImpresion.print();
                                 }
-                            }, 1000); // Dar tiempo para que cargue la imagen
+                            }, 1000);
                         };
 
                     } else {
