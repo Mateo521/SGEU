@@ -5,8 +5,6 @@ import com.unsl.sgeu.models.Rol;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -78,9 +76,10 @@ public class EmpleadoServices {
                 .orElse("Rol no encontrado");
     }
 
-    public List<Empleado> listarEmpleados() {
+    public Iterable<Empleado> listarEmpleados() {
         return empleadoRepository.findAll();
     }
+
     public String obtenerNombrePorUsuario(String nombreUsuario) {
     return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
             .map(e -> e.getNombre() + " " + e.getApellido())

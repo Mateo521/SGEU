@@ -27,7 +27,7 @@ public class LoginController {
         }
 
         // Nuevo: obtenemos rol y nombre completo por nombre de usuario
-        String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);         // "admin" | "guardia"
+        String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);
         String nombreCompleto = empleadoServices.obtenerNombrePorUsuario(nombreUsuario);
 
         // Guardamos en sesión lo necesario

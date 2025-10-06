@@ -207,7 +207,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-slate-500 text-sm font-medium">Guardias</p>
-                            <p class="text-3xl font-bold text-orange-600 mt-1" id="guardiaCount"></p>
+                            <p class="text-3xl font-bold text-orange-600 mt-1" id="guardiaCount">0</p>
                         </div>
                         <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,8 +283,8 @@
 
                                 <!-- Cargo -->
                                 <td class="px-6 py-4">
-                                    <span th:text="${e.cargo}"
-                                        th:classappend="${e.cargo == 'Administrador'} ? 'text-xs font-medium px-3 py-1.5 rounded-full bg-purple-100 text-purple-800' : 'text-xs font-medium px-3 py-1.5 rounded-full bg-orange-100 text-orange-800'">
+                                    <span th:text="${e.rol}"
+                                        th:classappend="${e.rol == 'Administrador'} ? 'text-xs font-medium px-3 py-1.5 rounded-full bg-purple-100 text-purple-800' : 'text-xs font-medium px-3 py-1.5 rounded-full bg-orange-100 text-orange-800'">
                                     </span>
                                 </td>
 

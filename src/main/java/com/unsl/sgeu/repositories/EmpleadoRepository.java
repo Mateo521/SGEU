@@ -15,7 +15,7 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
     // Variante segura (case-insensitive) y opcional
     Optional<Empleado> findByNombreUsuarioIgnoreCase(String nombreUsuario);
 
-    // Login (ojo: en producción NO guardes contraseñas en texto plano)
+    // Login 
     Optional<Empleado> findByNombreUsuarioAndContrasenia(String nombreUsuario, String contrasenia);
 
     // Filtrar por rol (admin/guardia)

@@ -1,32 +1,16 @@
 package com.unsl.sgeu.controllers;
 
 import com.unsl.sgeu.models.DetallesInfo;
-import com.unsl.sgeu.models.LeerQR;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import org.springframework.stereotype.Controller;
-import com.unsl.sgeu.services.EmpleadoServices;
 import jakarta.servlet.http.HttpSession;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
 public class PrincipalController {
-
-    private final EmpleadoServices empleadoServices;
-
-    PrincipalController(EmpleadoServices empleadoServices) {
-        this.empleadoServices = empleadoServices;
-    }
 
     @GetMapping("/detalles_info")
     public String info(Model model) {
