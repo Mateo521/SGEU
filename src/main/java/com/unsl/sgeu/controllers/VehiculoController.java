@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/vehiculos")
+//@RequestMapping("/vehiculos")
 public class VehiculoController {
 
     private final VehiculoService vehiculoService;
@@ -22,14 +22,13 @@ public class VehiculoController {
         this.vehiculoService = vehiculoService;
         this.personaService = personaService;
     }
-
-    @GetMapping("/agregar")
+    @GetMapping("/vehiculos/agregar")
     public String mostrarFormulario(Model model) {
         model.addAttribute("vehiculoForm", new VehiculoFormDTO());
         return "registrarvehiculo";
     }
 
-    @PostMapping("/agregar")
+    @PostMapping("/vehiculos/agregar")
     public String agregarVehiculo(@ModelAttribute VehiculoFormDTO form,
             RedirectAttributes redirectAttributes) {
         try {
@@ -94,13 +93,14 @@ public class VehiculoController {
   @GetMapping("/search")
     public String buscar(@RequestParam(value="q", required=false) String query,
                          @RequestParam(value="category", required=false) String category,
-                         @ModelAttribute VehiculoFormDTO form,
                          Model model) {
         String patente = query;
         boolean resultado;
+
         if ("Entrada".equals(category)) {
         //buscar vehiculo en la tabla
         resultado = "1".equals(query);
+
         } else{
             resultado = "2".equals(query);
         }
@@ -108,6 +108,6 @@ public class VehiculoController {
     model.addAttribute("category", category);
     model.addAttribute("resultado", resultado);
     model.addAttribute("patente", patente);
-        return "ieManual"; // tu vista (templates/ieManual.html)
+        return "ieManual";   // tu vista (templates/ieManual.html)
     }
 }
