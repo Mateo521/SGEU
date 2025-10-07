@@ -37,4 +37,21 @@ public class RegistroEstacionamientoService {
         registro.setModo("MANUAL");
         return registroestacionamientoRepo.save(registro);
     }
+
+     public RegistroEstacionamiento registrarSalida(String patente) {
+        Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
+        RegistroEstacionamiento registro = new RegistroEstacionamiento();
+        registro.setPatente(vehiculo.getPatente());
+        registro.setFechaHora(LocalDateTime.now());
+        registro.setTipoMovimiento("SALIDA");
+        registro.setIdEst(1);
+        registro.setModo("MANUAL");
+        return registroestacionamientoRepo.save(registro);
+     }
+
+    public boolean esPar(String patente){
+
+       long cantidad = registroestacionamientoRepo.countByPatente(patente);
+        return cantidad % 2 == 0;
+    }
 }

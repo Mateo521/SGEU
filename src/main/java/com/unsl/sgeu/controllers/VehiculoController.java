@@ -178,17 +178,27 @@ public class VehiculoController {
 
         boolean resultado;
 
-        if ("Entrada".equals(category) && vehiculoService.existePatente(patente)) {
+        if ("Entrada".equals(category) && registroestacionamientoService.esPar(patente)) {
         //buscar vehiculo en la tabla
             registroestacionamientoService.registrarEntrada(patente);
             resultado = true;
-       } else{
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+        return "ieManual";
+       } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
+            registroestacionamientoService.registrarSalida(patente);
+            resultado = true;
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            return "ieManual";
+        }  
             resultado = false;
-        }
-        
-    model.addAttribute("category", category);
-    model.addAttribute("resultado", resultado);
-    model.addAttribute("patente", patente);
-        return "ieManual";   // tu vista (templates/ieManual.html)
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            return "ieManual"; // tu vista (templates/ieManual.html)
     }
+
 }
