@@ -44,10 +44,14 @@ public class PersonaVehiculoService {
         return dnis;
     }
 
+    
+
     @Transactional
     public java.util.List<Persona> obtenerPersonasPorPatente(String patente) {
         var dnis = obtenerDnisPorPatente(patente);
         if (dnis.isEmpty()) return java.util.List.of();
         return personaRepository.findAllById(dnis);
     }
+
+    
 }
