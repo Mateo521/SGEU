@@ -3,31 +3,29 @@ package com.unsl.sgeu.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "`Estacionamiento`")
+@Table(name = "estacionamiento")
 public class Estacionamiento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_est")  
+    private Long idEst;
 
-    @Column(nullable = false)  private String nombre;
-    @Column(nullable = false)  private String direccion;
-    @Column(nullable = false)  private Integer capacidad;
+    @Column(nullable = false)
+    private String nombre;
 
-    @Column(nullable = false)  private Boolean estado = true; // true=activo, false=desactivado
+    @Column(nullable = false)
+    private String direccion;
 
-    public Estacionamiento() {}
+    @Column(nullable = false)
+    private Integer capacidad;
 
-    public Estacionamiento(String nombre, String direccion, Integer capacidad) {
-        this.nombre = nombre;
-        this.direccion = direccion;
-        this.capacidad = capacidad;
-        this.estado = true;
-    }
+    @Column(nullable = false)
+    private Boolean estado = true;
 
-    // Getters/Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // Getters y Setters
+    public Long getIdEst() { return idEst; }
+    public void setIdEst(Long idEst) { this.idEst = idEst; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -41,3 +39,4 @@ public class Estacionamiento {
     public Boolean getEstado() { return estado; }
     public void setEstado(Boolean estado) { this.estado = estado; }
 }
+
