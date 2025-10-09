@@ -51,24 +51,25 @@
             </section>
 
 
-            <!-- Sección de Seguridad -->
+            <!-- Sección: Asignar Estacionamientos -->
             <section id="security-section"
                 class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
+
                 <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
                     <div
-                        class="w-12 h-12 bg-gradient-to-br from-green-400 to-teal-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-                        🔒
+                        class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                        🚗
                     </div>
                     <div class="flex-1">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-1">Seguridad y Privacidad</h2>
-                        <p class="text-sm text-gray-600">Configura opciones de seguridad y privacidad</p>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-1">Asignar Estacionamientos</h2>
+                        <p class="text-sm text-gray-600">Gestiona las asignaciones de guardias y estacionamientos</p>
                     </div>
                 </div>
-                <div
-                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
-                    Componente de seguridad
-                </div>
+
+                <!-- Inserta el fragmento con la tabla nueva (estética clara de tu página) -->
+                <div th:replace="asignarestacionamientos :: contenido"></div>
             </section>
+
 
             <!-- Sección de Datos -->
             <section id="data-section"

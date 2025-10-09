@@ -1,0 +1,307 @@
+<!-- Fragmento Thymeleaf -->
+<div th:fragment="contenido">
+
+  <!-- Barra superior: búsqueda + filtros + botón -->
+  <div class="mb-6 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/70 p-4">
+    <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+      <div class="flex-1 flex gap-3">
+        <div class="relative flex-1">
+          <input id="ae-searchGuard" type="text" placeholder="Buscar por guardia..."
+                 class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">🔎</span>
+        </div>
+
+        <select id="ae-filterParking"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="all">Todos los estacionamientos</option>
+          <option value="Norte">Norte</option>
+          <option value="Sur">Sur</option>
+          <option value="Este">Este</option>
+          <option value="Oeste">Oeste</option>
+        </select>
+
+        <select id="ae-filterShift"
+                class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="all">Todos los turnos</option>
+          <option value="08:00 - 14:00">Mañana (08:00 - 14:00)</option>
+          <option value="14:00 - 21:00">Tarde (14:00 - 21:00)</option>
+        </select>
+      </div>
+
+      <button id="ae-openModal"
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white shadow-md hover:bg-indigo-700 transition">
+        <span class="text-lg leading-none">＋</span> Nueva asignación
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenedor tabla -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full" id="ae-table">
+        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Guardia</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estacionamiento</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Turno</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="ae-tbody">
+          <!-- filas dinámicas JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
+      <div class="text-slate-600 text-sm">
+        Total de guardias: <span class="font-semibold text-slate-900" id="ae-total">0</span>
+      </div>
+      <div class="text-slate-500 text-xs">
+        Última actualización: <span id="ae-lastUpdate"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="ae-modal" class="fixed inset-0 hidden z-50 items-center justify-center bg-black/40 p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold text-slate-900" id="ae-modalTitle">Nueva asignación</h3>
+        <button id="ae-closeModal" class="text-slate-500 hover:text-slate-700 text-xl">&times;</button>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Guardia</label>
+          <select id="ae-modalGuard"
+                  class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Seleccionar guardia...</option>
+            <option>Juan Pérez</option>
+            <option>María González</option>
+            <option>Carlos Rodríguez</option>
+            <option>Ana Martínez</option>
+            <option>Luis Fernández</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Estacionamiento</label>
+          <select id="ae-modalParking"
+                  class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Seleccionar estacionamiento...</option>
+            <option value="Norte">Norte</option>
+            <option value="Sur">Sur</option>
+            <option value="Este">Este</option>
+            <option value="Oeste">Oeste</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Turno</label>
+          <select id="ae-modalShift"
+                  class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Seleccionar turno...</option>
+            <option value="08:00 - 14:00">Mañana (08:00 - 14:00)</option>
+            <option value="14:00 - 21:00">Tarde (14:00 - 21:00)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Fecha</label>
+          <input id="ae-modalDate" type="text" readonly
+                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button id="ae-cancel" type="button"
+                  class="px-4 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">
+            Cancelar
+          </button>
+          <button id="ae-save" type="button"
+                  class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS (sin dependencias, idéntica lógica a tu demo, con colores adaptados) -->
+  <script>
+    (function () {
+      // Datos demo
+      let data = [
+        { id: 1, guard: 'Juan Pérez',  parking: 'Norte', shift: '08:00 - 14:00', date: new Date().toLocaleDateString('es-AR') },
+        { id: 2, guard: 'María González', parking: 'Sur',   shift: '14:00 - 21:00', date: new Date().toLocaleDateString('es-AR') },
+        { id: 3, guard: 'Carlos Rodríguez', parking: 'Este',  shift: '08:00 - 14:00', date: new Date().toLocaleDateString('es-AR') },
+        { id: 4, guard: 'Ana Martínez', parking: 'Oeste', shift: '14:00 - 21:00', date: new Date().toLocaleDateString('es-AR') },
+      ];
+      let editingId = null;
+      let nextId = 5;
+
+      const $ = (id) => document.getElementById(id);
+
+      function nowTime() {
+        return new Date().toLocaleTimeString('es-AR');
+      }
+      function today() {
+        return new Date().toLocaleDateString('es-AR');
+      }
+      function currentHour() {
+        return new Date().getHours();
+      }
+      function statusFor(shift) {
+        const h = currentHour();
+        if (shift === '08:00 - 14:00') {
+          if (h >= 8 && h < 14) return { t: 'Activo', cls: 'bg-green-100 text-green-700 border-green-200' };
+          if (h < 8)           return { t: 'Próximo', cls: 'bg-blue-100 text-blue-700 border-blue-200' };
+          return { t: 'Finalizado', cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+        } else {
+          if (h >= 14 && h < 21) return { t: 'Activo', cls: 'bg-green-100 text-green-700 border-green-200' };
+          if (h < 14)            return { t: 'Próximo', cls: 'bg-blue-100 text-blue-700 border-blue-200' };
+          return { t: 'Finalizado', cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+        }
+      }
+
+      function render(list = data) {
+        const tbody = $('ae-tbody');
+        if (!tbody) return;
+
+        if (!list.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center text-slate-400">
+                <div class="text-4xl mb-2">📭</div>
+                <div class="text-lg">No hay asignaciones</div>
+              </td>
+            </tr>`;
+        } else {
+          tbody.innerHTML = list.map(g => {
+            const st = statusFor(g.shift);
+            const initials = g.guard.split(' ').map(n => n[0]).join('').slice(0, 3).toUpperCase();
+            return `
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div class="mr-3 grid place-items-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 text-white text-sm font-bold">
+                      ${initials}
+                    </div>
+                    <div class="text-slate-900 font-medium">${g.guard}</div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-lg bg-violet-50 border border-violet-200 text-violet-700 text-sm">
+                    🅿️ ${g.parking}
+                  </span>
+                </td>
+                <td class="px-6 py-4"><span class="text-slate-700 font-medium">${g.shift}</span></td>
+                <td class="px-6 py-4"><span class="text-slate-600">${g.date}</span></td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold border ${st.cls}">
+                    ${st.t}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex justify-end gap-2">
+                    <button data-edit="${g.id}" class="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50" title="Editar">✏️</button>
+                    <button data-del="${g.id}" class="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50" title="Eliminar">🗑️</button>
+                  </div>
+                </td>
+              </tr>`;
+          }).join('');
+        }
+
+        $('ae-total').textContent = list.length.toString();
+        $('ae-lastUpdate').textContent = nowTime();
+
+        // acciones
+        tbody.querySelectorAll('[data-edit]').forEach(b =>
+          b.addEventListener('click', () => edit(parseInt(b.getAttribute('data-edit'), 10))));
+        tbody.querySelectorAll('[data-del]').forEach(b =>
+          b.addEventListener('click', () => del(parseInt(b.getAttribute('data-del'), 10))));
+      }
+
+      // Modal helpers
+      function openModal(newMode = true) {
+        editingId = newMode ? null : editingId;
+        $('ae-modalTitle').textContent = newMode ? 'Nueva asignación' : 'Editar asignación';
+        $('ae-modal').classList.remove('hidden'); $('ae-modal').classList.add('flex');
+        $('ae-modalDate').value = today();
+      }
+      function closeModal() {
+        $('ae-modal').classList.add('hidden'); $('ae-modal').classList.remove('flex');
+      }
+
+      // CRUD
+      function edit(id) {
+        const g = data.find(x => x.id === id); if (!g) return;
+        editingId = id;
+        $('ae-modalGuard').value = g.guard;
+        $('ae-modalParking').value = g.parking;
+        $('ae-modalShift').value = g.shift;
+        $('ae-modalDate').value = g.date;
+        openModal(false);
+      }
+      function del(id) {
+        if (!confirm('¿Eliminar esta asignación?')) return;
+        data = data.filter(x => x.id !== id);
+        render();
+      }
+      function save() {
+        const guard = $('ae-modalGuard').value.trim();
+        const parking = $('ae-modalParking').value;
+        const shift = $('ae-modalShift').value;
+        const date  = $('ae-modalDate').value || today();
+        if (!guard || !parking || !shift) { alert('Completá todos los campos.'); return; }
+
+        if (editingId) {
+          const i = data.findIndex(x => x.id === editingId);
+          data[i] = { id: editingId, guard, parking, shift, date };
+        } else {
+          data.push({ id: nextId++, guard, parking, shift, date });
+        }
+        render();
+        closeModal();
+      }
+
+      // Filtros
+      $('ae-searchGuard').addEventListener('input', e => {
+        const s = e.target.value.toLowerCase();
+        const base = filterBySelections();
+        render(base.filter(g => g.guard.toLowerCase().includes(s)));
+      });
+      $('ae-filterParking').addEventListener('change', () => {
+        const base = filterBySelections();
+        const s = $('ae-searchGuard').value.toLowerCase();
+        render(base.filter(g => g.guard.toLowerCase().includes(s)));
+      });
+      $('ae-filterShift').addEventListener('change', () => {
+        const base = filterBySelections();
+        const s = $('ae-searchGuard').value.toLowerCase();
+        render(base.filter(g => g.guard.toLowerCase().includes(s)));
+      });
+      function filterBySelections() {
+        const p = $('ae-filterParking').value;
+        const sh = $('ae-filterShift').value;
+        return data.filter(g =>
+          (p === 'all'  || g.parking === p) &&
+          (sh === 'all' || g.shift   === sh)
+        );
+      }
+
+      // Botones modal
+      $('ae-openModal').addEventListener('click', () => openModal(true));
+      $('ae-closeModal').addEventListener('click', closeModal);
+      $('ae-cancel').addEventListener('click', closeModal);
+      $('ae-save').addEventListener('click', save);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+      // Init
+      render();
+      setInterval(() => { $('ae-lastUpdate').textContent = nowTime(); }, 1000);
+    })();
+  </script>
+</div>
