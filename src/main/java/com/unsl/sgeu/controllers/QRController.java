@@ -1,44 +1,103 @@
 package com.unsl.sgeu.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.unsl.sgeu.services.*;
-import com.unsl.sgeu.models.*;
+
+import com.unsl.sgeu.services.VehiculoService;
+import com.unsl.sgeu.services.PersonaService;
+import com.unsl.sgeu.models.Vehiculo;
+import com.unsl.sgeu.models.Persona;
+
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/leerqr")
+@Controller
+@RequestMapping("/qr")
 public class QRController {
 
-    private final VehiculoService vehiculoService;
-    private final PersonaVehiculoService personaVehiculoService;
+    @Autowired
+    private VehiculoService vehiculoService;
+    
+    @Autowired
+    private PersonaService personaService;
 
-    public QRController(VehiculoService vehiculoService,
-                        PersonaVehiculoService personaVehiculoService) {
-        this.vehiculoService = vehiculoService;
-        this.personaVehiculoService = personaVehiculoService;
+    @GetMapping("/leer")  // Esto sería /qr/leer
+    public String mostrarLectorQR() {
+        return "leerqr";
     }
 
-    @PostMapping("/leer")
-    public ResponseEntity<?> leerQR(@RequestBody Map<String, String> request) {
-        String codigo = request.get("codigo");
+    @PostMapping("/procesar")
+    @ResponseBody
+    public ResponseEntity<?> leerCodigoQR(@RequestBody Map<String, String> request) {
+        try {
+            String codigoQR = request.get("codigo");
+            
+            // ✅ AGREGAR DEBUG
+            System.out.println("=== DEBUG LEER QR ===");
+            System.out.println("Código QR recibido: " + codigoQR);
+            
+            if (codigoQR == null || codigoQR.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("mensaje", "Código QR vacío"));
+            }
 
-        Vehiculo v = vehiculoService.buscarPorQr(codigo);
-        if (v == null) {
-            return ResponseEntity.status(404).body(Map.of("mensaje", "Vehículo desconocido"));
+            // Buscar vehículo por código QR
+            Vehiculo vehiculo = vehiculoService.buscarPorQr(codigoQR);
+            
+            if (vehiculo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("mensaje", "Vehículo no encontrado"));
+            }
+
+            // ✅ AGREGAR DEBUG DEL VEHÍCULO ENCONTRADO
+            System.out.println("Vehículo encontrado:");
+            System.out.println("- Patente: " + vehiculo.getPatente());
+            System.out.println("- DNI Dueño: " + vehiculo.getDniDuenio());
+            System.out.println("- Modelo: " + vehiculo.getModelo());
+            System.out.println("- Color: " + vehiculo.getColor());
+            System.out.println("- Tipo: " + vehiculo.getTipo());
+
+            // Crear respuesta con información completa
+            Map<String, Object> response = new HashMap<>();
+            response.put("patente", vehiculo.getPatente());
+            response.put("modelo", vehiculo.getModelo() != null ? vehiculo.getModelo() : "Sin modelo");
+            response.put("color", vehiculo.getColor() != null ? vehiculo.getColor() : "Sin color");
+            response.put("tipo", vehiculo.getTipo() != null ? vehiculo.getTipo() : "Sin tipo");
+            response.put("dniDuenio", vehiculo.getDniDuenio());
+            
+            // Agregar información del dueño si existe
+            if (vehiculo.getDniDuenio() != null) {
+                try {
+                    Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
+                    if (persona != null) {
+                        response.put("nombreDuenio", persona.getNombre());
+                        response.put("categoriaDuenio", persona.getCategoria());
+                        response.put("telefonoDuenio", persona.getTelefono());
+                        response.put("emailDuenio", persona.getEmail());
+                        
+                        System.out.println("Información del dueño:");
+                        System.out.println("- Nombre: " + persona.getNombre());
+                        System.out.println("- Categoría: " + persona.getCategoria());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error al buscar persona: " + e.getMessage());
+                }
+            }
+            
+            // ✅ AGREGAR DEBUG DE LA RESPUESTA
+            System.out.println("Respuesta enviada: " + response);
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("Error en leerCodigoQR: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("mensaje", "Error interno del servidor: " + e.getMessage()));
         }
-
-        // dueños por la tabla N:M
-        var dnisDuenios = personaVehiculoService.obtenerDnisPorPatente(v.getPatente());
-        // opcional: nombres de dueños
-        // var personas = personaVehiculoService.obtenerPersonasPorPatente(v.getPatente());
-
-        return ResponseEntity.ok(Map.of(
-            "mensaje", "✅ Vehículo encontrado",
-            "patente", v.getPatente(),
-            "modelo", v.getModelo(),
-            "color",  v.getColor(),
-            "duenios", dnisDuenios  // o personas si querés devolver objeto completo
-        ));
     }
 }

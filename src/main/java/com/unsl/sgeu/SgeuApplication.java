@@ -41,39 +41,10 @@ public class SgeuApplication {
             Categoria catEstudiante = categoriaService.getOrCreateByNombre("estudiante");
             VehiculoTipo tipoAuto   = vehiculoTipoService.getOrCreateByNombre("auto");
 
-            // ===== 2) Persona =====
-            Long dni = 12345678L;
-            Persona persona = personaRepo.findById(dni).orElseGet(() -> {
-                Persona p = new Persona();
-                p.setDni(dni);
-                p.setNombre("Ana");
-                p.setTelefono("266-123456");
-                p.setEmail("ana@uni.edu");
-                p.setCategoria(catEstudiante);
-                return personaRepo.save(p);
-            });
-            if (persona.getCategoria() == null) {
-                persona.setCategoria(catEstudiante);
-                personaRepo.save(persona);
-            }
-
-            // ===== 3) Vehículo =====
-            String patente = "AB321CD";
-            Vehiculo vehiculo = vehiculoRepo.findById(patente).orElseGet(() -> {
-                Vehiculo v = new Vehiculo();
-                v.setPatente(patente);
-                // Usa el nombre correcto de tu método de QR:
-                String qr = vehiculoService.generarCodigoQR(patente); // <--- si tu método se llama generarCodigoQR o generarCodigoQrUnico, cambialo aquí
-                v.setCodigoQr(qr);
-                v.setModelo("Ford Focus");
-                v.setColor("Verde");
-                v.setVehiculoTipo(tipoAuto); // o v.setIdVehiculoTipo(tipoAuto.getId());
-                return vehiculoRepo.save(v);
-            });
-
-            // ===== 4) Vincular Persona ↔ Vehículo =====
-            personaVehiculoService.vincular(persona.getDni(), vehiculo.getPatente());
-
+        
+     
+         
+           
             // ===== 5) Empleado admin =====
             String user = "admin";
             Empleado admin = empleadoRepo.findByNombreUsuario(user);
