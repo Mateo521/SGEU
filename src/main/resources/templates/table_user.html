@@ -284,7 +284,7 @@
                                 <!-- Cargo -->
                                 <td class="px-6 py-4">
                                     <span th:text="${e.rol}"
-                                        th:classappend="${e.rol == 'Administrador'} ? 'text-xs font-medium px-3 py-1.5 rounded-full bg-purple-100 text-purple-800' : 'text-xs font-medium px-3 py-1.5 rounded-full bg-orange-100 text-orange-800'">
+                                        th:classappend="${e.rol.toString() == 'Administrador'} ? 'text-xs font-medium px-3 py-1.5 rounded-full bg-purple-100 text-purple-800' : 'text-xs font-medium px-3 py-1.5 rounded-full bg-orange-100 text-orange-800'">
                                     </span>
                                 </td>
 
