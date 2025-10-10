@@ -10,6 +10,7 @@ import com.unsl.sgeu.dto.VehiculoFormDTO;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
+import java.util.List;
 
 @Controller
 @RequestMapping("/vehiculos")
@@ -21,10 +22,72 @@ public class VehiculoController {
     @Autowired
     private PersonaService personaService;
 
+    @GetMapping
+    public String listarVehiculos(Model model) {
+        System.out.println("=== DEBUG LISTAR VEHÍCULOS ===");
+
+        List<Vehiculo> lista = vehiculoService.obtenerTodos();
+        System.out.println("Total vehículos: " + lista.size());
+
+        model.addAttribute("vehiculos", lista);
+        return "vehiculos";
+    }
+
+    @GetMapping("/eliminar/{patente}")
+    public String eliminarVehiculo(@PathVariable String patente,
+            RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== ELIMINANDO VEHÍCULO ===");
+            System.out.println("Patente a eliminar: " + patente);
+
+            ResultadoEliminacion resultado = vehiculoService.eliminarVehiculo(patente);
+
+            if (resultado.isExitoso()) {
+                redirectAttributes.addFlashAttribute("success", resultado.getMensaje());
+            } else {
+                redirectAttributes.addFlashAttribute("error", resultado.getMensaje());
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al eliminar vehículo: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error",
+                    "Error inesperado al eliminar el vehículo: " + e.getMessage());
+        }
+
+        return "redirect:/vehiculos";
+    }
+
     @GetMapping("/agregar")
     public String mostrarFormulario(Model model) {
         model.addAttribute("vehiculoForm", new VehiculoFormDTO());
         return "registrarvehiculo";
+    }
+
+    @GetMapping("/eliminar-con-historial/{patente}")
+    public String eliminarVehiculoConHistorial(@PathVariable String patente,
+            RedirectAttributes redirectAttributes) {
+        try {
+            System.out.println("=== ELIMINANDO VEHÍCULO CON HISTORIAL ===");
+            System.out.println("Patente a eliminar: " + patente);
+
+            ResultadoEliminacion resultado = vehiculoService.eliminarVehiculoConHistorial(patente);
+
+            if (resultado.isExitoso()) {
+                redirectAttributes.addFlashAttribute("success", resultado.getMensaje());
+            } else {
+                redirectAttributes.addFlashAttribute("error", resultado.getMensaje());
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error al eliminar vehículo con historial: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error",
+                    "❌ <strong>Error inesperado</strong><br>" +
+                            "🛠️ <strong>Detalle:</strong> " + e.getMessage());
+        }
+
+        return "redirect:/vehiculos";
     }
 
     @PostMapping("/agregar")
@@ -209,4 +272,5 @@ public class VehiculoController {
     private String nullToDash(String s) {
         return (s == null || s.isBlank()) ? "—" : s;
     }
+
 }
