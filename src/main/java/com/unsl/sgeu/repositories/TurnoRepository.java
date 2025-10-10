@@ -1,6 +1,7 @@
 // src/main/java/com/unsl/sgeu/repositories/TurnoRepository.java
 package com.unsl.sgeu.repositories;
 
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Turno;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
@@ -37,4 +38,12 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             @Param("hasta") LocalDate hasta,
             Pageable pageable
     );
+
+     @Query("""
+        SELECT t.estacionamiento 
+        FROM Turno t 
+        WHERE t.empleado.nombreUsuario = :usuario 
+          AND t.fechaInicio = CURRENT_DATE
+    """)
+    Estacionamiento findEstacionamientoActivoByEmpleadoUsuario(@Param("usuario") String usuario);
 }
