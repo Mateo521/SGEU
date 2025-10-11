@@ -1,10 +1,14 @@
 package com.unsl.sgeu.services;
 
+import com.unsl.sgeu.dto.EmpleadoDTO;
+import com.unsl.sgeu.mappers.EmpleadoMapper;
 import com.unsl.sgeu.models.Empleado;
 import com.unsl.sgeu.models.Rol;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -85,5 +89,13 @@ public class EmpleadoServices {
             .map(e -> e.getNombre() + " " + e.getApellido())
             .orElse("Nombre no encontrado");
 }
+
+/**  devuelve solo guardias en formato DTO */
+    public List<EmpleadoDTO> listarGuardias() {
+        return empleadoRepository.findByRol(Rol.Guardia)
+                .stream()
+                .map(EmpleadoMapper::toDTO)
+                .toList();
+    }
 
 }
