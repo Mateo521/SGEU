@@ -43,9 +43,7 @@ public class VehiculoService {
     }
 
     
-    
-    
-   // ✅ MÉTODO MEJORADO SIN @Transactional
+     
     public ResultadoEliminacion eliminarVehiculo(String patente) {
         try {
             System.out.println("=== VALIDANDO ELIMINACIÓN DE VEHÍCULO ===");
@@ -225,7 +223,7 @@ public class VehiculoService {
             String rutaImagen = qrCodeService.generarImagenQR(
                     vehiculoGuardado.getCodigoQr(),
                     "qr_" + vehiculoGuardado.getPatente().replace(" ", "_"));
-            // Podrías guardar la ruta de la imagen en la base de datos si quieres
+ 
         } catch (Exception e) {
             System.err.println("Error generando imagen QR: " + e.getMessage());
         }

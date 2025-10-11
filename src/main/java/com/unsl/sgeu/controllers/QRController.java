@@ -25,7 +25,7 @@ public class QRController {
     @Autowired
     private PersonaService personaService;
 
-    @GetMapping("/leer")  // Esto sería /qr/leer
+    @GetMapping("/leer")  
     public String mostrarLectorQR() {
         return "leerqr";
     }
@@ -53,23 +53,15 @@ public class QRController {
                     .body(Map.of("mensaje", "Vehículo no encontrado"));
             }
 
-            // ✅ AGREGAR DEBUG DEL VEHÍCULO ENCONTRADO
-            System.out.println("Vehículo encontrado:");
-            System.out.println("- Patente: " + vehiculo.getPatente());
-            System.out.println("- DNI Dueño: " + vehiculo.getDniDuenio());
-            System.out.println("- Modelo: " + vehiculo.getModelo());
-            System.out.println("- Color: " + vehiculo.getColor());
-            System.out.println("- Tipo: " + vehiculo.getTipo());
-
-            // Crear respuesta con información completa
+          
+       
             Map<String, Object> response = new HashMap<>();
             response.put("patente", vehiculo.getPatente());
             response.put("modelo", vehiculo.getModelo() != null ? vehiculo.getModelo() : "Sin modelo");
             response.put("color", vehiculo.getColor() != null ? vehiculo.getColor() : "Sin color");
             response.put("tipo", vehiculo.getTipo() != null ? vehiculo.getTipo() : "Sin tipo");
             response.put("dniDuenio", vehiculo.getDniDuenio());
-            
-            // Agregar información del dueño si existe
+           
             if (vehiculo.getDniDuenio() != null) {
                 try {
                     Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
@@ -88,7 +80,7 @@ public class QRController {
                 }
             }
             
-            // ✅ AGREGAR DEBUG DE LA RESPUESTA
+       
             System.out.println("Respuesta enviada: " + response);
             
             return ResponseEntity.ok(response);

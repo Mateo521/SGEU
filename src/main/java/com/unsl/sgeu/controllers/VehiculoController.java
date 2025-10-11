@@ -106,21 +106,21 @@ public class VehiculoController {
                 return "redirect:/vehiculos/agregar";
             }
 
-            // Mapear categoría
+             
             Integer categoriaId = mapearCategoriaAId(form.getCategoriaNombre());
             if (categoriaId == null) {
                 redirectAttributes.addFlashAttribute("error", "Categoría inválida");
                 return "redirect:/vehiculos/agregar";
             }
 
-            // Mapear tipo de vehículo
+           
             Integer vehiculoTipoId = mapearTipoAId(form.getTipoNombre());
             if (vehiculoTipoId == null) {
                 redirectAttributes.addFlashAttribute("error", "Tipo de vehículo inválido");
                 return "redirect:/vehiculos/agregar";
             }
 
-            // Crear/actualizar persona
+             
             Persona persona = personaService.existePersona(form.getDni())
                     ? personaService.buscarPorDni(form.getDni())
                     : new Persona();
@@ -134,7 +134,7 @@ public class VehiculoController {
 
             personaService.guardarPersona(persona);
 
-            // Crear vehículo
+          
             String codigoQr = vehiculoService.generarCodigoQR(form.getPatente());
 
             Vehiculo vehiculo = new Vehiculo();
@@ -142,7 +142,7 @@ public class VehiculoController {
             vehiculo.setCodigoQr(codigoQr);
             vehiculo.setModelo(form.getModelo());
             vehiculo.setColor(form.getColor());
-            vehiculo.setIdVehiculoTipo(vehiculoTipoId); // Ahora es Integer
+            vehiculo.setIdVehiculoTipo(vehiculoTipoId); 
             vehiculo.setDniDuenio(form.getDni());
             vehiculo.setTipo(form.getTipoNombre());
 
@@ -167,11 +167,9 @@ public class VehiculoController {
         }
     }
 
-    // ========== MÉTODOS AUXILIARES (AGREGAR ESTOS) ==========
+  
 
-    /**
-     * Mapea el nombre de categoría a su ID
-     */
+   
     private Integer mapearCategoriaAId(String categoria) {
         if (categoria == null)
             return null;
@@ -189,9 +187,7 @@ public class VehiculoController {
         }
     }
 
-    /**
-     * Mapea el nombre de tipo de vehículo a su ID
-     */
+ 
     private Integer mapearTipoAId(String tipo) {
         if (tipo == null)
             return null;
@@ -205,9 +201,7 @@ public class VehiculoController {
         }
     }
 
-    /**
-     * Mapea el ID de categoría a su nombre
-     */
+ 
     private String mapearIdACategoria(Integer id) {
         if (id == null)
             return "Sin categoría";
@@ -225,9 +219,7 @@ public class VehiculoController {
         }
     }
 
-    /**
-     * Crea información resumida del vehículo para mostrar en la vista
-     */
+ 
 
     private String crearInfoVehiculo(VehiculoFormDTO form, Persona persona) {
         // Usar los datos del formulario directamente para evitar problemas
@@ -246,9 +238,7 @@ public class VehiculoController {
                 categoriaNombre);
     }
 
-    /**
-     * Convierte el nombre de categoría del formulario a texto legible
-     */
+  
     private String mapearCategoriaNombreATexto(String categoria) {
         if (categoria == null)
             return "Sin categoría";
@@ -266,9 +256,7 @@ public class VehiculoController {
         }
     }
 
-    /**
-     * Convierte valores null o vacíos a guión
-     */
+    
     private String nullToDash(String s) {
         return (s == null || s.isBlank()) ? "—" : s;
     }
