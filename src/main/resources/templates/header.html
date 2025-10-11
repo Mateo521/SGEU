@@ -197,24 +197,3 @@
 
   </header>
 </div>
-
-<script>
-let inactivityTimer;
-const INACTIVITY_LIMIT = 10 * 1000; // 10 segundos
-
-function resetTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-        location.reload(); // recarga la página
-    }, INACTIVITY_LIMIT);
-}
-
-// Detecta actividad del usuario
-document.addEventListener('mousemove', resetTimer);
-document.addEventListener('keydown', resetTimer);
-document.addEventListener('scroll', resetTimer);
-document.addEventListener('touchstart', resetTimer);
-
-// Inicializa el timer
-resetTimer();
-</script>
