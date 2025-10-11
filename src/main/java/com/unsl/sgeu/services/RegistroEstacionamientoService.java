@@ -33,7 +33,7 @@ public class RegistroEstacionamientoService {
                 int eliminados = registroRepo.deleteByPatente(patente);
                 System.out.println("Registros eliminados: " + eliminados);
 
-                // Verificar que se eliminaron 
+                // Verificar que se eliminaronn 
                 long cantidadDespues = registroRepo.countByPatente(patente);
                 System.out.println("Registros restantes: " + cantidadDespues);
 
@@ -104,7 +104,7 @@ public class RegistroEstacionamientoService {
                 estado.setUltimoRegistro(ultimoRegistro);
                 estado.setEstaEstacionado("ingreso".equals(ultimoRegistro.getTipo()));
 
-                // Formatear fecha para mostrar
+                // Formatear fecha  .
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 estado.setFechaUltimoRegistro(ultimoRegistro.getFechaHora().format(formatter));
             }
@@ -136,7 +136,7 @@ public class RegistroEstacionamientoService {
             } else {
                 return String.format(
                         " No se puede eliminar el vehículo con patente <strong>%s</strong><br>" +
-                                "📋 <strong>Motivo:</strong> Tiene %d registro(s) de estacionamiento en el historial<br>"
+                                " <strong>Motivo:</strong> Tiene %d registro(s) de estacionamiento en el historial<br>"
                                 +
                                 " <strong>Último movimiento:</strong> %s el %s<br>" +
                                 " <strong>Opciones:</strong><br>" +
