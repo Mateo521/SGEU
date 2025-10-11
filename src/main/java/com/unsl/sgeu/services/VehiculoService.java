@@ -5,6 +5,7 @@ import com.unsl.sgeu.repositories.VehiculoRepository;
 import org.springframework.stereotype.Service;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,9 @@ public class VehiculoService {
         this.vehiculoRepo = vehiculoRepo;
         this.qrCodeService = qrCodeService;
     }
+
+
+
 
     public Vehiculo buscarPorQr(String codigoQr) {
         return vehiculoRepo.findByCodigoQr(codigoQr);
@@ -73,4 +77,6 @@ public class VehiculoService {
             throw new RuntimeException("Error en el algoritmo de hash", e);
         }
     }
+
+
 }
