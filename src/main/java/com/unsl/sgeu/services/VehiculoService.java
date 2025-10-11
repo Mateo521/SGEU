@@ -88,34 +88,34 @@ public class VehiculoService {
     
     public List<Vehiculo> obtenerPorGuardia(Long guardiaId) {
     try {
-        System.out.println("🔍 Obteniendo vehículos para guardia ID: " + guardiaId);
+        System.out.println(" Obteniendo vehículos para guardia ID: " + guardiaId);
         
        
-        System.out.println("🔍 Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
-        System.out.println("🔍 Valor de guardiaId: " + guardiaId);
-        System.out.println("🔍 Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
+        System.out.println(" Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
+        System.out.println(" Valor de guardiaId: " + guardiaId);
+        System.out.println(" Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
         
         List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
         
-        System.out.println("🔍 IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
+        System.out.println(" IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
         
         if (idsEstacionamientos.isEmpty()) {
-            System.out.println("⚠️ Guardia sin estacionamientos asignados - mostrando lista vacía");
+            System.out.println(" Guardia sin estacionamientos asignados - mostrando lista vacía");
             return List.of();
         }
         
-        System.out.println("✅ Estacionamientos del guardia: " + idsEstacionamientos);
+        System.out.println(" Estacionamientos del guardia: " + idsEstacionamientos);
         
         List<Vehiculo> vehiculos = obtenerPorEstacionamientos(idsEstacionamientos);
         
-        System.out.println("✅ Vehículos encontrados: " + vehiculos.size());
+        System.out.println(" Vehículos encontrados: " + vehiculos.size());
         return vehiculos;
         
     } catch (Exception e) {
-        System.err.println("❌ Error al obtener vehículos por guardia: " + e.getMessage());
+        System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
         e.printStackTrace();
         
-        System.out.println("🔄 FALLBACK: Mostrando todos los vehículos por error");
+        System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
         return obtenerTodos();
     }
 }
