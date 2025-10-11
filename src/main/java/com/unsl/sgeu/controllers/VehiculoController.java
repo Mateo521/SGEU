@@ -54,7 +54,7 @@ public class VehiculoController {
         System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
 
         if (!esAdministrador && !esGuardia) {
-            System.out.println("❌ Usuario sin permisos");
+            System.out.println(" Usuario sin permisos");
             model.addAttribute("error", "No tiene permisos para acceder a esta sección");
             return "error";
         }
@@ -63,16 +63,16 @@ public class VehiculoController {
 
         try {
             if (esAdministrador) {
-                System.out.println("🔑 Procesando como ADMINISTRADOR");
+                System.out.println(" Procesando como admin");
                 if (buscar != null && !buscar.trim().isEmpty()) {
                     System.out.println("Admin buscando: " + buscar);
                     lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
                 } else {
-                    System.out.println("Admin obteniendo todos los vehículos");
+                    System.out.println("Admin obteniendo todos los vehics.");
                     lista = vehiculoService.obtenerTodos();
                 }
             } else {
-                System.out.println("🛡️ Procesando como GUARDIA");
+                System.out.println(" Procesando como GUARDIA");
                 if (buscar != null && !buscar.trim().isEmpty()) {
                     System.out.println("Guardia buscando: " + buscar);
                     lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
@@ -82,13 +82,13 @@ public class VehiculoController {
                 }
             }
         } catch (Exception e) {
-            System.err.println("❌ Error al obtener vehículos: " + e.getMessage());
+            System.err.println(" Error al obtener vehículos: " + e.getMessage());
             e.printStackTrace();
             lista = List.of();
-            model.addAttribute("error", "❌ Error al cargar vehículos: " + e.getMessage());
+            model.addAttribute("error", " Error al cargar vehículos: " + e.getMessage());
         }
 
-        System.out.println("✅ Total vehículos encontrados: " + lista.size());
+        System.out.println(" Total vehiculos encontrados: " + lista.size());
 
         model.addAttribute("vehiculos", lista);
         model.addAttribute("buscar", buscar);
@@ -97,7 +97,7 @@ public class VehiculoController {
         model.addAttribute("esGuardia", esGuardia);
         model.addAttribute("nombreCompleto", nombreCompleto);
 
-        System.out.println("✅ Retornando vista 'vehiculos'");
+        System.out.println(" Retornando vista 'vehiculos'");
         return "vehiculos";
     }
 
@@ -114,17 +114,17 @@ public class VehiculoController {
             RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
-            // 🔐 VERIFICAR PERMISOS
+        
             String rol = (String) session.getAttribute("rol");
             boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
             boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
             if (!esAdministrador && !esGuardia) {
-                redirectAttributes.addFlashAttribute("error", "❌ No tiene permisos para eliminar vehículos");
+                redirectAttributes.addFlashAttribute("error", "No tiene permisos para eliminar vehículos");
                 return "redirect:/vehiculos";
             }
 
-            System.out.println("=== ELIMINANDO VEHÍCULO (NORMAL) ===");
+            System.out.println("NLIMINANDO VEHÍCULO (NORMAL)");
             System.out.println("Patente: " + patente + " | Usuario: " + rol);
 
             ResultadoEliminacion resultado = vehiculoService.eliminarVehiculo(patente);
@@ -139,7 +139,7 @@ public class VehiculoController {
             System.err.println("Error al eliminar vehículo: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
-                    "❌ Error inesperado al eliminar el vehículo: " + e.getMessage());
+                    "Error inesperado al eliminar el vehículo: " + e.getMessage());
         }
 
         return "redirect:/vehiculos";
@@ -151,17 +151,18 @@ public class VehiculoController {
             RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
-            // 🔐 SOLO ADMINISTRADORES
+          
             String rol = (String) session.getAttribute("rol");
             boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-
+/*
+probando control
             if (!esAdministrador) {
                 redirectAttributes.addFlashAttribute("error",
                         "Solo los administradores pueden eliminar vehículos con historial");
                 return "redirect:/vehiculos";
             }
-
-            System.out.println("=== ELIMINANDO VEHÍCULO CON HISTORIAL ===");
+ */
+            System.out.println("ELIMINANDO VEHICULO CON HISTORIAL");
             System.out.println("Patente: " + patente + " | Admin: " + session.getAttribute("nombreCompleto"));
 
             ResultadoEliminacion resultado = vehiculoService.eliminarVehiculoConHistorial(patente);
@@ -176,7 +177,7 @@ public class VehiculoController {
             System.err.println("Error al eliminar vehículo con historial: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
-                    "❌ Error crítico al eliminar: " + e.getMessage());
+                    "Error crítico al eliminar: " + e.getMessage());
         }
 
         return "redirect:/vehiculos";
