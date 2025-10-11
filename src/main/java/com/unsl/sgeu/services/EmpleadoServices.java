@@ -1,8 +1,11 @@
 package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.models.Empleado;
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Rol;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
+import com.unsl.sgeu.repositories.TurnoRepository;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -12,11 +15,14 @@ public class EmpleadoServices {
 
     private final EmpleadoRepository empleadoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TurnoRepository turnoRepository;
 
     public EmpleadoServices(EmpleadoRepository empleadoRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            TurnoRepository turnoRepository) {
         this.empleadoRepository = empleadoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.turnoRepository = turnoRepository;
     }
 
     /* =====================  AUTH  ===================== */
@@ -84,6 +90,10 @@ public class EmpleadoServices {
     return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
             .map(e -> e.getNombre() + " " + e.getApellido())
             .orElse("Nombre no encontrado");
-}
+    }
+
+    public Estacionamiento obtenerEstacionamientoActivo(String usuario) {
+        return turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(usuario);
+    }
 
 }
