@@ -3,7 +3,7 @@ class QRVehiculoManager {
     constructor() {
         this.currentData = null;
     }
-
+//prueba con clases
     
     mostrarQR(button) {
         try {
@@ -28,7 +28,7 @@ class QRVehiculoManager {
             for (const id of elementos) {
                 const elemento = document.getElementById(id);
                 if (!elemento) {
-                    console.error(`❌ Elemento no encontrado: ${id}`);
+                    console.error(`Elemento no encontrado: ${id}`);
                     alert(`Error: Elemento ${id} no encontrado en el modal`);
                     return;
                 }
@@ -52,14 +52,14 @@ class QRVehiculoManager {
                 return;
             }
             
-            // Resetear estados
+            // Resetear estado
             qrImage.style.display = 'block';
             qrError.style.display = 'none';
             
            
             qrImage.src = `/qr-codes/qr_${this.currentData.patente}.png`;
             
-            // Manejar errores de carga
+            // Manejar errores de cargaa
             qrImage.onload = function() {
                 console.log(' Imagen QR cargada correctamente');
             };
@@ -76,12 +76,12 @@ class QRVehiculoManager {
             if (modal) {
                 modal.classList.remove('hidden');
             } else {
-                console.error('❌ Modal no encontrado');
+                console.error(' Modal no encontrado');
                 alert('Error: Modal no encontrado');
             }
 
         } catch (error) {
-            console.error('❌ Error al mostrar QR:', error);
+            console.error(' Error al mostrar QR:', error);
             alert('Error al mostrar el código QR: ' + error.message);
         }
     }
@@ -103,7 +103,7 @@ class QRVehiculoManager {
             this.imprimirConImagenExistente(data);
 
         } catch (error) {
-            console.error('❌ Error al imprimir QR:', error);
+            console.error(' Error al imprimir QR:', error);
             alert('Error al imprimir el código QR: ' + error.message);
         }
     }
@@ -283,7 +283,7 @@ class QRVehiculoManager {
         printWindow.document.close();
     }
 
-    // ❌ CERRAR MODAL
+    
     cerrarModal() {
         const modal = document.getElementById('qrModal');
         if (modal) {
