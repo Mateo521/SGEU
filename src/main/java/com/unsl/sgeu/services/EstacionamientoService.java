@@ -15,13 +15,13 @@ public interface EstacionamientoService {
 
     EstacionamientoDTO obtener(Long id);
 
-    List<EstacionamientoDTO> listarTodos();     // si querés solo activos, podés separar
+    List<EstacionamientoDTO> listarTodos();     
 
     List<EstacionamientoDTO> listarActivos();
 
     List<EstacionamientoDTO> listarDesactivados();
 
-    void cambiarEstado(Long id, boolean estado); // true=activar, false=desactivar
+    void cambiarEstado(Long id, boolean estado);  
 
     void eliminarFisico(Long id); // opcional (borrado físico)
 }

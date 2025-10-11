@@ -13,7 +13,7 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-// PersonaVehiculoService.java
+
 @Service
 public class PersonaVehiculoService {
 
@@ -26,7 +26,11 @@ public class PersonaVehiculoService {
     }
 
     @Transactional
-    public void vincular(Long dni, String patente) { /* ... como ya te pasé ... */ }
+    public void vincular(Long dni, String patente) { 
+        
+
+        
+     }
 
     @Transactional
     public java.util.List<Long> obtenerDnisPorPatente(String patente) {

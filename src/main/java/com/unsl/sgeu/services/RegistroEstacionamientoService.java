@@ -19,11 +19,11 @@ public class RegistroEstacionamientoService {
     @Autowired
     private RegistroEstacionamientoRepository registroRepo;
 
-    // ✅ MÉTODO CON TRANSACCIÓN INDEPENDIENTE Y MANEJO DE ERRORES
+    
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void eliminarRegistrosPorPatente(String patente) {
         try {
-            System.out.println("=== ELIMINANDO REGISTROS ===");
+            System.out.println("=== ELIMINANDO REGISTROSS");
             System.out.println("Patente: " + patente);
 
             long cantidadAntes = registroRepo.countByPatente(patente);
@@ -116,8 +116,7 @@ public class RegistroEstacionamientoService {
             return new EstadoVehiculo(patente);
         }
     }
-
-    // ✅ Generar mensaje de error personalizado
+ 
     public String generarMensajeError(String patente) {
         try {
             EstadoVehiculo estado = obtenerEstadoDetallado(patente);

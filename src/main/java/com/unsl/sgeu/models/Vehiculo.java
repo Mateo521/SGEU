@@ -20,10 +20,10 @@ public class Vehiculo {
     private String color;
     
     @Column(name = "id_vehiculo_tipo")
-    private Integer idVehiculoTipo;  // ✅ Debe ser Integer, no Short
+    private Integer idVehiculoTipo;   
     
     @Column(name = "dni_duenio")
-    @JsonProperty("dniDuenio")  // ✅ Esto mapea dni_duenio a dniDuenio en JSON
+    @JsonProperty("dniDuenio")   
     private Long dniDuenio;
     
     @Column(name = "tipo")

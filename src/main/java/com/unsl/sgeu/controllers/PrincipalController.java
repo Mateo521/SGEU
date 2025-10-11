@@ -12,11 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @Controller
 public class PrincipalController {
 
-    @GetMapping("/detalles_info")
-    public String info(Model model) {
-        model.addAttribute("detallesInfo", new DetallesInfo());
-        return "detalles_info";
-    }
+ 
 
     // Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
     @GetMapping("/")
@@ -67,12 +63,5 @@ public class PrincipalController {
      * return ResponseEntity.ok("QR recibido correctamente: " + qr.getCodigo());
      * }
      */
-    @PostMapping("/detalles_info")
-    public String recibirFormulario(@ModelAttribute DetallesInfo detallesInfo) {
 
-        System.out.println("Nombre: " + detallesInfo.getNombre());
-        System.out.println("Correo: " + detallesInfo.getCorreo());
-
-        return "detalles_info";
-    }
 }

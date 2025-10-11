@@ -40,7 +40,7 @@ public class Persona {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
-    // ✅ DEBE ACEPTAR Integer
+ 
     public Integer getIdCategoria() { return idCategoria; }
     public void setIdCategoria(Integer idCategoria) { this.idCategoria = idCategoria; }
     

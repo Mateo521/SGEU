@@ -97,7 +97,7 @@ public class VehiculoService {
         }
     }
 
-    // ✅ MÉTODO MEJORADO CON MANEJO MANUAL DE TRANSACCIONES
+    
     public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
         try {
             System.out.println("=== ELIMINANDO VEHÍCULO CON HISTORIAL ===");
@@ -126,7 +126,7 @@ public class VehiculoService {
             long cantidadRegistros = registroService.contarRegistrosPorPatente(patente);
             System.out.println("Cantidad de registros a eliminar: " + cantidadRegistros);
             
-            // ✅ ELIMINAR REGISTROS PRIMERO (en su propia transacción)
+            
             if (cantidadRegistros > 0) {
                 System.out.println("Eliminando " + cantidadRegistros + " registros de estacionamiento");
                 
@@ -147,8 +147,7 @@ public class VehiculoService {
                         "❌ Error al eliminar registros de estacionamiento: " + e.getMessage());
                 }
             }
-            
-            // ✅ ELIMINAR VEHÍCULO (después de que los registros ya fueron eliminados)
+           
             System.out.println("Eliminando vehículo...");
             try {
                 vehiculoRepo.deleteById(patente);
@@ -213,15 +212,15 @@ public class VehiculoService {
     }
 
     public Vehiculo guardarVehiculo(Vehiculo vehiculo) {
-        // Generar código QR único si no existe
+       
         if (vehiculo.getCodigoQr() == null || vehiculo.getCodigoQr().isEmpty()) {
             vehiculo.setCodigoQr(generarCodigoQR(vehiculo.getPatente()));
         }
 
-        // Guardar vehículo primero
+      
         Vehiculo vehiculoGuardado = vehiculoRepo.save(vehiculo);
 
-        // Generar imagen QR
+   
         try {
             String rutaImagen = qrCodeService.generarImagenQR(
                     vehiculoGuardado.getCodigoQr(),

@@ -18,7 +18,7 @@ public class RegistroEstacionamiento {
     private LocalDateTime fechaHora;
     
     @Column(name = "tipo_movimiento", nullable = false)   
-    private String tipo;  // Mantener el nombre del atributo como 'tipo' para no cambiar todo el código
+    private String tipo;   
     
     @Column(name = "modo")
     private String modo;
@@ -26,7 +26,7 @@ public class RegistroEstacionamiento {
     @Column(name = "id_est")
     private Long idEstacionamiento;
     
-    // ✅ Getters y setters sin cambios
+ 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
