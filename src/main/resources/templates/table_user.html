@@ -227,9 +227,6 @@
                             <tr>
                                 <th
                                     class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                    Estado</th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                                     Nombre Completo</th>
                                 <th
                                     class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -242,25 +239,12 @@
                                     Email</th>
                                 <th
                                     class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                    Estacionamiento</th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                                     Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100" id="tableBody">
-                            <tr th:each="e : ${empleados}" class="table-row-hover">
-                                <!-- Estado -->
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <!-- <span
-                                            th:classappend="${e.status == 'online'} ? 'w-3 h-3 rounded-full bg-green-500 status-indicator' : 'w-3 h-3 rounded-full bg-slate-400'"></span>
-                                        <span th:text="${e.status == 'online'} ? 'Conectado' : 'Desconectado'"
-                                            th:classappend="${e.status == 'online'} ? 'text-xs font-medium px-2.5 py-1 rounded-full bg-green-100 text-green-800' : 'text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600'">
-                                        </span> -->
-                                    </div>
-                                </td>
-
+                            <tr th:each="e : ${empleados}" class="table-row-hover"
+                                th:attr="data-id=${e.id}, data-nombre=${e.nombre}, data-apellido=${e.apellido}, data-usuario=${e.nombreUsuario}, data-cargo=${e.rol}, data-correo=${e.correo}">
                                 <!-- Nombre completo -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
@@ -293,34 +277,18 @@
                                     <span class="text-slate-600" th:text="${e.correo}"></span>
                                 </td>
 
-                                <!-- Estacionamiento -->
-                                <td class="px-6 py-4">
-                                    <!-- <select th:value="${e.estacionamiento}"
-                                        class="pl-3 pr-8 py-1.5 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                                        <option value="Estacionamiento Centro"
-                                            th:selected="${e.estacionamiento == 'Estacionamiento Centro'}">
-                                            Estacionamiento Centro</option>
-                                        <option value="Estacionamiento Norte"
-                                            th:selected="${e.estacionamiento == 'Estacionamiento Norte'}">
-                                            Estacionamiento Norte</option>
-                                        <option value="Estacionamiento Sur"
-                                            th:selected="${e.estacionamiento == 'Estacionamiento Sur'}">Estacionamiento
-                                            Sur</option>
-                                    </select> -->
-                                </td>
-
                                 <!-- Acciones -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                            title="Editar">
+                                            title="Editar" onclick="openEditModal(this)">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
                                         <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                            title="Eliminar">
+                                            title="Eliminar" onclick="onDelete(this)">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -336,7 +304,7 @@
         </div>
 
         <!-- Edit Modal -->
-        <!-- <div id="editModal"
+        <div id="editModal"
             class="hidden fixed inset-0 z-50 modal-backdrop bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
                 <div class="p-6 border-b border-slate-200">
@@ -384,7 +352,7 @@
                         <select id="editCargo"
                             class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                             required>
-                            <option value="Admin">Admin</option>
+                            <option value="Administrador">Administrador</option>
                             <option value="Guardia">Guardia</option>
                         </select>
                     </div>
@@ -393,16 +361,6 @@
                         <input type="email" id="editEmail"
                             class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                             required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Estacionamiento Asignado</label>
-                        <select id="editEstacionamiento"
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            required>
-                            <option value="Estacionamiento Centro">Estacionamiento Centro</option>
-                            <option value="Estacionamiento Norte">Estacionamiento Norte</option>
-                            <option value="Estacionamiento Sur">Estacionamiento Sur</option>
-                        </select>
                     </div>
                     <div class="flex gap-3 pt-4">
                         <button type="submit"
@@ -416,7 +374,124 @@
                     </div>
                 </form>
             </div>
-        </div> -->
+        </div>
+
+        <script>
+            // Filtrado de tabla por texto y selectores
+            function filterTable() {
+                const q = document.getElementById('searchInput').value.toLowerCase().trim();
+                const cargo = document.getElementById('cargoFilter').value;
+                const status = document.getElementById('statusFilter').value;
+                const rows = document.querySelectorAll('#tableBody tr');
+                let total = 0, online = 0, admins = 0, guardias = 0;
+
+                rows.forEach(r => {
+                    const nombre = (r.getAttribute('data-nombre') || '').toLowerCase();
+                    const apellido = (r.getAttribute('data-apellido') || '').toLowerCase();
+                    const usuario = (r.getAttribute('data-usuario') || '').toLowerCase();
+                    const correo = (r.getAttribute('data-correo') || '').toLowerCase();
+                    const rol = (r.getAttribute('data-cargo') || '').toLowerCase();
+
+                    const matchesQuery = q === '' || nombre.includes(q) || apellido.includes(q) || usuario.includes(q) || correo.includes(q);
+                    const matchesCargo = cargo === '' || rol.includes(cargo.toLowerCase());
+                    // status no disponible en datos; ignoramos por ahora o puedes mapearlo en backend
+                    const matchesStatus = true;
+
+                    const show = matchesQuery && matchesCargo && matchesStatus;
+                    r.style.display = show ? '' : 'none';
+
+                    if (show) {
+                        total++;
+                        if (rol.includes('administrador') || rol.includes('admin')) admins++;
+                        if (rol.includes('guardia')) guardias++;
+                        // ejemplo: consideramos todos 'online' por ahora
+                        online++;
+                    }
+                });
+
+                document.getElementById('totalEmployees').textContent = total;
+                document.getElementById('onlineCount').textContent = online;
+                document.getElementById('adminCount').textContent = admins;
+                document.getElementById('guardiaCount').textContent = guardias;
+            }
+
+            // Abrir modal y poblar formulario con atributos data-
+            function openEditModal(btn) {
+                const tr = btn.closest('tr');
+                if (!tr) return;
+                const id = tr.getAttribute('data-id');
+                document.getElementById('editId').value = id || '';
+                document.getElementById('editNombre').value = tr.getAttribute('data-nombre') || '';
+                document.getElementById('editApellido').value = tr.getAttribute('data-apellido') || '';
+                document.getElementById('editUsuario').value = tr.getAttribute('data-usuario') || '';
+                const cargo = tr.getAttribute('data-cargo') || '';
+                const select = document.getElementById('editCargo');
+                if (select) {
+                    for (let i = 0; i < select.options.length; i++) {
+                        if (select.options[i].value.toLowerCase() === cargo.toLowerCase() || select.options[i].value.toLowerCase().includes(cargo.toLowerCase())) {
+                            select.selectedIndex = i; break;
+                        }
+                    }
+                }
+                document.getElementById('editEmail').value = tr.getAttribute('data-correo') || '';
+
+                document.getElementById('editModal').classList.remove('hidden');
+            }
+
+            function closeEditModal() {
+                document.getElementById('editModal').classList.add('hidden');
+            }
+
+            // Handler para eliminar (puedes adaptar para enviar petición al backend)
+            function onDelete(btn) {
+                const tr = btn.closest('tr');
+                if (!tr) return;
+                const nombre = tr.getAttribute('data-nombre') + ' ' + tr.getAttribute('data-apellido');
+                if (!confirm(`¿Eliminar al usuario ${nombre}?`)) return;
+                // Si se desea: crear fetch('/empleados/' + id, { method: 'DELETE' })
+                tr.remove();
+                filterTable();
+            }
+
+            // Submit del formulario: por ahora evita enviar y actualiza la fila en DOM
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('editForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const id = document.getElementById('editId').value;
+                    const nombre = document.getElementById('editNombre').value;
+                    const apellido = document.getElementById('editApellido').value;
+                    const usuario = document.getElementById('editUsuario').value;
+                    const cargo = document.getElementById('editCargo').value;
+                    const email = document.getElementById('editEmail').value;
+
+                    // Actualizar fila correspondiente
+                    const row = document.querySelector(`#tableBody tr[data-id='${id}']`);
+                    if (row) {
+                        row.setAttribute('data-nombre', nombre);
+                        row.setAttribute('data-apellido', apellido);
+                        row.setAttribute('data-usuario', usuario);
+                        row.setAttribute('data-cargo', cargo);
+                        row.setAttribute('data-correo', email);
+                        // actualizar texto visible
+                        const nameCell = row.querySelector('td:first-child p');
+                        if (nameCell) nameCell.textContent = nombre + ' ' + apellido;
+                        const userCell = row.querySelector('td:nth-child(2) .text-slate-600');
+                        if (userCell) userCell.textContent = usuario;
+                        const cargoCell = row.querySelector('td:nth-child(3) span');
+                        if (cargoCell) cargoCell.textContent = cargo;
+                        const emailCell = row.querySelector('td:nth-child(4) span');
+                        if (emailCell) emailCell.textContent = email;
+                    }
+
+                    closeEditModal();
+                    filterTable();
+                    // TODO: enviar datos al backend via fetch POST/PUT
+                });
+
+                // Inicializar stats y filtrado
+                filterTable();
+            });
+        </script>
     </main>
 </body>
 
