@@ -53,7 +53,7 @@ public class VehiculoService {
             
             if (!vehiculoRepo.existsById(patente)) {
                 return new ResultadoEliminacion(false, 
-                    "❌ El vehículo con patente <strong>" + patente + "</strong> no existe en el sistema.");
+                    " El vehículo con patente <strong>" + patente + "</strong> no existe en el sistema.");
             }
             
             // Verificar registros SIN transacción activa
@@ -76,14 +76,14 @@ public class VehiculoService {
                     "✅ Vehículo con patente <strong>" + patente + "</strong> eliminado exitosamente.");
             } else {
                 return new ResultadoEliminacion(false, 
-                    "❌ Error inesperado al eliminar el vehículo.");
+                    " Error inesperado al eliminar el vehículo.");
             }
             
         } catch (Exception e) {
             System.err.println("Error al eliminar vehículo: " + e.getMessage());
             e.printStackTrace();
             
-            String mensajeError = "❌ <strong>Error al eliminar el vehículo</strong><br>";
+            String mensajeError = " <strong>Error al eliminar el vehículo</strong><br>";
             
             if (e.getMessage().contains("foreign key constraint") || 
                 e.getMessage().contains("constraint fails")) {
@@ -100,12 +100,12 @@ public class VehiculoService {
     
     public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
         try {
-            System.out.println("=== ELIMINANDO VEHÍCULO CON HISTORIAL ===");
+            System.out.println("=== ELIMINANDO VEHÍCULO CON HISTORIAL ==");
             System.out.println("Patente: " + patente);
             
             if (!vehiculoRepo.existsById(patente)) {
                 return new ResultadoEliminacion(false, 
-                    "❌ El vehículo con patente <strong>" + patente + "</strong> no existe en el sistema.");
+                    "El vehículo con patente <strong>" + patente + "</strong> no existe en el sistema.");
             }
             
             boolean estaEstacionado = registroService.vehiculoEstaEstacionado(patente);
@@ -115,10 +115,10 @@ public class VehiculoService {
                 EstadoVehiculo estado = registroService.obtenerEstadoDetallado(patente);
                 return new ResultadoEliminacion(false, 
                     String.format(
-                        "❌ <strong>No se puede eliminar el vehículo</strong><br>" +
-                        "🚗 <strong>Motivo:</strong> El vehículo está actualmente estacionado<br>" +
-                        "📅 <strong>Ingreso:</strong> %s<br>" +
-                        "💡 <strong>Solución:</strong> Registre primero el egreso del vehículo",
+                        "<strong>No se puede eliminar el vehículo</strong><br>" +
+                        "<strong>Motivo:</strong> El vehículo está actualmente estacionado<br>" +
+                        "<strong>Ingreso:</strong> %s<br>" +
+                        "<strong>Solución:</strong> Registre primero el egreso del vehículo",
                         estado.getFechaUltimoRegistro()
                     ));
             }
@@ -134,17 +134,17 @@ public class VehiculoService {
                     registroService.eliminarRegistrosPorPatente(patente);
                     System.out.println("Registros eliminados exitosamente");
                     
-                    // Verificar que se eliminaron
+                    // Verificar que se eliminaronn
                     long registrosRestantes = registroService.contarRegistrosPorPatente(patente);
                     if (registrosRestantes > 0) {
                         return new ResultadoEliminacion(false, 
-                            "❌ Error: No se pudieron eliminar todos los registros. Quedan " + registrosRestantes + " registros.");
+                            "Error: No se pudieron eliminar todos los registros. Quedan " + registrosRestantes + " registros.");
                     }
                     
                 } catch (Exception e) {
                     System.err.println("Error eliminando registros: " + e.getMessage());
                     return new ResultadoEliminacion(false, 
-                        "❌ Error al eliminar registros de estacionamiento: " + e.getMessage());
+                        "Error al eliminar registros de estacionamiento: " + e.getMessage());
                 }
             }
            
@@ -158,29 +158,29 @@ public class VehiculoService {
                 if (eliminado) {
                     String mensaje = cantidadRegistros > 0 ? 
                         String.format(
-                            "✅ <strong>Eliminación completa exitosa</strong><br>" +
-                            "🚗 <strong>Vehículo:</strong> %s eliminado<br>" +
-                            "📋 <strong>Historial:</strong> %d registro(s) eliminado(s)<br>" +
-                            "🎉 <strong>Estado:</strong> Limpieza completa realizada",
+                            "<strong>Eliminación completa exitosa</strong><br>" +
+                            "<strong>Vehículo:</strong> %s eliminado<br>" +
+                            "<strong>Historial:</strong> %d registro(s) eliminado(s)<br>" +
+                            " <strong>Estado:</strong> Limpieza completa realizada",
                             patente, cantidadRegistros
                         ) :
                         String.format(
-                            "✅ <strong>Vehículo eliminado exitosamente</strong><br>" +
-                            "🚗 <strong>Patente:</strong> %s<br>" +
-                            "📋 <strong>Historial:</strong> Sin registros previos",
+                            "<strong>Vehículo eliminado exitosamente</strong><br>" +
+                            "<strong>Patente:</strong> %s<br>" +
+                            "<strong>Historial:</strong> Sin registros previos",
                             patente
                         );
                         
                     return new ResultadoEliminacion(true, mensaje);
                 } else {
                     return new ResultadoEliminacion(false, 
-                        "❌ Error inesperado: El vehículo no se pudo eliminar después del proceso.");
+                        " Error inesperado: El vehículo no se pudo eliminar después del proceso.");
                 }
                 
             } catch (Exception e) {
                 System.err.println("Error eliminando vehículo: " + e.getMessage());
                 return new ResultadoEliminacion(false, 
-                    "❌ Error al eliminar el vehículo: " + e.getMessage());
+                    " Error al eliminar el vehículo: " + e.getMessage());
             }
                 
         } catch (Exception e) {
@@ -188,10 +188,10 @@ public class VehiculoService {
             e.printStackTrace();
             
             String mensajeError = String.format(
-                "❌ <strong>Error durante la eliminación</strong><br>" +
-                "🚗 <strong>Vehículo:</strong> %s<br>" +
-                "🛠️ <strong>Error técnico:</strong> %s<br>" +
-                "💡 <strong>Sugerencia:</strong> Contacte al administrador del sistema",
+                " <strong>Error durante la eliminación</strong><br>" +
+                " <strong>Vehículo:</strong> %s<br>" +
+                " <strong>Error técnico:</strong> %s<br>" +
+                " <strong>Sugerencia:</strong> Contacte al administrador del sistema",
                 patente, e.getMessage()
             );
             

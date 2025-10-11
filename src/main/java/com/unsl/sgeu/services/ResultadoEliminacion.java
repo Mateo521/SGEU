@@ -10,7 +10,7 @@ public class ResultadoEliminacion {
         this.mensaje = mensaje;
     }
     
-    // Getters y setters
+    // Getters y setterss
     public boolean isExitoso() { 
         return exitoso; 
     }

@@ -33,7 +33,7 @@ public class RegistroEstacionamientoService {
                 int eliminados = registroRepo.deleteByPatente(patente);
                 System.out.println("Registros eliminados: " + eliminados);
 
-                // Verificar que se eliminaron correctamente
+                // Verificar que se eliminaron 
                 long cantidadDespues = registroRepo.countByPatente(patente);
                 System.out.println("Registros restantes: " + cantidadDespues);
 
@@ -127,19 +127,19 @@ public class RegistroEstacionamientoService {
 
             if (estado.isEstaEstacionado()) {
                 return String.format(
-                        "❌ No se puede eliminar el vehículo con patente <strong>%s</strong><br>" +
-                                "🚗 <strong>Motivo:</strong> El vehículo está actualmente estacionado<br>" +
-                                "📅 <strong>Ingreso:</strong> %s<br>" +
-                                "💡 <strong>Solución:</strong> Registre primero el egreso del vehículo",
+                        "No se puede eliminar el vehículo con patente <strong>%s</strong><br>" +
+                                " <strong>Motivo:</strong> El vehículo está actualmente estacionado<br>" +
+                                " <strong>Ingreso:</strong> %s<br>" +
+                                " <strong>Solución:</strong> Registre primero el egreso del vehículo",
                         patente,
                         estado.getFechaUltimoRegistro());
             } else {
                 return String.format(
-                        "❌ No se puede eliminar el vehículo con patente <strong>%s</strong><br>" +
+                        " No se puede eliminar el vehículo con patente <strong>%s</strong><br>" +
                                 "📋 <strong>Motivo:</strong> Tiene %d registro(s) de estacionamiento en el historial<br>"
                                 +
-                                "📅 <strong>Último movimiento:</strong> %s el %s<br>" +
-                                "💡 <strong>Opciones:</strong><br>" +
+                                " <strong>Último movimiento:</strong> %s el %s<br>" +
+                                " <strong>Opciones:</strong><br>" +
                                 "   • Use 'Eliminar con historial' para borrar todo<br>" +
                                 "   • O contacte al administrador para limpiar el historial",
                         patente,
