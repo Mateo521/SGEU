@@ -4,11 +4,12 @@ import com.unsl.sgeu.models.RegistroEstacionamiento;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
-
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -53,5 +54,10 @@ public class RegistroEstacionamientoService {
 
        long cantidad = registroestacionamientoRepo.countByPatente(patente);
         return cantidad % 2 == 0;
+    }
+
+    
+     public List<String> obtenerPatentesAdentroMasDeCuatroHoras() {
+        return registroestacionamientoRepo.findPatentesAdentroMasDeCuatroHoras();
     }
 }

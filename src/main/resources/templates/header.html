@@ -30,6 +30,10 @@
                   d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
               </svg>
               <span class="ms-3">Inicio</span>
+             <span id="patentes-badge"
+             th:if="${!#lists.isEmpty(patentesVencidas)}"
+      th:text="${#lists.size(patentesVencidas)}"
+                class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300"></span> 
             </a>
           </li>
 
@@ -193,3 +197,24 @@
 
   </header>
 </div>
+
+<script>
+let inactivityTimer;
+const INACTIVITY_LIMIT = 10 * 1000; // 10 segundos
+
+function resetTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+        location.reload(); // recarga la página
+    }, INACTIVITY_LIMIT);
+}
+
+// Detecta actividad del usuario
+document.addEventListener('mousemove', resetTimer);
+document.addEventListener('keydown', resetTimer);
+document.addEventListener('scroll', resetTimer);
+document.addEventListener('touchstart', resetTimer);
+
+// Inicializa el timer
+resetTimer();
+</script>
