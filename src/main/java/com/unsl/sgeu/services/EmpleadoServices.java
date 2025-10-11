@@ -18,29 +18,30 @@ public class EmpleadoServices {
     private final TurnoRepository turnoRepository;
 
     public EmpleadoServices(EmpleadoRepository empleadoRepository,
-                            PasswordEncoder passwordEncoder,
-                            TurnoRepository turnoRepository) {
+            PasswordEncoder passwordEncoder,
+            TurnoRepository turnoRepository) {
         this.empleadoRepository = empleadoRepository;
         this.passwordEncoder = passwordEncoder;
         this.turnoRepository = turnoRepository;
     }
 
-    /* =====================  AUTH  ===================== */
+    /* ===================== AUTH ===================== */
 
     public boolean login(String nombreUsuario, String contrasenia) {
         Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
-        if (opt.isEmpty()) return false;
+        if (opt.isEmpty())
+            return false;
         Empleado empleado = opt.get();
         return passwordEncoder.matches(contrasenia, empleado.getContrasenia());
     }
 
     /** Registra con rol explícito (admin/guardia). */
     public boolean register(String nombre,
-                            String apellido,
-                            String nombreUsuario,
-                            String contrasenia,
-                            String correo,
-                            Rol rol) {
+            String apellido,
+            String nombreUsuario,
+            String contrasenia,
+            String correo,
+            Rol rol) {
         if (empleadoRepository.existsByNombreUsuario(nombreUsuario)) {
             return false; // usuario ya existe
         }
@@ -58,16 +59,16 @@ public class EmpleadoServices {
 
     /** Overload: por compatibilidad si aún te llega "cargo" como String. */
     public boolean register(String nombre,
-                            String apellido,
-                            String nombreUsuario,
-                            String contrasenia,
-                            String correo,
-                            String cargoStr) {
+            String apellido,
+            String nombreUsuario,
+            String contrasenia,
+            String correo,
+            String cargoStr) {
         Rol rol = ("Administrador".equalsIgnoreCase(cargoStr)) ? Rol.Administrador : Rol.Guardia;
         return register(nombre, apellido, nombreUsuario, contrasenia, correo, rol);
     }
 
-    /* =====================  QUERIES  ===================== */
+    /* ===================== QUERIES ===================== */
 
     public String obtenerNombreEmpleado(Long id) {
         return empleadoRepository.findById(id)
@@ -87,13 +88,23 @@ public class EmpleadoServices {
     }
 
     public String obtenerNombrePorUsuario(String nombreUsuario) {
-    return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
-            .map(e -> e.getNombre() + " " + e.getApellido())
-            .orElse("Nombre no encontrado");
+        return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
+                .map(e -> e.getNombre() + " " + e.getApellido())
+                .orElse("Nombre no encontrado");
     }
 
     public Estacionamiento obtenerEstacionamientoActivo(String usuario) {
         return turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(usuario);
+    }
+
+    public Long obtenerIdPorUsuario(String nombreUsuario) {
+        try {
+            Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
+            return empleado != null ? empleado.getId() : null;
+        } catch (Exception e) {
+            System.err.println("Error al obtener ID por usuario: " + e.getMessage());
+            return null;
+        }
     }
 
 }

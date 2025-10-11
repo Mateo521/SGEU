@@ -19,8 +19,8 @@ public class LoginController {
 
     @PostMapping("/login")
     public String login(@RequestParam String nombreUsuario,
-                        @RequestParam String contrasenia,
-                        HttpSession session) {
+            @RequestParam String contrasenia,
+            HttpSession session) {
 
         boolean ok = empleadoServices.login(nombreUsuario, contrasenia);
         if (!ok) {
@@ -30,20 +30,28 @@ public class LoginController {
         // Nuevo: obtenemos rol y nombre completo por nombre de usuario
         String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);
         String nombreCompleto = empleadoServices.obtenerNombrePorUsuario(nombreUsuario);
+        Long usuarioId = empleadoServices.obtenerIdPorUsuario(nombreUsuario);
+
         Estacionamiento estacionamiento = empleadoServices.obtenerEstacionamientoActivo(nombreUsuario);
 
         // Guardamos en sesión lo necesario
+        session.setAttribute("usuarioId", usuarioId);
         session.setAttribute("user", nombreUsuario);
         session.setAttribute("rol", rol);
         session.setAttribute("nombreCompleto", nombreCompleto);
         session.setAttribute("estacionamiento", estacionamiento);
 
-        
+        System.out.println("=== VERIFICACIÓN SESIÓN ===");
+        System.out.println("Usuario: " + session.getAttribute("user"));
+        System.out.println("ID: " + session.getAttribute("usuarioId"));
+        System.out.println("Rol: " + session.getAttribute("rol"));
+        System.out.println("Nombre: " + session.getAttribute("nombreCompleto"));
+        System.out.println("========================");
+
         System.out.println("Usuario " + nombreUsuario + " inició sesión. Rol: " + rol);
 
         Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
         System.out.println("Estacionamiento del guardia: " + (est != null ? est.getNombre() : "Ninguno"));
-
 
         return "redirect:/?success=true";
     }
