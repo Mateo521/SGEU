@@ -35,7 +35,7 @@ public class VehiculoController {
             HttpSession session,
             HttpServletRequest request) {
 
-        System.out.println("=== DEBUG COMPLETO ===");
+        System.out.println(" DEBUG COMPLETO");
         System.out.println("URL completa: " + request.getRequestURL());
         System.out.println("URI: " + request.getRequestURI());
         System.out.println("Método HTTP: " + request.getMethod());
@@ -103,7 +103,7 @@ public class VehiculoController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String testMethod(Model model) {
-        System.out.println("=== MÉTODO TEST FUNCIONANDO ===");
+        System.out.println(" METODO TEST FUNCIONANDO");
         model.addAttribute("vehiculos", List.of());
         model.addAttribute("mensaje", "Método de prueba funcionando correctamente");
         return "vehiculos";
@@ -145,7 +145,7 @@ public class VehiculoController {
         return "redirect:/vehiculos";
     }
 
-    // 🗑️ ELIMINAR CON HISTORIAL (solo administradores)
+    
     @PostMapping("/eliminar-con-historial/{patente}")
     public String eliminarVehiculoConHistorial(@PathVariable String patente,
             RedirectAttributes redirectAttributes,
