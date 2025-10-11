@@ -46,7 +46,7 @@ public class QRController {
             }
 
             // Buscar vehículo por código QR
-            Vehiculo vehiculo = vehiculoService.buscarPorQr(codigoQR);
+            Vehiculo vehiculo = vehiculoService.buscarPorCodigoQr(codigoQR);
             
             if (vehiculo == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

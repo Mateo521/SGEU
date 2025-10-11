@@ -32,11 +32,13 @@ public class QRCodeService {
         BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT);
 
         // Guardar imagen
-        String nombreCompleto = nombreArchivo + ".png";
+        String nombreCompleto = "qr_"+ nombreArchivo + ".png";
         Path rutaArchivo = Paths.get(QR_CODE_IMAGE_PATH + nombreCompleto);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", rutaArchivo);
 
-        // Retornar la URL para acceder desde el navegador
+        System.out.println(" QR guardado en: " + rutaArchivo.toAbsolutePath());
+
+        
         return "/qr-codes/" + nombreCompleto;
     }
 

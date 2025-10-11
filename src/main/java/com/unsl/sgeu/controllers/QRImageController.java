@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import java.util.Optional;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,7 +48,48 @@ public class QRImageController {
         }
     }
     
-  
+ 
+
+@GetMapping("/qr-patente/{patente}")
+public ResponseEntity<Resource> obtenerQRPorPatente(@PathVariable String patente) {
+    try {
+        Path directorio = Paths.get(QR_CODE_IMAGE_PATH);
+        
+        if (!Files.exists(directorio)) {
+            System.err.println(" Directorio no existe: " + directorio.toAbsolutePath());
+            return ResponseEntity.notFound().build();
+        }
+        
+        // Buscar archivo que empiece con "qr_" + patente
+        Optional<Path> archivoEncontrado = Files.list(directorio)
+            .filter(path -> {
+                String nombre = path.getFileName().toString();
+                return nombre.startsWith("qr_" + patente + "_") && nombre.endsWith(".png");
+            })
+            .findFirst();
+        
+        if (archivoEncontrado.isEmpty()) {
+            System.err.println("No se encontró QR para patente: " + patente);
+            return ResponseEntity.notFound().build();
+        }
+        
+        Resource resource = new FileSystemResource(archivoEncontrado.get());
+        String filename = archivoEncontrado.get().getFileName().toString();
+        
+        System.out.println("✅ Sirviendo QR: " + filename + " para patente: " + patente);
+        
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .body(resource);
+                
+    } catch (Exception e) {
+        System.err.println("Error buscando QR para patente " + patente + ": " + e.getMessage());
+        return ResponseEntity.notFound().build();
+    }
+}
+
+
     @GetMapping("/qr-image/{codigo}")
     public ResponseEntity<byte[]> generarImagenQRAlVuelo(@PathVariable String codigo) {
         try {

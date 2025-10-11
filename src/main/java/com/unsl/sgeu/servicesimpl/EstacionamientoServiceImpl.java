@@ -8,6 +8,7 @@ import com.unsl.sgeu.services.EstacionamientoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.unsl.sgeu.repositories.TurnoRepository;  
 
 import java.util.List;
 
@@ -18,9 +19,11 @@ import static com.unsl.sgeu.mappers.EstacionamientoMapper.toDTO;
 public class EstacionamientoServiceImpl implements EstacionamientoService {
 
     private final EstacionamientoRepository repo;
+   private final TurnoRepository turnoRepository;
 
-    public EstacionamientoServiceImpl(EstacionamientoRepository repo) {
+      public EstacionamientoServiceImpl(EstacionamientoRepository repo, TurnoRepository turnoRepository) {
         this.repo = repo;
+        this.turnoRepository = turnoRepository;
     }
 
     @Override
@@ -84,4 +87,61 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
         if (!repo.existsById(id)) throw new EntityNotFoundException("Estacionamiento no encontrado");
         repo.deleteById(id);
     }
+
+
+
+      @Override
+    @Transactional(readOnly = true)
+    public List<Long> obtenerIdsPorEmpleado(Long empleadoId) {
+        try {
+            System.out.println("🔍 Buscando estacionamientos para empleado ID: " + empleadoId);
+            
+            List<Long> ids = turnoRepository.findEstacionamientoIdsByEmpleadoId(empleadoId);
+            
+            System.out.println("✅ Estacionamientos encontrados: " + ids);
+            return ids;
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al obtener estacionamientos por empleado: " + e.getMessage());
+            e.printStackTrace();
+            return List.of(); // Lista vacía en caso de error
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstacionamientoDTO> obtenerPorEmpleado(Long empleadoId) {
+        try {
+            System.out.println("🔍 Obteniendo estacionamientos completos para empleado ID: " + empleadoId);
+            
+            List<Estacionamiento> estacionamientos = turnoRepository.findEstacionamientosByEmpleadoId(empleadoId);
+            
+            List<EstacionamientoDTO> dtos = estacionamientos.stream()
+                    .map(EstacionamientoMapper::toDTO)
+                    .toList();
+                    
+            System.out.println("✅ DTOs creados: " + dtos.size());
+            return dtos;
+                    
+        } catch (Exception e) {
+            System.err.println("❌ Error al obtener estacionamientos: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean empleadoTieneAcceso(Long empleadoId, Long estacionamientoId) {
+        try {
+            boolean tieneAcceso = turnoRepository.existsByEmpleadoAndEstacionamiento(empleadoId, estacionamientoId);
+            System.out.println("🔐 Empleado " + empleadoId + " tiene acceso a estacionamiento " + estacionamientoId + ": " + tieneAcceso);
+            return tieneAcceso;
+        } catch (Exception e) {
+            System.err.println("❌ Error verificando acceso: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    
 }

@@ -11,6 +11,6 @@ public interface PersonaRepository extends JpaRepository<Persona, Long> {
 
     Optional<Persona> findByTelefono(String telefono);
 
-    // Si querés mantenerlo por legibilidad, aunque ya existe existsById:
+ 
     boolean existsByDni(Long dni);  // opcional
 }

@@ -24,4 +24,14 @@ public interface EstacionamientoService {
     void cambiarEstado(Long id, boolean estado);  
 
     void eliminarFisico(Long id); // opcional (borrado físico)
+
+ 
+       List<Long> obtenerIdsPorEmpleado(Long empleadoId);
+    
+  
+    List<EstacionamientoDTO> obtenerPorEmpleado(Long empleadoId);
+    
+ 
+    boolean empleadoTieneAcceso(Long empleadoId, Long estacionamientoId);
+
 }
