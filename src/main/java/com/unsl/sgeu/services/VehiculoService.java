@@ -19,7 +19,10 @@ public class VehiculoService {
      @Autowired
     private EstacionamientoService estacionamientoService;
 
-    // ✅ Métodos básicos
+      @Autowired
+    private RegistroEstacionamientoService registroEstacionamientoService;
+
+   
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepo.findAll();
     }
@@ -171,27 +174,31 @@ public class VehiculoService {
         }
     }
 
-    public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
-        try {
-            Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
-            if (vehiculo == null) {
-                return new ResultadoEliminacion(false, "❌ El vehículo con patente " + patente + " no existe");
-            }
-            
-            // 
-            // registroEstacionamientoService.eliminarPorPatente(patente);
-            
-            vehiculoRepo.deleteById(patente);
-            
-            return new ResultadoEliminacion(true, 
-                " Vehículo " + patente + " y todo su historial eliminados completamente");
-            
-        } catch (Exception e) {
-            System.err.println("Error al eliminar vehículo con historial: " + e.getMessage());
-            return new ResultadoEliminacion(false, 
-                "❌ Error crítico al eliminar con historial: " + e.getMessage());
+   public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
+    try {
+        Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
+        if (vehiculo == null) {
+            return new ResultadoEliminacion(false, "❌ El vehículo con patente " + patente + " no existe");
         }
+        
+        System.out.println("🗑️ Eliminando registros de estacionamiento para patente: " + patente);
+        
+       
+        registroEstacionamientoService.eliminarRegistrosPorPatente(patente);
+        
+ 
+        vehiculoRepo.deleteById(patente);
+        
+        return new ResultadoEliminacion(true, 
+            "Vehículo " + patente + " y todo su historial eliminados completamente");
+        
+    } catch (Exception e) {
+        System.err.println("Error al eliminar vehículo con historial: " + e.getMessage());
+        e.printStackTrace();
+        return new ResultadoEliminacion(false, 
+            "❌ Error crítico al eliminar con historial: " + e.getMessage());
     }
+}
  
 
     public String generarCodigoQR(String patente) {

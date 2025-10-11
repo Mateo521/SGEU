@@ -179,7 +179,7 @@
                                                 th:data-color="${vehiculo.color ?: 'Sin color'}"
                                                 th:data-tipo="${vehiculo.tipo ?: 'Sin tipo'}"
                                                 th:data-dni="${vehiculo.dniDuenio ?: 'Sin DNI'}"
-                                                class="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors"
+                                                class="text-blue-600 cursor-pointer hover:text-blue-800 p-1 rounded transition-colors"
                                                 title="Ver código QR">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -198,7 +198,7 @@
                                                 th:data-color="${vehiculo.color ?: 'Sin color'}"
                                                 th:data-tipo="${vehiculo.tipo ?: 'Sin tipo'}"
                                                 th:data-dni="${vehiculo.dniDuenio ?: 'Sin DNI'}"
-                                                class="text-green-600 hover:text-green-800 p-1 rounded transition-colors"
+                                                class="text-green-600 cursor-pointer hover:text-green-800 p-1 rounded transition-colors"
                                                 title="Imprimir código QR">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -216,15 +216,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
 
-                                        <button class="text-blue-600 hover:text-blue-900 p-1 rounded"
-                                            title="Ver detalles">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </button>
+                                 
 
 
                                         <a th:if="${esAdministrador}"
@@ -251,7 +243,7 @@
                                         <form th:if="${esAdministrador}"
                                             th:action="@{/vehiculos/eliminar-con-historial/{patente}(patente=${vehiculo.patente})}"
                                             method="post" class="inline">
-                                            <button type="submit" class="text-red-800 hover:text-red-900 p-1 rounded"
+                                            <button type="submit" class="text-red-800 cursor-pointer hover:text-red-900 p-1 rounded"
                                                 onclick="return confirm('⚠️ PELIGRO: Esto eliminará el vehículo Y todo su historial. ¿Continuar?')"
                                                 title="Eliminar con historial">
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
