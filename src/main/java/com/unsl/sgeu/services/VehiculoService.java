@@ -143,7 +143,7 @@ public class VehiculoService {
             System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
             e.printStackTrace();
 
-            System.out.println("🔄 FALLBACK: Mostrando todos los vehículos por error");
+            System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
             return obtenerTodos();
         }
     }
