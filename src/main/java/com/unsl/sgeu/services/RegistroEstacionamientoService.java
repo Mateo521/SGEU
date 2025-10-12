@@ -19,7 +19,43 @@ public class RegistroEstacionamientoService {
     @Autowired
     private RegistroEstacionamientoRepository registroRepo;
 
+     public RegistroEstacionamiento registrarEntrada(String patente) {
+        Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
+
+        RegistroEstacionamiento registro = new RegistroEstacionamiento();
+        registro.setPatente(vehiculo.getPatente());
+        registro.setFechaHora(LocalDateTime.now());
+        registro.setTipoMovimiento("ENTRADA");
+        registro.setIdEst(1);
+        registro.setModo("MANUAL");
+        return registroestacionamientoRepo.save(registro);
+    }
+
+     public RegistroEstacionamiento registrarSalida(String patente) {
+        Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
+        RegistroEstacionamiento registro = new RegistroEstacionamiento();
+        registro.setPatente(vehiculo.getPatente());
+        registro.setFechaHora(LocalDateTime.now());
+        registro.setTipoMovimiento("SALIDA");
+        registro.setIdEst(1);
+        registro.setModo("MANUAL");
+        return registroestacionamientoRepo.save(registro);
+     }
+
+    public boolean esPar(String patente){
+
+       long cantidad = registroestacionamientoRepo.countByPatente(patente);
+        return cantidad % 2 == 0;
+    }
+
     
+     public List<String> obtenerPatentesAdentroMasDeCuatroHoras() {
+        return registroestacionamientoRepo.findPatentesAdentroMasDeCuatroHoras();
+    }
+
+
+
+
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void eliminarRegistrosPorPatente(String patente) {
         try {

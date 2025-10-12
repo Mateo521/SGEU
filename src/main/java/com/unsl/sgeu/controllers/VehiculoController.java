@@ -15,8 +15,10 @@ import com.unsl.sgeu.services.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/vehiculos")
+//@RequestMapping("/vehiculos")
 public class VehiculoController {
+    @Autowired
+    private RegistroEstacionamientoService registroestacionamientoService;
 
     @Autowired
     private VehiculoService vehiculoService;
@@ -189,7 +191,7 @@ probando control
         return "registrarvehiculo";
     }
 
-    @PostMapping("/agregar")
+    @PostMapping("/vehiculos/agregar")
     public String agregarVehiculo(@ModelAttribute VehiculoFormDTO form,
             RedirectAttributes redirectAttributes) {
         try {
@@ -356,4 +358,36 @@ probando control
         return (s == null || s.isBlank()) ? "—" : s;
     }
 
+
+    @GetMapping("/search")
+    public String buscar(@RequestParam(value="q", required=false) String patente,
+                         @RequestParam(value="category", required=false) String category,
+                         Model model) {
+
+        boolean resultado=true;
+
+        if ("Entrada".equals(category) && vehiculoService.existePatente(patente) && registroestacionamientoService.esPar(patente)) {
+        //buscar vehiculo en la tabla
+            registroestacionamientoService.registrarEntrada(patente);
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            resultado = true;
+        return "ieManual";
+       } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
+            registroestacionamientoService.registrarSalida(patente);
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            resultado = true;
+            return "ieManual";
+        }  
+            resultado = false;
+    model.addAttribute("category", category);
+    model.addAttribute("resultado", resultado);
+    model.addAttribute("patente", patente);
+        return "ieManual";   // tu vista (templates/ieManual.html)
+    }
+
 }
+
