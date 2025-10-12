@@ -14,6 +14,8 @@ public class StatsResponseDTO {
     private List<Number> categoriasData;
     private List<String> ocupacionLabels;
     private List<Number> ocupacionData;
+    // lista detallada de ocupacion por estacionamiento (nombre, capacidad, ingresos, porcentaje)
+    private List<EstacionamientoStatsDTO> porcentajeOcupacion;
     private List<String> evolucionLabels;
     private List<Number> evolucionData;
 
@@ -40,6 +42,8 @@ public class StatsResponseDTO {
     public void setOcupacionLabels(List<String> ocupacionLabels) { this.ocupacionLabels = ocupacionLabels; }
     public List<Number> getOcupacionData() { return ocupacionData; }
     public void setOcupacionData(List<Number> ocupacionData) { this.ocupacionData = ocupacionData; }
+    public List<EstacionamientoStatsDTO> getPorcentajeOcupacion() { return porcentajeOcupacion; }
+    public void setPorcentajeOcupacion(List<EstacionamientoStatsDTO> porcentajeOcupacion) { this.porcentajeOcupacion = porcentajeOcupacion; }
     public List<String> getEvolucionLabels() { return evolucionLabels; }
     public void setEvolucionLabels(List<String> evolucionLabels) { this.evolucionLabels = evolucionLabels; }
     public List<Number> getEvolucionData() { return evolucionData; }

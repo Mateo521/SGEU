@@ -6,238 +6,368 @@
     <title>Estadísticas</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        neo: {
-                            bg: '#e0e5ec',
-                            light: '#ffffff',
-                            dark: '#a3b1c6',
-                            text: '#2c3e50',
-                            secondary: '#5a6c7d',
-                            accent: '#667eea'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background: #e0e5ec;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        .neo-card {
-            background: #e0e5ec;
-            box-shadow: 12px 12px 24px #a3b1c6, -12px -12px 24px #ffffff;
-            transition: all 0.3s ease;
-        }
-        
-        .neo-card:hover {
-            box-shadow: 16px 16px 32px #a3b1c6, -16px -16px 32px #ffffff;
-        }
-        
-        .neo-inset {
-            background: #e0e5ec;
-            box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
-        }
-        
-        .neo-row {
-            background: #e0e5ec;
-            box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
-            transition: all 0.3s ease;
-        }
-        
-        .neo-row:hover {
-            transform: translateY(-2px);
-            box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
-        }
-        
-        .neo-title {
-            text-shadow: 2px 2px 4px #a3b1c6, -2px -2px 4px #ffffff;
+        * {
+            font-family: 'Inter', sans-serif;
         }
 
-        .neo-button {
-            background: #e0e5ec;
-            box-shadow: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-dark {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-wrapper {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .pagination-btn {
             transition: all 0.2s ease;
         }
 
-        .neo-button:hover {
-            box-shadow: 6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff;
+        .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
         }
 
-        .neo-button:active {
-            box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
-        .neo-input {
-            background: #e0e5ec;
-            box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
-            border: none;
+        .stat-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        input, select {
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
             outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .neo-input:focus {
-            box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+        .table-row {
+            transition: all 0.2s ease;
         }
 
-        .chart-container {
-            background: #e0e5ec;
-            box-shadow: inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff;
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+        .table-row:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: scale(1.01);
         }
     </style>
 </head>
-<body class="min-h-screen py-8 px-4">
+<body class="py-12 px-4">
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-5xl font-light text-center mb-8 tracking-[0.15em] text-neo-text neo-title">
-            ESTADÍSTICAS
-        </h1>
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold text-white mb-3 tracking-tight">
+                Estadísticas
+            </h1>
+            <p class="text-white/80 text-lg">Panel de análisis y métricas</p>
+        </div>
 
         <!-- Filtros -->
-        <div class="neo-card rounded-3xl p-6 mb-8">
+        <div class="glass-card rounded-3xl p-6 mb-8 hover-lift">
             <form id="filtro" class="flex flex-wrap gap-4 items-end">
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-semibold text-neo-secondary mb-2 tracking-wide uppercase">Desde</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Desde
+                    </label>
                     <input type="date" id="desde" name="desde" 
-                           class="neo-input w-full px-4 py-3 rounded-xl text-neo-text font-medium"/>
+                           class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white"/>
                 </div>
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-semibold text-neo-secondary mb-2 tracking-wide uppercase">Hasta</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Hasta
+                    </label>
                     <input type="date" id="hasta" name="hasta" 
-                           class="neo-input w-full px-4 py-3 rounded-xl text-neo-text font-medium"/>
+                           class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white"/>
                 </div>
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-semibold text-neo-secondary mb-2 tracking-wide uppercase">Estacionamiento</label>
-                    <select id="estId" class="neo-input w-full px-4 py-3 rounded-xl text-neo-text font-medium">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-parking mr-2"></i>Estacionamiento
+                    </label>
+                    <select id="estId" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white">
                         <option value="">Todos los estacionamientos</option>
                     </select>
                 </div>
-                <button type="submit" class="neo-button px-8 py-3 rounded-xl text-neo-accent font-semibold tracking-wide uppercase hover:text-neo-text">
-                    Aplicar
+                <button type="submit" class="btn-gradient text-white px-8 py-3 rounded-xl font-semibold">
+                    <i class="fas fa-search mr-2"></i>Aplicar Filtros
                 </button>
             </form>
         </div>
 
-        <div id="info" class="text-center text-neo-accent font-medium mb-4"></div>
+        <div id="info" class="text-center text-white font-medium mb-6 text-lg"></div>
 
         <!-- Grid de gráficos principales -->
-        <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
             <!-- Categorías -->
-            <div class="neo-card rounded-3xl p-6">
-                <h3 class="text-xl font-medium mb-4 text-neo-accent tracking-wide">
-                    Porcentaje por categoría
-                </h3>
-                <div class="chart-container">
+            <div class="glass-card rounded-3xl p-6 hover-lift">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold gradient-text flex items-center">
+                        <i class="fas fa-chart-pie mr-3"></i>Categorías
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
+                        <i class="fas fa-users mr-1"></i><span id="totalCategorias">0</span>
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-6">
                     <canvas id="chartCategorias"></canvas>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full" id="tablaCategorias">
                         <thead>
-                            <tr>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Categoria</th>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Cantidad</th>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">%</th>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-4 px-4 text-gray-600 font-semibold">Categoría</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Cantidad</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Porcentaje</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="paginationCategorias" class="flex justify-center gap-2 mt-4"></div>
                 </div>
             </div>
 
             <!-- Ocupación -->
-            <div class="neo-card rounded-3xl p-6">
-                <h3 class="text-xl font-medium mb-4 text-neo-accent tracking-wide">
-                    Ocupación por estacionamiento
-                </h3>
-                <div class="chart-container">
+            <div class="glass-card rounded-3xl p-6 hover-lift">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold gradient-text flex items-center">
+                        <i class="fas fa-chart-bar mr-3"></i>Ocupación
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
+                        <i class="fas fa-building mr-1"></i><span id="totalOcupacion">0</span>
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-6">
                     <canvas id="chartOcupacion"></canvas>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full" id="tablaOcupacion">
                         <thead>
-                            <tr>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Estacionamiento</th>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Capacidad</th>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Ingresos</th>
-                                <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">%</th>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-4 px-4 text-gray-600 font-semibold">Estacionamiento</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Capacidad</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Ingresos</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">%</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="paginationOcupacion" class="flex justify-center gap-2 mt-4"></div>
                 </div>
             </div>
         </div>
 
         <!-- Evolución diaria -->
-        <div class="neo-card rounded-3xl p-6 mb-8">
-            <h3 class="text-xl font-medium mb-4 text-neo-accent tracking-wide">
-                Evolución diaria
-            </h3>
-            <div class="chart-container">
+        <div class="glass-card rounded-3xl p-6 mb-8 hover-lift">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold gradient-text flex items-center">
+                    <i class="fas fa-chart-line mr-3"></i>Evolución Diaria
+                </h3>
+                <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
+                    <i class="fas fa-calendar-day mr-1"></i><span id="totalEvolucion">0</span> días
+                </span>
+            </div>
+            <div class="chart-wrapper mb-6">
                 <canvas id="chartEvolucion"></canvas>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full" id="tablaEvolucion">
                     <thead>
-                        <tr>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Fecha</th>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Cantidad</th>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="text-left py-4 px-4 text-gray-600 font-semibold">Fecha</th>
+                            <th class="text-center py-4 px-4 text-gray-600 font-semibold">Cantidad</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+                <div id="paginationEvolucion" class="flex justify-center gap-2 mt-4"></div>
             </div>
         </div>
 
-        <!-- Horarios pico -->
-        <div class="neo-card rounded-3xl p-6 mb-8">
-            <h3 class="text-xl font-medium mb-4 text-neo-accent tracking-wide">
-                Horarios pico
-            </h3>
-            <div class="chart-container">
-                <canvas id="chartHorarios"></canvas>
+        <!-- Grid inferior -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <!-- Horarios pico -->
+            <div class="glass-card rounded-3xl p-6 hover-lift">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold gradient-text flex items-center">
+                        <i class="fas fa-clock mr-3"></i>Horarios Pico
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">Top 5</span>
+                </div>
+                <div class="chart-wrapper mb-6">
+                    <canvas id="chartHorarios"></canvas>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="tablaHorarios">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-4 px-4 text-gray-600 font-semibold">Hora</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="paginationHorarios" class="flex justify-center gap-2 mt-4"></div>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full" id="tablaHorarios">
-                    <thead>
-                        <tr>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Hora</th>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Cantidad</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
 
-        <!-- Conteo por modo -->
-        <div class="neo-card rounded-3xl p-6 mb-8">
-            <h3 class="text-xl font-medium mb-4 text-neo-accent tracking-wide">
-                Conteo por modo (MANUAL / QR)
-            </h3>
-            <div class="overflow-x-auto">
-                <table class="w-full" id="tablaModo">
-                    <thead>
-                        <tr>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Modo</th>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">Cantidad</th>
-                            <th class="text-left py-3 px-4 text-neo-secondary text-xs font-semibold tracking-wider uppercase">%</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <!-- Conteo por modo -->
+            <div class="glass-card rounded-3xl p-6 hover-lift">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold gradient-text flex items-center">
+                        <i class="fas fa-qrcode mr-3"></i>Modo de Acceso
+                    </h3>
+                </div>
+                <div class="chart-wrapper mb-6">
+                    <canvas id="chartModo"></canvas>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full" id="tablaModo">
+                        <thead>
+                            <tr class="border-b-2 border-gray-200">
+                                <th class="text-left py-4 px-4 text-gray-600 font-semibold">Modo</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Cantidad</th>
+                                <th class="text-center py-4 px-4 text-gray-600 font-semibold">Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="paginationModo" class="flex justify-center gap-2 mt-4"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
     let chartInstances = {};
+    const ROWS_PER_PAGE = 6;
+    let paginationData = {};
+
+    function createPagination(tableId, data) {
+        const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
+        
+        if (totalPages <= 1) {
+            document.getElementById('pagination' + tableId).innerHTML = '';
+            return;
+        }
+
+        if (!paginationData[tableId]) {
+            paginationData[tableId] = { currentPage: 1, data: data };
+        } else {
+            paginationData[tableId].data = data;
+        }
+
+        const currentPage = paginationData[tableId].currentPage;
+        const container = document.getElementById('pagination' + tableId);
+        
+        let html = `
+            <button onclick="changePage('${tableId}', ${currentPage - 1})" 
+                    class="pagination-btn px-4 py-2 rounded-lg border-2 border-gray-300 font-semibold"
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        `;
+
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                html += `
+                    <button onclick="changePage('${tableId}', ${i})" 
+                            class="pagination-btn px-4 py-2 rounded-lg border-2 font-semibold ${i === currentPage ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-transparent' : 'border-gray-300'}">
+                        ${i}
+                    </button>
+                `;
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                html += '<span class="px-2 text-gray-500">...</span>';
+            }
+        }
+
+        html += `
+            <button onclick="changePage('${tableId}', ${currentPage + 1})" 
+                    class="pagination-btn px-4 py-2 rounded-lg border-2 border-gray-300 font-semibold"
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    function changePage(tableId, page) {
+        const data = paginationData[tableId].data;
+        const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
+        
+        if (page < 1 || page > totalPages) return;
+        
+        paginationData[tableId].currentPage = page;
+        renderTablePage(tableId, data);
+        createPagination(tableId, data);
+    }
+
+    function renderTablePage(tableId, data) {
+        const currentPage = paginationData[tableId].currentPage;
+        const start = (currentPage - 1) * ROWS_PER_PAGE;
+        const end = start + ROWS_PER_PAGE;
+        const pageData = data.slice(start, end);
+
+        const tbody = document.querySelector(`#tabla${tableId} tbody`);
+        tbody.innerHTML = '';
+
+        pageData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.className = 'table-row border-b border-gray-100';
+            tr.innerHTML = row;
+            tbody.appendChild(tr);
+        });
+    }
 
     async function fetchEstacionamientos(){
         try{
@@ -266,7 +396,7 @@
 
     async function load(){
         const info = document.getElementById('info');
-        info.textContent = 'Cargando estacionamientos...';
+        info.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando estacionamientos...';
         const ests = await fetchEstacionamientos();
         const sel = document.getElementById('estId');
         sel.querySelectorAll('option:not([value=""])').forEach(o=>o.remove());
@@ -282,7 +412,7 @@
 
     async function cargarDatos(){
         const info = document.getElementById('info');
-        info.textContent = 'Cargando datos...';
+        info.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando datos...';
         const p = getQueryParams();
         const q = new URLSearchParams();
         if(p.desde) q.set('desde', p.desde);
@@ -290,145 +420,245 @@
         if(p.estId) q.set('estId', p.estId);
         try{
             const resp = await fetch('/estadisticas?' + q.toString(), { headers: { 'Accept':'application/json' } });
-            if(!resp.ok){ info.textContent = 'Error cargando datos: ' + resp.status; return; }
+            if(!resp.ok){ info.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Error cargando datos: ' + resp.status; return; }
             const json = await resp.json();
             const data = json.data || json;
             renderAll(data);
             info.textContent = '';
-        }catch(e){ info.textContent = 'No se pudo conectar al servidor'; }
+        }catch(e){ info.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>No se pudo conectar al servidor'; }
     }
 
     function renderAll(data){
-        // Limpiar gráficos anteriores
         Object.values(chartInstances).forEach(chart => chart.destroy());
         chartInstances = {};
+        paginationData = {};
 
-        // categorias
-        const tbodyC = document.querySelector('#tablaCategorias tbody'); 
-        tbodyC.innerHTML='';
+        // Categorías
+        const categoriasRows = [];
         (data.categorias||[]).forEach(c => {
-            const tr = document.createElement('tr');
-            tr.className = 'neo-row rounded-xl';
-            tr.innerHTML = `<td class="py-3 px-4 text-neo-text rounded-l-xl">${c.categoria}</td><td class="py-3 px-4 text-neo-text">${c.cantidad}</td><td class="py-3 px-4 text-neo-accent font-semibold rounded-r-xl">${c.porcentaje}%</td>`;
-            tbodyC.appendChild(tr);
+            categoriasRows.push(`
+                <td class="py-4 px-4 font-medium">${c.categoria}</td>
+                <td class="py-4 px-4 text-center font-semibold text-purple-600">${c.cantidad}</td>
+                <td class="py-4 px-4 text-center">
+                    <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        ${c.porcentaje}%
+                    </span>
+                </td>
+            `);
         });
+        document.getElementById('totalCategorias').textContent = (data.categorias||[]).reduce((sum, c) => sum + c.cantidad, 0);
+        
+        if (categoriasRows.length > 7) {
+            paginationData['Categorias'] = { currentPage: 1, data: categoriasRows };
+            renderTablePage('Categorias', categoriasRows);
+            createPagination('Categorias', categoriasRows);
+        } else {
+            const tbody = document.querySelector('#tablaCategorias tbody');
+            tbody.innerHTML = categoriasRows.map(row => `<tr class="table-row border-b border-gray-100">${row}</tr>`).join('');
+        }
 
-        // ocupacion
-        const tbodyO = document.querySelector('#tablaOcupacion tbody'); 
-        tbodyO.innerHTML='';
-        (data.porcentajeOcupacion||[]).forEach(e => {
-            const tr = document.createElement('tr');
-            tr.className = 'neo-row rounded-xl';
-            tr.innerHTML = `<td class="py-3 px-4 text-neo-text rounded-l-xl">${e.nombre}</td><td class="py-3 px-4 text-neo-text">${e.capacidad}</td><td class="py-3 px-4 text-neo-text">${e.ingresos}</td><td class="py-3 px-4 text-neo-accent font-semibold rounded-r-xl">${e.porcentaje}%</td>`;
-            tbodyO.appendChild(tr);
-        });
+        // Ocupación
+        const ocupacionRows = [];
+        const ocupList = (data.porcentajeOcupacion && data.porcentajeOcupacion.length>0) ? data.porcentajeOcupacion : null;
+        if(ocupList){
+            ocupList.forEach(e => {
+                ocupacionRows.push(`
+                    <td class="py-4 px-4 font-medium">${e.nombre}</td>
+                    <td class="py-4 px-4 text-center font-semibold">${e.capacidad}</td>
+                    <td class="py-4 px-4 text-center font-semibold text-purple-600">${e.ingresos}</td>
+                    <td class="py-4 px-4 text-center">
+                        <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            ${e.porcentaje}%
+                        </span>
+                    </td>
+                `);
+            });
+        }
+        document.getElementById('totalOcupacion').textContent = ocupacionRows.length;
 
-        // evolucion
-        const tbodyE = document.querySelector('#tablaEvolucion tbody'); 
-        tbodyE.innerHTML='';
+        if (ocupacionRows.length > 7) {
+            paginationData['Ocupacion'] = { currentPage: 1, data: ocupacionRows };
+            renderTablePage('Ocupacion', ocupacionRows);
+            createPagination('Ocupacion', ocupacionRows);
+        } else {
+            const tbody = document.querySelector('#tablaOcupacion tbody');
+            tbody.innerHTML = ocupacionRows.map(row => `<tr class="table-row border-b border-gray-100">${row}</tr>`).join('');
+        }
+
+        // Evolución
+        const evolucionRows = [];
         (data.evolucion||[]).forEach(d => {
-            const tr = document.createElement('tr');
-            tr.className = 'neo-row rounded-xl';
-            tr.innerHTML = `<td class="py-3 px-4 text-neo-text rounded-l-xl">${d.dia}</td><td class="py-3 px-4 text-neo-accent font-semibold rounded-r-xl">${d.cantidad}</td>`;
-            tbodyE.appendChild(tr);
+            evolucionRows.push(`
+                <td class="py-4 px-4 font-medium">${d.dia}</td>
+                <td class="py-4 px-4 text-center">
+                    <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-full font-semibold">
+                        ${d.cantidad}
+                    </span>
+                </td>
+            `);
         });
+        document.getElementById('totalEvolucion').textContent = evolucionRows.length;
 
-        // horarios
-        const tbodyH = document.querySelector('#tablaHorarios tbody'); 
-        tbodyH.innerHTML='';
+        if (evolucionRows.length > 7) {
+            paginationData['Evolucion'] = { currentPage: 1, data: evolucionRows };
+            renderTablePage('Evolucion', evolucionRows);
+            createPagination('Evolucion', evolucionRows);
+        } else {
+            const tbody = document.querySelector('#tablaEvolucion tbody');
+            tbody.innerHTML = evolucionRows.map(row => `<tr class="table-row border-b border-gray-100">${row}</tr>`).join('');
+        }
+
+        // Horarios
+        const horariosRows = [];
         (data.horariosPico||[]).forEach(h => {
-            const tr = document.createElement('tr');
-            tr.className = 'neo-row rounded-xl';
-            tr.innerHTML = `<td class="py-3 px-4 text-neo-text rounded-l-xl">${h.hora}</td><td class="py-3 px-4 text-neo-accent font-semibold rounded-r-xl">${h.cantidad}</td>`;
-            tbodyH.appendChild(tr);
+            horariosRows.push(`
+                <td class="py-4 px-4 font-medium"><i class="fas fa-clock mr-2 text-purple-600"></i>${h.hora}</td>
+                <td class="py-4 px-4 text-center">
+                    <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-full font-semibold">
+                        ${h.cantidad}
+                    </span>
+                </td>
+            `);
         });
 
-        // modos
-        const tbodyM = document.querySelector('#tablaModo tbody'); 
-        tbodyM.innerHTML='';
+        if (horariosRows.length > 7) {
+            paginationData['Horarios'] = { currentPage: 1, data: horariosRows };
+            renderTablePage('Horarios', horariosRows);
+            createPagination('Horarios', horariosRows);
+        } else {
+            const tbody = document.querySelector('#tablaHorarios tbody');
+            tbody.innerHTML = horariosRows.map(row => `<tr class="table-row border-b border-gray-100">${row}</tr>`).join('');
+        }
+
+        // Modos
+        const modoRows = [];
         (data.conteoModos||data.modoConteo||[]).forEach(m => {
-            const tr = document.createElement('tr');
-            tr.className = 'neo-row rounded-xl';
-            tr.innerHTML = `<td class="py-3 px-4 text-neo-text rounded-l-xl">${m.modo}</td><td class="py-3 px-4 text-neo-text">${m.cantidad}</td><td class="py-3 px-4 text-neo-accent font-semibold rounded-r-xl">${m.porcentaje}%</td>`;
-            tbodyM.appendChild(tr);
+            const icon = m.modo === 'MANUAL' ? 'fa-hand-pointer' : 'fa-qrcode';
+            modoRows.push(`
+                <td class="py-4 px-4 font-medium"><i class="fas ${icon} mr-2 text-purple-600"></i>${m.modo}</td>
+                <td class="py-4 px-4 text-center font-semibold text-purple-600">${m.cantidad}</td>
+                <td class="py-4 px-4 text-center">
+                    <span class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        ${m.porcentaje}%
+                    </span>
+                </td>
+            `);
         });
 
-        // Configuración global de Chart.js
+        if (modoRows.length > 7) {
+            paginationData['Modo'] = { currentPage: 1, data: modoRows };
+            renderTablePage('Modo', modoRows);
+            createPagination('Modo', modoRows);
+        } else {
+            const tbody = document.querySelector('#tablaModo tbody');
+            tbody.innerHTML = modoRows.map(row => `<tr class="table-row border-b border-gray-100">${row}</tr>`).join('');
+        }
+
+        // Charts
         const chartDefaults = {
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
                 legend: {
                     labels: {
-                        color: '#2c3e50',
-                        font: { size: 12, weight: '500' },
-                        padding: 15
+                        color: '#4b5563',
+                        font: { size: 13, weight: '600', family: 'Inter' },
+                        padding: 20
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1
                 }
             }
         };
 
-        // Chart Categorías (Doughnut mejorado)
+        // Chart Categorías (Polar Area)
         const categoriasLabels = data.categoriasLabels || (data.categorias||[]).map(c=>c.categoria);
         const categoriasData = data.categoriasData || (data.categorias||[]).map(c=>c.cantidad);
         const ctxC = document.getElementById('chartCategorias').getContext('2d');
         chartInstances.categorias = new Chart(ctxC, { 
-            type:'doughnut', 
+            type:'polarArea',
             data:{ 
                 labels:categoriasLabels, 
                 datasets:[{ 
                     data:categoriasData, 
-                    backgroundColor:['#667eea','#764ba2','#f093fb','#4facfe'],
-                    borderWidth: 0,
-                    hoverOffset: 15
+                    backgroundColor:[
+                        'rgba(102, 126, 234, 0.7)',
+                        'rgba(118, 75, 162, 0.7)',
+                        'rgba(240, 147, 251, 0.7)',
+                        'rgba(79, 172, 254, 0.7)'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
                 }] 
             },
             options: {
                 ...chartDefaults,
-                cutout: '65%',
-                plugins: {
-                    ...chartDefaults.plugins,
-                    legend: { position: 'bottom' }
+                scales: {
+                    r: {
+                        ticks: { backdropColor: 'transparent', color: '#6b7280' },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    }
                 }
             }
         });
 
-        // Chart Ocupación
+        // Chart Ocupación (Horizontal Bar)
         const ocupLabels = data.ocupacionLabels || (data.porcentajeOcupacion||[]).map(e=>e.nombre);
         const ocupData = data.ocupacionData || (data.porcentajeOcupacion||[]).map(e=>e.porcentaje);
         const ctxO = document.getElementById('chartOcupacion').getContext('2d');
         chartInstances.ocupacion = new Chart(ctxO, { 
-            type:'bar', 
+            type:'bar',
             data:{ 
                 labels:ocupLabels, 
                 datasets:[{ 
                     label:'% Ocupación', 
-                    data:ocupData, 
-                    backgroundColor:'rgba(102, 126, 234, 0.8)',
-                    borderRadius: 8,
+                    data:ocupData,
+                    backgroundColor: ocupData.map((_, i) => {
+                        const colors = [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(118, 75, 162, 0.8)',
+                            'rgba(240, 147, 251, 0.8)',
+                            'rgba(79, 172, 254, 0.8)'
+                        ];
+                        return colors[i % colors.length];
+                    }),
+                    borderRadius: 10,
                     borderSkipped: false
                 }] 
             }, 
             options:{ 
                 ...chartDefaults,
+                indexAxis: 'y',
                 scales:{ 
-                    y:{ 
+                    x:{ 
                         beginAtZero:true,
-                        grid: { color: 'rgba(163, 177, 198, 0.2)' },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { color: '#6b7280', font: { size: 12 } }
                     },
-                    x: {
+                    y: {
                         grid: { display: false },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
+                        ticks: { color: '#374151', font: { size: 12, weight: '600' } }
                     }
-                } 
+                }
             } 
         });
 
-        // Chart Evolución
+        // Chart Evolución (Area Chart)
         const evoLabels = data.evolucionLabels || (data.evolucion||[]).map(d=>d.dia);
         const evoData = data.evolucionData || (data.evolucion||[]).map(d=>d.cantidad);
         const ctxE = document.getElementById('chartEvolucion').getContext('2d');
+        
+        const gradient = ctxE.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.4)');
+        gradient.addColorStop(1, 'rgba(118, 75, 162, 0.05)');
+
         chartInstances.evolucion = new Chart(ctxE, { 
             type:'line', 
             data:{ 
@@ -437,15 +667,18 @@
                     label:'Ingresos diarios', 
                     data:evoData, 
                     borderColor:'#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    backgroundColor: gradient,
                     borderWidth: 3,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#667eea',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 7
+                    pointRadius: 6,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#667eea',
+                    pointBorderWidth: 3,
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: '#667eea',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3
                 }] 
             }, 
             options:{ 
@@ -453,50 +686,114 @@
                 scales:{ 
                     y:{ 
                         beginAtZero:true,
-                        grid: { color: 'rgba(163, 177, 198, 0.2)' },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { color: '#6b7280', font: { size: 12 } }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
+                        ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 45 }
                     }
-                } 
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
             } 
         });
 
-        // Chart Horarios
+        // Chart Horarios (Radar)
         const horarios = data.horariosPico || [];
         const ctxH = document.getElementById('chartHorarios').getContext('2d');
         chartInstances.horarios = new Chart(ctxH, { 
-            type:'bar', 
+            type:'radar', 
             data:{ 
                 labels:horarios.map(h=>h.hora), 
                 datasets:[{ 
                     label:'Ingresos por hora', 
                     data:horarios.map(h=>h.cantidad), 
-                    backgroundColor:'rgba(118, 75, 162, 0.8)',
-                    borderRadius: 8,
-                    borderSkipped: false
+                    backgroundColor: 'rgba(118, 75, 162, 0.3)',
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    pointBackgroundColor: 'rgba(118, 75, 162, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }] 
             }, 
             options:{ 
                 ...chartDefaults,
-                scales:{ 
-                    y:{ 
-                        beginAtZero:true,
-                        grid: { color: 'rgba(163, 177, 198, 0.2)' },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#5a6c7d', font: { size: 11 } }
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: { 
+                            backdropColor: 'transparent',
+                            color: '#6b7280',
+                            font: { size: 11 }
+                        },
+                        grid: { color: 'rgba(0, 0, 0, 0.08)' },
+                        pointLabels: {
+                            color: '#374151',
+                            font: { size: 12, weight: '600' }
+                        }
                     }
-                } 
+                }
+            } 
+        });
+
+        // Chart Modo (Doughnut con stats)
+        const modoData = data.conteoModos || data.modoConteo || [];
+        const ctxM = document.getElementById('chartModo').getContext('2d');
+        chartInstances.modo = new Chart(ctxM, { 
+            type:'doughnut', 
+            data:{ 
+                labels: modoData.map(m => m.modo),
+                datasets:[{ 
+                    data: modoData.map(m => m.cantidad),
+                    backgroundColor:[
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(118, 75, 162, 0.8)'
+                    ],
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 20
+                }] 
+            },
+            options: {
+                ...chartDefaults,
+                cutout: '70%',
+                plugins: {
+                    ...chartDefaults.plugins,
+                    legend: { 
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: { size: 14, weight: '600' },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return {
+                                            text: `${label}: ${value} (${percentage}%)`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
+                    }
+                }
             } 
         });
     }
 
-    // formulario
     document.getElementById('filtro').addEventListener('submit', function(e){
         e.preventDefault();
         const desde = document.getElementById('desde').value;

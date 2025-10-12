@@ -135,6 +135,8 @@ public class StatsController {
         }
         dto.setOcupacionLabels(ocupLabels);
         dto.setOcupacionData(ocupData);
+        // Exponer la lista detallada para la tabla en el frontend
+        dto.setPorcentajeOcupacion(estList);
 
         var evo = statsService.evolucionIngresosDiarios(desde,hasta,estId);
         var evoList = new java.util.ArrayList<EvolucionDTO>();
