@@ -67,6 +67,15 @@ public String index(HttpSession session, Model model,
     Long usuarioId = (Long) session.getAttribute("usuarioId");
     String nombreCompleto = (String) session.getAttribute("nombreCompleto");
 
+
+
+
+
+
+
+
+    
+
     System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol + " | ID: " + usuarioId);
 
     boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
