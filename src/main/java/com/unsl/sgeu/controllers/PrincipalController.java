@@ -176,7 +176,7 @@ public String index(HttpSession session, Model model,
  
     model.addAttribute("paneles", paneles);
     
- 
+  
     model.addAttribute("vehiculos", lista);
     model.addAttribute("buscar", buscar);
     model.addAttribute("rol", rol);
