@@ -10,9 +10,7 @@ import com.unsl.sgeu.repositories.VehiculoRepository;
 import java.util.UUID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.unsl.sgeu.services.PersonaService;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class VehiculoService {
@@ -59,7 +57,7 @@ public class VehiculoService {
                 persona.setNombre(form.getNombre());
                 persona.setTelefono(form.getTelefono());
                 persona.setEmail(form.getEmail());
-                persona.setIdCategoria(categoriaId); 
+                persona.setIdCategoria(categoriaId);
                 persona.setCategoria(form.getCategoriaNombre());
                 personaService.guardarPersona(persona);
             }
@@ -68,7 +66,7 @@ public class VehiculoService {
             vehiculo.setPatente(form.getPatente());
             vehiculo.setModelo(form.getModelo());
             vehiculo.setColor(form.getColor());
-            vehiculo.setIdVehiculoTipo(tipoId);  
+            vehiculo.setIdVehiculoTipo(tipoId);
             vehiculo.setTipo(form.getTipoNombre());
 
             vehiculoRepo.save(vehiculo);
@@ -84,17 +82,14 @@ public class VehiculoService {
         if (patente == null || patente.trim().isEmpty()) {
             return obtenerTodos();
         }
-
         return vehiculoRepo.findByPatenteContainingIgnoreCase(patente.trim());
     }
 
     public List<Vehiculo> obtenerPorEstacionamiento(Long idEstacionamiento) {
-
         return vehiculoRepo.findVehiculosByEstacionamiento(idEstacionamiento);
     }
 
     public List<Vehiculo> buscarEnEstacionamiento(Long idEstacionamiento, String patente) {
-
         return vehiculoRepo.findVehiculosByEstacionamientoAndPatente(idEstacionamiento, patente);
     }
 
@@ -102,7 +97,6 @@ public class VehiculoService {
         if (idsEstacionamientos == null || idsEstacionamientos.isEmpty()) {
             return List.of();
         }
-
         return vehiculoRepo.findVehiculosByEstacionamientos(idsEstacionamientos);
     }
 
@@ -110,80 +104,41 @@ public class VehiculoService {
         if (idsEstacionamientos == null || idsEstacionamientos.isEmpty()) {
             return List.of();
         }
-
         return vehiculoRepo.findVehiculosByEstacionamientosAndPatente(idsEstacionamientos, patente);
     }
 
     public List<Vehiculo> obtenerPorGuardia(Long guardiaId) {
         try {
-            System.out.println("Obteniendo vehículos para guardia ID: " + guardiaId);
-
+            System.out.println(" Obteniendo vehículos para guardia ID: " + guardiaId);
             System.out.println(
-                    "Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
-            System.out.println("Valor de guardiaId: " + guardiaId);
-            System.out.println("Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
+                    " Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
+            System.out.println(" Valor de guardiaId: " + guardiaId);
+            System.out.println(" Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
 
             List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
 
-            System.out.println("IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
+            System.out.println(" IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
 
             if (idsEstacionamientos.isEmpty()) {
-                System.out.println("Guardia sin estacionamientos asignados - mostrando lista vacía");
+                System.out.println(" Guardia sin estacionamientos asignados - mostrando lista vacía");
                 return List.of();
             }
 
-            System.out.println("Estacionamientos del guardia: " + idsEstacionamientos);
+            System.out.println(" Estacionamientos del guardia: " + idsEstacionamientos);
 
             List<Vehiculo> vehiculos = obtenerPorEstacionamientos(idsEstacionamientos);
 
-            System.out.println("Vehículos encontrados: " + vehiculos.size());
+            System.out.println(" Vehículos encontrados: " + vehiculos.size());
             return vehiculos;
 
         } catch (Exception e) {
             System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
             e.printStackTrace();
-
             System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
             return obtenerTodos();
         }
     }
 
-    try {
-        System.out.println(" Obteniendo vehículos para guardia ID: " + guardiaId);
-        
-       
-        System.out.println(" Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
-        System.out.println(" Valor de guardiaId: " + guardiaId);
-        System.out.println(" Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
-        
-        List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
-        
-        System.out.println(" IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
-        
-        if (idsEstacionamientos.isEmpty()) {
-            System.out.println(" Guardia sin estacionamientos asignados - mostrando lista vacía");
-            return List.of();
-        }
-        
-        System.out.println(" Estacionamientos del guardia: " + idsEstacionamientos);
-        
-        List<Vehiculo> vehiculos = obtenerPorEstacionamientos(idsEstacionamientos);
-        
-        System.out.println(" Vehículos encontrados: " + vehiculos.size());
-        return vehiculos;
-        
-    } catch (Exception e) {
-        System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
-        e.printStackTrace();
-        
-        System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
-        return obtenerTodos();
-    }
-}
-
-
-  
-    
     public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long guardiaId) {
         try {
             System.out.println(" Buscando patente '" + patente + "' para guardia ID: " + guardiaId);
@@ -205,7 +160,6 @@ public class VehiculoService {
         } catch (Exception e) {
             System.err.println(" Error al buscar por patente y guardia: " + e.getMessage());
             e.printStackTrace();
-
             System.out.println(" FALLBACK: Búsqueda sin filtro por error");
             return buscarVehiculosPorPatente(patente);
         }
@@ -237,7 +191,6 @@ public class VehiculoService {
             System.out.println(" Eliminando registros de estacionamiento para patente: " + patente);
 
             registroEstacionamientoService.eliminarRegistrosPorPatente(patente);
-
             vehiculoRepo.deleteById(patente);
 
             return new ResultadoEliminacion(true,
@@ -253,6 +206,41 @@ public class VehiculoService {
 
     public String generarCodigoQR(String patente) {
         return "qr-" + generarCodigoQrUnico(patente);
+    }
+
+    public List<Vehiculo> obtenerTodosVehiculosPorGuardia(Long guardiaId) {
+        try {
+            System.out.println("Obteniendo TODOS los vehículos registrados por guardia ID: " + guardiaId);
+
+            List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
+
+            if (idsEstacionamientos.isEmpty()) {
+                System.out.println("Guardia sin estacionamientos asignados");
+                return List.of();
+            }
+
+            System.out.println("Estacionamientos del guardia: " + idsEstacionamientos);
+
+            List<Vehiculo> vehiculos = vehiculoRepo.findAllVehiculosByGuardiaEstacionamientos(idsEstacionamientos);
+
+            System.out.println("Total vehículos encontrados: " + vehiculos.size());
+            return vehiculos;
+
+        } catch (Exception e) {
+            System.err.println(" Error al obtener todos los vehículos por guardia: " + e.getMessage());
+            e.printStackTrace();
+            return obtenerTodos();
+        }
+    }
+
+    public String obtenerEstacionamientoOrigenVehiculo(String patente, Long guardiaId) {
+        try {
+            List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
+            return vehiculoRepo.findEstacionamientoOrigenByPatente(patente, idsEstacionamientos);
+        } catch (Exception e) {
+            System.err.println("Error al obtener estacionamiento origen: " + e.getMessage());
+            return "Desconocido";
+        }
     }
 
     public String generarCodigoQrUnico(String patente) {

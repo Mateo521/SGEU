@@ -10,64 +10,70 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
-    
-   
+
     Vehiculo findByPatente(String patente);
+
     Vehiculo findByCodigoQr(String codigoQr);
-    
-  
-   
+
     @Query("""
-        SELECT DISTINCT v FROM Vehiculo v 
-        JOIN RegistroEstacionamiento r ON v.patente = r.patente 
-        WHERE r.idEstacionamiento = :idEstacionamiento
-        ORDER BY v.patente
-        """)
+            SELECT DISTINCT v FROM Vehiculo v
+            JOIN RegistroEstacionamiento r ON v.patente = r.patente
+            WHERE r.idEstacionamiento = :idEstacionamiento
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findVehiculosByEstacionamiento(@Param("idEstacionamiento") Long idEstacionamiento);
-    
-  
+
     @Query("""
-        SELECT DISTINCT v FROM Vehiculo v 
-        JOIN RegistroEstacionamiento r ON v.patente = r.patente 
-        WHERE r.idEstacionamiento IN :idsEstacionamientos
-        ORDER BY v.patente
-        """)
+            SELECT DISTINCT v FROM Vehiculo v
+            JOIN RegistroEstacionamiento r ON v.patente = r.patente
+            WHERE r.idEstacionamiento IN :idsEstacionamientos
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findVehiculosByEstacionamientos(@Param("idsEstacionamientos") List<Long> idsEstacionamientos);
-    
- 
+
     @Query("""
-        SELECT DISTINCT v FROM Vehiculo v 
-        JOIN RegistroEstacionamiento r ON v.patente = r.patente 
-        WHERE r.idEstacionamiento = :idEstacionamiento 
-        AND UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
-        ORDER BY v.patente
-        """)
+            SELECT DISTINCT v FROM Vehiculo v
+            JOIN RegistroEstacionamiento r ON v.patente = r.patente
+            WHERE r.idEstacionamiento = :idEstacionamiento
+            AND UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findVehiculosByEstacionamientoAndPatente(
-        @Param("idEstacionamiento") Long idEstacionamiento, 
-        @Param("patente") String patente
-    );
-    
- 
+            @Param("idEstacionamiento") Long idEstacionamiento,
+            @Param("patente") String patente);
+
     @Query("""
-        SELECT DISTINCT v FROM Vehiculo v 
-        JOIN RegistroEstacionamiento r ON v.patente = r.patente 
-        WHERE r.idEstacionamiento IN :idsEstacionamientos 
-        AND UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
-        ORDER BY v.patente
-        """)
+            SELECT DISTINCT v FROM Vehiculo v
+            JOIN RegistroEstacionamiento r ON v.patente = r.patente
+            WHERE r.idEstacionamiento IN :idsEstacionamientos
+            AND UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findVehiculosByEstacionamientosAndPatente(
-        @Param("idsEstacionamientos") List<Long> idsEstacionamientos, 
-        @Param("patente") String patente
-    );
-    
- 
+            @Param("idsEstacionamientos") List<Long> idsEstacionamientos,
+            @Param("patente") String patente);
+
     @Query("""
-        SELECT v FROM Vehiculo v 
-        WHERE UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
-        ORDER BY v.patente
-        """)
+            SELECT v FROM Vehiculo v
+            WHERE UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findByPatenteContainingIgnoreCase(@Param("patente") String patente);
- 
+
     @Query("SELECT v FROM Vehiculo v WHERE v.patente = :patente")
     Vehiculo findVehiculoByPatente(@Param("patente") String patente);
+
+    @Query("SELECT DISTINCT v FROM Vehiculo v WHERE v.patente IN " +
+            "(SELECT DISTINCT re.patente FROM RegistroEstacionamiento re WHERE re.idEstacionamiento IN :idsEstacionamientos)")
+    List<Vehiculo> findAllVehiculosByGuardiaEstacionamientos(
+            @Param("idsEstacionamientos") List<Long> idsEstacionamientos);
+
+   
+    @Query("SELECT e.nombre FROM RegistroEstacionamiento re " +
+            "JOIN Estacionamiento e ON re.idEstacionamiento = e.idEst " +
+            "WHERE re.patente = :patente AND re.idEstacionamiento IN :idsEstacionamientos " +
+            "ORDER BY re.fechaHora ASC LIMIT 1")
+    String findEstacionamientoOrigenByPatente(@Param("patente") String patente,
+            @Param("idsEstacionamientos") List<Long> idsEstacionamientos);
+
 }

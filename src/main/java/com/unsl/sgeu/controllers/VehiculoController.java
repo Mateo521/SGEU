@@ -17,7 +17,7 @@ import java.util.List;
 
 @SessionAttributes
 @Controller
-//@RequestMapping("/vehiculos")
+// @RequestMapping("/vehiculos")
 public class VehiculoController {
     @Autowired
     private RegistroEstacionamientoService registroestacionamientoService;
@@ -31,79 +31,115 @@ public class VehiculoController {
     @Autowired
     private QRCodeService qrCodeService;
 
-    /*@GetMapping
-    public String listarVehiculos(
-            @RequestParam(value = "buscar", required = false) String buscar,
-            @RequestParam(value = "estacionamientoFiltro", required = false) Long estacionamientoFiltro,
-            Model model,
-            HttpSession session,
-            HttpServletRequest request) {
+    @GetMapping("vehiculos/agregar")
+    public String mostrarFormularioAgregar(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        System.out.println(" GET /agregar - Mostrando formulario");
 
-        System.out.println(" DEBUG COMPLETO");
-        System.out.println("URL completa: " + request.getRequestURL());
-        System.out.println("URI: " + request.getRequestURI());
-        System.out.println("Método HTTP: " + request.getMethod());
-        System.out.println("Query String: " + request.getQueryString());
-        System.out.println("Context Path: " + request.getContextPath());
+        if (session.getAttribute("user") == null) {
+            System.out.println("Usuario no autenticado");
+            return "redirect:/login";
+        }
 
         String rol = (String) session.getAttribute("rol");
-        Long usuarioId = (Long) session.getAttribute("usuarioId");
-        String nombreCompleto = (String) session.getAttribute("nombreCompleto");
-
-        System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol + " | ID: " + usuarioId);
-
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
-        System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
+        System.out.println("Usuario: " + session.getAttribute("nombreCompleto") + " | Rol: " + rol);
 
         if (!esAdministrador && !esGuardia) {
-            System.out.println(" Usuario sin permisos");
-            model.addAttribute("error", "No tiene permisos para acceder a esta sección");
-            return "error";
+            System.out.println("Usuario sin permisos para agregar vehículos");
+            redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
+            return "redirect:/"; // Redirigir a la pagina principal
         }
 
-        List<Vehiculo> lista;
+        System.out.println("Mostrando formulario de agregar vehículo");
+        model.addAttribute("vehiculoForm", new VehiculoFormDTO());
+        model.addAttribute("esEdicion", false);
 
-        try {
-            if (esAdministrador) {
-                System.out.println(" Procesando como admin");
-                if (buscar != null && !buscar.trim().isEmpty()) {
-                    System.out.println("Admin buscando: " + buscar);
-                    lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
-                } else {
-                    System.out.println("Admin obteniendo todos los vehics.");
-                    lista = vehiculoService.obtenerTodos();
-                }
-            } else {
-                System.out.println(" Procesando como GUARDIA");
-                if (buscar != null && !buscar.trim().isEmpty()) {
-                    System.out.println("Guardia buscando: " + buscar);
-                    lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
-                } else {
-                    System.out.println("Guardia obteniendo vehículos asignados");
-                    lista = vehiculoService.obtenerPorGuardia(usuarioId);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println(" Error al obtener vehículos: " + e.getMessage());
-            e.printStackTrace();
-            lista = List.of();
-            model.addAttribute("error", " Error al cargar vehículos: " + e.getMessage());
-        }
+        return "registrarvehiculo";
+    }
 
-        System.out.println(" Total vehiculos encontrados: " + lista.size());
-
-        model.addAttribute("vehiculos", lista);
-        model.addAttribute("buscar", buscar);
-        model.addAttribute("rol", rol);
-        model.addAttribute("esAdministrador", esAdministrador);
-        model.addAttribute("esGuardia", esGuardia);
-        model.addAttribute("nombreCompleto", nombreCompleto);
-
-        System.out.println(" Retornando vista 'vehiculos'");
-        return "vehiculos";
-    }*/
+    /*
+     * @GetMapping
+     * public String listarVehiculos(
+     * 
+     * @RequestParam(value = "buscar", required = false) String buscar,
+     * 
+     * @RequestParam(value = "estacionamientoFiltro", required = false) Long
+     * estacionamientoFiltro,
+     * Model model,
+     * HttpSession session,
+     * HttpServletRequest request) {
+     * 
+     * System.out.println(" DEBUG COMPLETO");
+     * System.out.println("URL completa: " + request.getRequestURL());
+     * System.out.println("URI: " + request.getRequestURI());
+     * System.out.println("Método HTTP: " + request.getMethod());
+     * System.out.println("Query String: " + request.getQueryString());
+     * System.out.println("Context Path: " + request.getContextPath());
+     * 
+     * String rol = (String) session.getAttribute("rol");
+     * Long usuarioId = (Long) session.getAttribute("usuarioId");
+     * String nombreCompleto = (String) session.getAttribute("nombreCompleto");
+     * 
+     * System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol +
+     * " | ID: " + usuarioId);
+     * 
+     * boolean esAdministrador = "ADMINISTRADOR".equals(rol) ||
+     * "Administrador".equals(rol);
+     * boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+     * 
+     * System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: "
+     * + esGuardia);
+     * 
+     * if (!esAdministrador && !esGuardia) {
+     * System.out.println(" Usuario sin permisos");
+     * model.addAttribute("error", "No tiene permisos para acceder a esta sección");
+     * return "error";
+     * }
+     * 
+     * List<Vehiculo> lista;
+     * 
+     * try {
+     * if (esAdministrador) {
+     * System.out.println(" Procesando como admin");
+     * if (buscar != null && !buscar.trim().isEmpty()) {
+     * System.out.println("Admin buscando: " + buscar);
+     * lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
+     * } else {
+     * System.out.println("Admin obteniendo todos los vehics.");
+     * lista = vehiculoService.obtenerTodos();
+     * }
+     * } else {
+     * System.out.println(" Procesando como GUARDIA");
+     * if (buscar != null && !buscar.trim().isEmpty()) {
+     * System.out.println("Guardia buscando: " + buscar);
+     * lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
+     * } else {
+     * System.out.println("Guardia obteniendo vehículos asignados");
+     * lista = vehiculoService.obtenerPorGuardia(usuarioId);
+     * }
+     * }
+     * } catch (Exception e) {
+     * System.err.println(" Error al obtener vehículos: " + e.getMessage());
+     * e.printStackTrace();
+     * lista = List.of();
+     * model.addAttribute("error", " Error al cargar vehículos: " + e.getMessage());
+     * }
+     * 
+     * System.out.println(" Total vehiculos encontrados: " + lista.size());
+     * 
+     * model.addAttribute("vehiculos", lista);
+     * model.addAttribute("buscar", buscar);
+     * model.addAttribute("rol", rol);
+     * model.addAttribute("esAdministrador", esAdministrador);
+     * model.addAttribute("esGuardia", esGuardia);
+     * model.addAttribute("nombreCompleto", nombreCompleto);
+     * 
+     * System.out.println(" Retornando vista 'vehiculos'");
+     * return "vehiculos";
+     * }
+     */
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String testMethod(Model model) {
@@ -113,7 +149,7 @@ public class VehiculoController {
         return "vehiculos";
     }
 
-    @GetMapping("/eliminar/{patente}")
+    @GetMapping("vehiculos/eliminar/{patente}")
     public String eliminarVehiculo(@PathVariable String patente,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
@@ -125,7 +161,7 @@ public class VehiculoController {
 
             if (!esAdministrador && !esGuardia) {
                 redirectAttributes.addFlashAttribute("error", "No tiene permisos para eliminar vehículos");
-                return "redirect:/vehiculos";
+                return "redirect:/";
             }
 
             System.out.println("NLIMINANDO VEHÍCULO (NORMAL)");
@@ -146,10 +182,10 @@ public class VehiculoController {
                     "Error inesperado al eliminar el vehículo: " + e.getMessage());
         }
 
-        return "redirect:/vehiculos";
+        return "redirect:/";
     }
 
-    @PostMapping("/eliminar-con-historial/{patente}")
+    @PostMapping("vehiculos/eliminar-con-historial/{patente}")
     public String eliminarVehiculoConHistorial(@PathVariable String patente,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
@@ -451,7 +487,6 @@ public class VehiculoController {
                 return "redirect:/vehiculos/editar/" + patenteOriginal;
             }
 
-          
             boolean actualizado = vehiculoService.actualizarVehiculo(patenteOriginal, form, categoriaId, tipoId);
 
             if (actualizado) {
@@ -471,42 +506,41 @@ public class VehiculoController {
         }
     }
 
-
     @GetMapping("/search")
-    public String buscar(@RequestParam(value="q", required=false) String patente,
-                         @RequestParam(value="category", required=false) String category,
-                         Model model,
-                         HttpSession session) {
+    public String buscar(@RequestParam(value = "q", required = false) String patente,
+            @RequestParam(value = "category", required = false) String category,
+            Model model,
+            HttpSession session) {
 
-        boolean resultado=true;
+        boolean resultado = true;
 
         Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
-         
-        if ("Entrada".equals(category) && vehiculoService.existePatente(patente) && registroestacionamientoService.esPar(patente)) {
-        //buscar vehiculo en la tabla
-        System.out.println("entro al entrada");
+
+        if ("Entrada".equals(category) && vehiculoService.existePatente(patente)
+                && registroestacionamientoService.esPar(patente)) {
+            // buscar vehiculo en la tabla
+            System.out.println("entro al entrada");
             registroestacionamientoService.registrarEntrada(patente, est1);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);
             resultado = true;
-        return "ieManual";
-       } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
-         System.out.println("entro al salida");
+            return "ieManual";
+        } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)) {
+            System.out.println("entro al salida");
             registroestacionamientoService.registrarSalida(patente, est1);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);
             resultado = true;
             return "ieManual";
-        }  
-         System.out.println("no entro a ninguno");
-            resultado = false;
-    model.addAttribute("category", category);
-    model.addAttribute("resultado", resultado);
-    model.addAttribute("patente", patente);
-        return "ieManual";   // tu vista (templates/ieManual.html)
+        }
+        System.out.println("no entro a ninguno");
+        resultado = false;
+        model.addAttribute("category", category);
+        model.addAttribute("resultado", resultado);
+        model.addAttribute("patente", patente);
+        return "ieManual"; // tu vista (templates/ieManual.html)
     }
 
 }
-

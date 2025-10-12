@@ -60,7 +60,7 @@
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
                 <div class="flex-1 max-w-md">
-                    <form method="GET" th:action="@{/vehiculos}" class="flex gap-2">
+                    <form method="GET" th:action="@{/}" class="flex gap-2">
                         <div class="relative flex-1">
                             <input type="text" name="buscar" th:value="${buscar}"
                                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -75,7 +75,7 @@
                             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                             Buscar
                         </button>
-                        <a th:href="@{/vehiculos}"
+                        <a th:href="@{/}"
                             class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             Limpiar
                         </a>
@@ -83,7 +83,7 @@
                 </div>
 
 
-                <div th:if="${esAdministrador}">
+                <!--div th:if="${esAdministrador}">
                     <a href="/vehiculos/agregar"
                         class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,15 @@
                         </svg>
                         Agregar Vehículo
                     </a>
-                </div>
+                </div-->
+                <a href="/vehiculos/agregar"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Agregar Vehículo
+                </a>
             </div>
 
 
@@ -126,6 +134,12 @@
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Propietario</th>
+                                <!--th th:if="${esGuardia}"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Registrado en</th-->
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Registrado en</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     QR</th>
@@ -155,6 +169,8 @@
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.dniDuenio ?: '—'}">DNI</div>
                                 </td>
 
+                                <!--td th:if="${esGuardia}" th:text="${estacionamientosOrigen[vehiculo.patente]}"></td-->
+                                <td th:text="${estacionamientosOrigen[vehiculo.patente]}"></td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
@@ -216,7 +232,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
 
-                                 
+
 
 
                                         <a th:if="${esAdministrador}"
@@ -243,7 +259,8 @@
                                         <form th:if="${esAdministrador}"
                                             th:action="@{/vehiculos/eliminar-con-historial/{patente}(patente=${vehiculo.patente})}"
                                             method="post" class="inline">
-                                            <button type="submit" class="text-red-800 cursor-pointer hover:text-red-900 p-1 rounded"
+                                            <button type="submit"
+                                                class="text-red-800 cursor-pointer hover:text-red-900 p-1 rounded"
                                                 onclick="return confirm('PELIGRO: Esto va a eliminar el vehículo y todo su historial. ¿desea continuar?')"
                                                 title="Eliminar con historial">
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -254,6 +271,7 @@
                                         </form>
                                     </div>
                                 </td>
+
                             </tr>
                         </tbody>
                     </table>
