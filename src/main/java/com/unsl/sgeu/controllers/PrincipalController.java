@@ -53,7 +53,7 @@ public String index(HttpSession session, Model model,
         return "redirect:/login";
     }
 
-    System.out.println("🔍 DEBUG COMPLETO");
+  
     System.out.println("URL completa: " + request.getRequestURL());
     System.out.println("URI: " + request.getRequestURI());
     System.out.println("Método HTTP: " + request.getMethod());
@@ -72,17 +72,18 @@ public String index(HttpSession session, Model model,
     System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
 
     if (!esAdministrador && !esGuardia) {
-        System.out.println("❌ Usuario sin permisos");
+        System.out.println(" Usuario sin permisos");
         model.addAttribute("error", "No tiene permisos para acceder a esta sección");
         return "error";
     }
 
     List<Vehiculo> lista;
-    Map<String, String> estacionamientosOrigen = new HashMap<>(); // ✅ SOLO ESTO
+    Map<String, String> estacionamientosOrigen = new HashMap<>(); 
+    
 
     try {
         if (esAdministrador) {
-            System.out.println("👑 Procesando como ADMINISTRADOR");
+            System.out.println(" Procesando como ADMINISTRADOR");
             if (buscar != null && !buscar.trim().isEmpty()) {
                 System.out.println("Admin buscando: " + buscar);
                 lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
@@ -90,20 +91,21 @@ public String index(HttpSession session, Model model,
                 System.out.println("Admin obteniendo todos los vehículos");
                 lista = vehiculoService.obtenerTodos();
             }
-            // ✅ Admin no necesita estacionamientos origen (maneja todos)
+        
             
         } else {
-            System.out.println("👮 Procesando como GUARDIA - MOSTRANDO TODOS");
+           
+            
             if (buscar != null && !buscar.trim().isEmpty()) {
                 System.out.println("Guardia buscando: " + buscar);
                 lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
             } else {
                 System.out.println("Guardia obteniendo TODOS sus vehículos registrados");
-                // ✅ CAMBIO PRINCIPAL: Mostrar TODOS los vehículos del guardia
+              
                 lista = vehiculoService.obtenerTodosVehiculosPorGuardia(usuarioId);
             }
             
-            // ✅ SOLO PARA GUARDIA: Obtener estacionamiento donde se registró cada vehículo
+         
             for (Vehiculo vehiculo : lista) {
                 try {
                     String estacionamientoOrigen = vehiculoService.obtenerEstacionamientoOrigenVehiculo(
@@ -117,27 +119,30 @@ public String index(HttpSession session, Model model,
         }
         
     } catch (Exception e) {
-        System.err.println("💥 Error al obtener vehículos: " + e.getMessage());
+        System.err.println(" Error al obtener vehículos: " + e.getMessage());
         e.printStackTrace();
         lista = List.of();
         model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
     }
 
-    System.out.println("📊 Total vehículos encontrados: " + lista.size());
+    System.out.println(" Total vehículos encontrados: " + lista.size());
     if (esGuardia) {
-        System.out.println("📍 Estacionamientos origen mapeados: " + estacionamientosOrigen.size());
+        System.out.println(" Estacionamientos origen mapeados: " + estacionamientosOrigen.size());
     }
 
-    // ✅ ATRIBUTOS AL MODEL
+ 
+    
     model.addAttribute("vehiculos", lista);
     model.addAttribute("buscar", buscar);
     model.addAttribute("rol", rol);
     model.addAttribute("esAdministrador", esAdministrador);
     model.addAttribute("esGuardia", esGuardia);
     model.addAttribute("nombreCompleto", nombreCompleto);
-    model.addAttribute("estacionamientosOrigen", estacionamientosOrigen); // ✅ SOLO ESTO NUEVO
+    model.addAttribute("estacionamientosOrigen", estacionamientosOrigen);
+    
 
-    System.out.println("✅ Retornando vista 'vehiculos'");
+  
+    
     return "vehiculos";
 }
 

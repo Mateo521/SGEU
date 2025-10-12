@@ -78,6 +78,24 @@ public class VehiculoService {
         }
     }
 
+    public void probarEstadoVehiculo(String patente) {
+        System.out.println("🧪 PRUEBA - Verificando estado de: " + patente);
+        EstadoVehiculo estado = registroEstacionamientoService.obtenerEstadoActualVehiculo(patente);
+
+        System.out.println("📊 RESULTADO:");
+        System.out.println("   - Patente: " + estado.getPatente());
+        System.out.println("   - Tiene registros: " + estado.isTieneRegistros());
+        System.out.println("   - Está estacionado: " + estado.isEstaEstacionado());
+        System.out.println("   - ID Estacionamiento: " + estado.getIdEstacionamiento());
+        System.out.println("   - Nombre estacionamiento: " + estado.getNombreEstacionamiento());
+        System.out.println("   - Cantidad registros: " + estado.getCantidadRegistros());
+
+        if (estado.getUltimoRegistro() != null) {
+            System.out.println("   - Último tipo: " + estado.getUltimoRegistro().getTipo());
+            System.out.println("   - Última fecha: " + estado.getUltimoRegistro().getFechaHora());
+        }
+    }
+
     public List<Vehiculo> buscarVehiculosPorPatente(String patente) {
         if (patente == null || patente.trim().isEmpty()) {
             return obtenerTodos();
@@ -165,11 +183,14 @@ public class VehiculoService {
         }
     }
 
-    public ResultadoEliminacion eliminarVehiculo(String patente) {
+      public ResultadoEliminacion eliminarVehiculo(String patente) {
+    System.out.println(" Iniciando eliminación del vehículo: " + patente);
+    
     try {
-        System.out.println(" Iniciando eliminación del vehículo: " + patente);
         
-        // Verificar que el vehiculo existe
+        probarEstadoVehiculo(patente);
+        
+       
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         if (vehiculo == null) {
             String mensaje = " El vehículo con patente " + patente + " no existe";
@@ -177,65 +198,58 @@ public class VehiculoService {
             return new ResultadoEliminacion(false, mensaje);
         }
 
-        
-        
-        System.out.println("🔍 Verificando estado actual antes de eliminar...");
         EstadoVehiculo estado = registroEstacionamientoService.obtenerEstadoActualVehiculo(patente);
         
-        System.out.println(" Estado obtenido:");
+        System.out.println(" Estado obtenido para eliminación:");
         System.out.println("   - Tiene registros: " + estado.isTieneRegistros());
         System.out.println("   - Está estacionado: " + estado.isEstaEstacionado());
         System.out.println("   - Nombre estacionamiento: " + estado.getNombreEstacionamiento());
         
+     
         if (estado.isEstaEstacionado()) {
             String mensaje = String.format(
-                " No se puede eliminar el vehículo %s porque se encuentra actualmente en el estacionamiento: %s. " +
+                "No se puede eliminar el vehículo %s porque se encuentra actualmente en el estacionamiento: %s. " +
                 "Debe registrar la salida primero.", 
                 patente, estado.getNombreEstacionamiento()
             );
-            System.out.println(mensaje);
+          
             return new ResultadoEliminacion(false, mensaje);
         }
 
-       
+    
+        System.out.println(" Vehículo " + patente + " no está en ningún estacionamiento.");
+        System.out.println("Procediendo a eliminar...");
         
-        System.out.println(" Vehículo " + patente + " no está en ningún estacionamiento. Procediendo a eliminar...");
+      
         vehiculoRepo.deleteById(patente);
         
-        String mensajeExito = " Vehículo " + patente + " eliminado exitosamente";
+        String mensajeExito = "Vehículo " + patente + " eliminado exitosamente";
         System.out.println(mensajeExito);
         return new ResultadoEliminacion(true, mensajeExito);
 
+    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+      
+        
+        System.err.println(" Error de integridad al eliminar vehículo " + patente + ": " + e.getMessage());
+        
+        String mensaje = String.format(
+            " No se puede eliminar el vehículo %s porque tiene registros de estacionamiento asociados. " +
+            "Para eliminarlo completamente, use la opción 'Eliminar con historial'.", 
+            patente
+        );
+        
+        return new ResultadoEliminacion(false, mensaje);
+        
     } catch (Exception e) {
-        System.err.println(" Error al eliminar vehículo " + patente + ": " + e.getMessage());
+      
+        
+        System.err.println(" Error inesperado al eliminar vehículo " + patente + ": " + e.getMessage());
         e.printStackTrace();
         
-        
-        String mensaje;
-        if (e.getMessage().contains("foreign key constraint fails")) {
-            mensaje = String.format(
-                " No se puede eliminar el vehículo %s porque tiene registros de estacionamiento asociados. " +
-                "Para eliminarlo completamente, use la opción 'Eliminar con historial'.", 
-                patente
-            );
-        } else if (e.getMessage().contains("constraint")) {
-            mensaje = String.format(
-                " No se puede eliminar el vehículo %s porque está siendo utilizado en otros registros del sistema.", 
-                patente
-            );
-        } else {
-            mensaje = " Error interno al eliminar el vehículo. Intente nuevamente.";
-        }
-        
+        String mensaje = " Error interno al eliminar el vehículo. Intente nuevamente.";
         return new ResultadoEliminacion(false, mensaje);
     }
 }
-
-
-
-
-
-
 
 
     public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
