@@ -9,11 +9,13 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.unsl.sgeu.dto.VehiculoFormDTO;
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
 import java.util.List;
 
+@SessionAttributes
 @Controller
 //@RequestMapping("/vehiculos")
 public class VehiculoController {
@@ -29,7 +31,7 @@ public class VehiculoController {
     @Autowired
     private QRCodeService qrCodeService;
 
-    @GetMapping
+    /*@GetMapping
     public String listarVehiculos(
             @RequestParam(value = "buscar", required = false) String buscar,
             @RequestParam(value = "estacionamientoFiltro", required = false) Long estacionamientoFiltro,
@@ -101,7 +103,7 @@ public class VehiculoController {
 
         System.out.println(" Retornando vista 'vehiculos'");
         return "vehiculos";
-    }
+    }*/
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String testMethod(Model model) {
@@ -362,26 +364,32 @@ probando control
     @GetMapping("/search")
     public String buscar(@RequestParam(value="q", required=false) String patente,
                          @RequestParam(value="category", required=false) String category,
-                         Model model) {
+                         Model model,
+                         HttpSession session) {
 
         boolean resultado=true;
-
+          Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
+        System.out.println(est1.getIdEst());
+System.out.println(""+"Entrada".equals(category)+" "+vehiculoService.existePatente(patente)+" "+registroestacionamientoService.esPar(patente));
         if ("Entrada".equals(category) && vehiculoService.existePatente(patente) && registroestacionamientoService.esPar(patente)) {
         //buscar vehiculo en la tabla
-            registroestacionamientoService.registrarEntrada(patente);
+        System.out.println("entro al entrada");
+            registroestacionamientoService.registrarEntrada(patente, session);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);
             resultado = true;
         return "ieManual";
        } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
-            registroestacionamientoService.registrarSalida(patente);
+         System.out.println("entro al salida");
+            registroestacionamientoService.registrarSalida(patente, session);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);
             resultado = true;
             return "ieManual";
         }  
+         System.out.println("no entro a ninguno");
             resultado = false;
     model.addAttribute("category", category);
     model.addAttribute("resultado", resultado);
