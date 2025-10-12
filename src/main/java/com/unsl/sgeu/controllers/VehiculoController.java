@@ -219,7 +219,7 @@ public class VehiculoController {
                     "Error crítico al eliminar: " + e.getMessage());
         }
 
-        return "redirect:/vehiculos";
+        return "redirect:/";
     }
 
     @GetMapping("/agregar")
