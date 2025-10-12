@@ -8,6 +8,7 @@ import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.transaction.annotation.Propagation;
 import jakarta.servlet.http.HttpSession;
 import javax.persistence.EntityManager;
@@ -17,7 +18,7 @@ import javax.persistence.Query;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
+@SessionAttributes
 @Service
 public class RegistroEstacionamientoService {
 
@@ -28,27 +29,26 @@ public class RegistroEstacionamientoService {
     private VehiculoRepository vehiculoRepo;
 
 
-     public RegistroEstacionamiento registrarEntrada(String patente, HttpSession session) {
+     public RegistroEstacionamiento registrarEntrada(String patente, Estacionamiento est) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         registro.setTipo("ENTRADA");
-        Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
         System.out.println(est.getIdEst());
-        registro.setId(est.getIdEst());
+        registro.setIdEstacionamiento(est.getIdEst());
         registro.setModo("MANUAL");
         return registroRepo.save(registro);
     }
 
-     public RegistroEstacionamiento registrarSalida(String patente, HttpSession session) {
+     public RegistroEstacionamiento registrarSalida(String patente, Estacionamiento est) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         registro.setTipo("SALIDA");
-        registro.setId(((Estacionamiento)session.getAttribute("estacionamiento")).getIdEst());
+        registro.setIdEstacionamiento(est.getIdEst());
         registro.setModo("MANUAL");
         return registroRepo.save(registro);
      }
@@ -60,8 +60,8 @@ public class RegistroEstacionamientoService {
     }
 
     
-     public List<String> obtenerPatentesAdentroMasDeCuatroHoras() {
-        return registroRepo.findPatentesAdentroMasDeCuatroHoras();
+     public List<String> obtenerPatentesAdentroMasDeCuatroHoras(Estacionamiento est) {
+        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getIdEst());
     }
 
 

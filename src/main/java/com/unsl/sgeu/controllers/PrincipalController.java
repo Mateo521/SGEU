@@ -1,12 +1,14 @@
 package com.unsl.sgeu.controllers;
 
 import com.unsl.sgeu.models.DetallesInfo;
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +23,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
+@SessionAttributes
 public class PrincipalController {
 
     @Autowired
        private RegistroEstacionamientoService registroestacionamientoService;
     @Autowired
     private VehiculoService vehiculoService;
-
-    @ModelAttribute("patentesVencidas")
-    public List<String> cargarPatentesVencidas() {
-        return registroestacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras();
-    }
-
     // Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
     @GetMapping("/")
     public String index(HttpSession session, Model model,  @RequestParam(value = "buscar", required = false) String buscar,
@@ -160,4 +158,16 @@ public class PrincipalController {
     public String showManual() {
         return "ieManual"; }
         
+
+@ModelAttribute("patentesVencidas")
+    public List<String> cargarPatentesVencidas(HttpSession session) {
+        Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
+         if (est == null) {
+        // No hay sesión activa o no hay estacionamiento seleccionado
+        System.out.println("ESTACIONAMIENTO NULL");
+        return Collections.emptyList(); // Devuelve lista vacía en ese caso
+    }
+        System.out.println("ESTACIONAMIENOT: "+est.getIdEst());
+        return registroestacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
+    }
 }

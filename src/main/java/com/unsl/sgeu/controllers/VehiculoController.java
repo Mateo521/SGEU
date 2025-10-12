@@ -368,13 +368,13 @@ probando control
                          HttpSession session) {
 
         boolean resultado=true;
-          Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
-        System.out.println(est1.getIdEst());
-System.out.println(""+"Entrada".equals(category)+" "+vehiculoService.existePatente(patente)+" "+registroestacionamientoService.esPar(patente));
+
+        Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
+         
         if ("Entrada".equals(category) && vehiculoService.existePatente(patente) && registroestacionamientoService.esPar(patente)) {
         //buscar vehiculo en la tabla
         System.out.println("entro al entrada");
-            registroestacionamientoService.registrarEntrada(patente, session);
+            registroestacionamientoService.registrarEntrada(patente, est1);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);
@@ -382,7 +382,7 @@ System.out.println(""+"Entrada".equals(category)+" "+vehiculoService.existePaten
         return "ieManual";
        } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
          System.out.println("entro al salida");
-            registroestacionamientoService.registrarSalida(patente, session);
+            registroestacionamientoService.registrarSalida(patente, est1);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);

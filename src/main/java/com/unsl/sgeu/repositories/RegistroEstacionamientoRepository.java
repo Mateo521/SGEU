@@ -1,5 +1,6 @@
 package com.unsl.sgeu.repositories;
 
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.RegistroEstacionamiento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,11 +24,12 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
     int deleteByPatente(@Param("patente") String patente);
 
 
-     @Query (value = "SELECT r.patente " +
+    @Query(value = "SELECT r.patente " +
                "FROM registro_estacionamiento r " +
+               "WHERE r.id_est = :idEst " +
                "GROUP BY r.patente " +
                "HAVING COUNT(*) % 2 = 1 " +
                "AND TIMESTAMPDIFF(HOUR, MAX(r.fecha_hora), NOW()) >= 4",
        nativeQuery = true)
-    List<String> findPatentesAdentroMasDeCuatroHoras();
+List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
 }
