@@ -114,7 +114,7 @@ public class VehiculoController {
             RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
-        
+
             String rol = (String) session.getAttribute("rol");
             boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
             boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
@@ -145,23 +145,22 @@ public class VehiculoController {
         return "redirect:/vehiculos";
     }
 
-    
     @PostMapping("/eliminar-con-historial/{patente}")
     public String eliminarVehiculoConHistorial(@PathVariable String patente,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
         try {
-          
+
             String rol = (String) session.getAttribute("rol");
             boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-/*
-probando control
-            if (!esAdministrador) {
-                redirectAttributes.addFlashAttribute("error",
-                        "Solo los administradores pueden eliminar vehículos con historial");
-                return "redirect:/vehiculos";
-            }
- */
+            /*
+             * probando control
+             * if (!esAdministrador) {
+             * redirectAttributes.addFlashAttribute("error",
+             * "Solo los administradores pueden eliminar vehículos con historial");
+             * return "redirect:/vehiculos";
+             * }
+             */
             System.out.println("ELIMINANDO VEHICULO CON HISTORIAL");
             System.out.println("Patente: " + patente + " | Admin: " + session.getAttribute("nombreCompleto"));
 
@@ -354,6 +353,118 @@ probando control
 
     private String nullToDash(String s) {
         return (s == null || s.isBlank()) ? "—" : s;
+    }
+
+    @GetMapping("/editar/{patente}")
+    public String mostrarFormularioEdicion(@PathVariable String patente,
+            Model model,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        try {
+
+            String rol = (String) session.getAttribute("rol");
+            boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+            boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+
+            if (!esAdministrador && !esGuardia) {
+                redirectAttributes.addFlashAttribute("error", "No tiene permisos para editar vehículos");
+                return "redirect:/vehiculos";
+            }
+
+            Vehiculo vehiculo = vehiculoService.buscarPorPatente(patente);
+            if (vehiculo == null) {
+                redirectAttributes.addFlashAttribute("error", "Vehículo no encontrado");
+                return "redirect:/vehiculos";
+            }
+
+            Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
+            if (persona == null) {
+                redirectAttributes.addFlashAttribute("error", "Propietario no encontrado");
+                return "redirect:/vehiculos";
+            }
+
+            // Crear DTO con datoss
+            VehiculoFormDTO form = new VehiculoFormDTO();
+            form.setPatente(vehiculo.getPatente());
+            form.setModelo(vehiculo.getModelo());
+            form.setColor(vehiculo.getColor());
+            form.setTipoNombre(vehiculo.getTipo());
+            form.setDni(persona.getDni());
+            form.setNombre(persona.getNombre());
+            form.setTelefono(persona.getTelefono());
+            form.setEmail(persona.getEmail());
+            form.setCategoriaNombre(persona.getCategoria());
+
+            model.addAttribute("vehiculoForm", form);
+            model.addAttribute("esEdicion", true);
+            model.addAttribute("patenteOriginal", patente);
+
+            return "editarvehiculo";
+
+        } catch (Exception e) {
+            System.err.println("Error al cargar formulario de edición: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al cargar el vehículo");
+            return "redirect:/vehiculos";
+        }
+    }
+
+    @PostMapping("/editar/{patenteOriginal}")
+    public String editarVehiculo(@PathVariable String patenteOriginal,
+            @ModelAttribute VehiculoFormDTO form,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
+        try {
+
+            String rol = (String) session.getAttribute("rol");
+            boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+            boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+
+            if (!esAdministrador && !esGuardia) {
+                redirectAttributes.addFlashAttribute("error", "No tiene permisos para editar vehículos");
+                return "redirect:/vehiculos";
+            }
+
+            // validaciones
+            if (form.getDni() == null || form.getPatente() == null ||
+                    form.getCategoriaNombre() == null || form.getTipoNombre() == null) {
+                redirectAttributes.addFlashAttribute("error", "Todos los campos son obligatorios");
+                return "redirect:/vehiculos/editar/" + patenteOriginal;
+            }
+
+            // Si cambió la patente, verificar que no exista
+            if (!patenteOriginal.equals(form.getPatente()) &&
+                    vehiculoService.existePatente(form.getPatente())) {
+                redirectAttributes.addFlashAttribute("error", "Ya existe un vehículo con esa patente");
+                return "redirect:/vehiculos/editar/" + patenteOriginal;
+            }
+
+            // Actualizar vhículo
+            Integer categoriaId = mapearCategoriaAId(form.getCategoriaNombre());
+            Integer tipoId = mapearTipoAId(form.getTipoNombre());
+
+            if (categoriaId == null || tipoId == null) {
+                redirectAttributes.addFlashAttribute("error", "Categoría o tipo inválido");
+                return "redirect:/vehiculos/editar/" + patenteOriginal;
+            }
+
+          
+            boolean actualizado = vehiculoService.actualizarVehiculo(patenteOriginal, form, categoriaId, tipoId);
+
+            if (actualizado) {
+                redirectAttributes.addFlashAttribute("success",
+                        "Vehículo " + form.getPatente() + " actualizado exitosamente");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Error al actualizar el vehículo");
+            }
+
+            return "redirect:/vehiculos";
+
+        } catch (Exception e) {
+            System.err.println("Error al editar vehículo: " + e.getMessage());
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar: " + e.getMessage());
+            return "redirect:/vehiculos";
+        }
     }
 
 }
