@@ -11,8 +11,8 @@ import java.util.UUID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import com.unsl.sgeu.services.PersonaService;
-
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class VehiculoService {
@@ -148,6 +148,42 @@ public class VehiculoService {
         }
     }
 
+    try {
+        System.out.println(" Obteniendo vehículos para guardia ID: " + guardiaId);
+        
+       
+        System.out.println(" Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
+        System.out.println(" Valor de guardiaId: " + guardiaId);
+        System.out.println(" Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
+        
+        List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
+        
+        System.out.println(" IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
+        
+        if (idsEstacionamientos.isEmpty()) {
+            System.out.println(" Guardia sin estacionamientos asignados - mostrando lista vacía");
+            return List.of();
+        }
+        
+        System.out.println(" Estacionamientos del guardia: " + idsEstacionamientos);
+        
+        List<Vehiculo> vehiculos = obtenerPorEstacionamientos(idsEstacionamientos);
+        
+        System.out.println(" Vehículos encontrados: " + vehiculos.size());
+        return vehiculos;
+        
+    } catch (Exception e) {
+        System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
+        e.printStackTrace();
+        
+        System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
+        return obtenerTodos();
+    }
+}
+
+
+  
+    
     public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long guardiaId) {
         try {
             System.out.println(" Buscando patente '" + patente + "' para guardia ID: " + guardiaId);

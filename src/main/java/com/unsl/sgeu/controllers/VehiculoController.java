@@ -9,14 +9,18 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.unsl.sgeu.dto.VehiculoFormDTO;
+import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
 import java.util.List;
 
+@SessionAttributes
 @Controller
-@RequestMapping("/vehiculos")
+//@RequestMapping("/vehiculos")
 public class VehiculoController {
+    @Autowired
+    private RegistroEstacionamientoService registroestacionamientoService;
 
     @Autowired
     private VehiculoService vehiculoService;
@@ -27,7 +31,7 @@ public class VehiculoController {
     @Autowired
     private QRCodeService qrCodeService;
 
-    @GetMapping
+    /*@GetMapping
     public String listarVehiculos(
             @RequestParam(value = "buscar", required = false) String buscar,
             @RequestParam(value = "estacionamientoFiltro", required = false) Long estacionamientoFiltro,
@@ -99,7 +103,7 @@ public class VehiculoController {
 
         System.out.println(" Retornando vista 'vehiculos'");
         return "vehiculos";
-    }
+    }*/
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String testMethod(Model model) {
@@ -188,7 +192,7 @@ public class VehiculoController {
         return "registrarvehiculo";
     }
 
-    @PostMapping("/agregar")
+    @PostMapping("/vehiculos/agregar")
     public String agregarVehiculo(@ModelAttribute VehiculoFormDTO form,
             RedirectAttributes redirectAttributes) {
         try {
@@ -467,4 +471,42 @@ public class VehiculoController {
         }
     }
 
+
+    @GetMapping("/search")
+    public String buscar(@RequestParam(value="q", required=false) String patente,
+                         @RequestParam(value="category", required=false) String category,
+                         Model model,
+                         HttpSession session) {
+
+        boolean resultado=true;
+
+        Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
+         
+        if ("Entrada".equals(category) && vehiculoService.existePatente(patente) && registroestacionamientoService.esPar(patente)) {
+        //buscar vehiculo en la tabla
+        System.out.println("entro al entrada");
+            registroestacionamientoService.registrarEntrada(patente, est1);
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            resultado = true;
+        return "ieManual";
+       } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)){
+         System.out.println("entro al salida");
+            registroestacionamientoService.registrarSalida(patente, est1);
+            model.addAttribute("category", category);
+            model.addAttribute("resultado", resultado);
+            model.addAttribute("patente", patente);
+            resultado = true;
+            return "ieManual";
+        }  
+         System.out.println("no entro a ninguno");
+            resultado = false;
+    model.addAttribute("category", category);
+    model.addAttribute("resultado", resultado);
+    model.addAttribute("patente", patente);
+        return "ieManual";   // tu vista (templates/ieManual.html)
+    }
+
 }
+
