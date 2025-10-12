@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -31,9 +32,11 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
             "AND TIMESTAMPDIFF(HOUR, MAX(r.fecha_hora), NOW()) >= 4", nativeQuery = true)
     List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
 
+    List<RegistroEstacionamiento> findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
+            Long idEstacionamiento, String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
-
- 
- 
+    // Buscar por est y rango de fechas
+    List<RegistroEstacionamiento> findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
+            Long idEstacionamiento, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
 }

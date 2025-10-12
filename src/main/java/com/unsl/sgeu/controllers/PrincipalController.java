@@ -1,13 +1,16 @@
 package com.unsl.sgeu.controllers;
 
+import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.DetallesInfo;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Vehiculo;
+import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,21 +31,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
+import com.unsl.sgeu.dto.PanelDTO;
 @Controller
 @SessionAttributes
 public class PrincipalController {
 
     @Autowired
-       private RegistroEstacionamientoService registroestacionamientoService;
+       private RegistroEstacionamientoService registroEstacionamientoService;
     @Autowired
     private VehiculoService vehiculoService;
     // Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
   
     
-
+   @Autowired
+    private EstacionamientoService estacionamientoService;
     
-    @GetMapping("/")
+@GetMapping("/")
 public String index(HttpSession session, Model model, 
                    @RequestParam(value = "buscar", required = false) String buscar,
                    @RequestParam(value = "estacionamientoFiltro", required = false) Long estacionamientoFiltro, 
@@ -53,7 +57,6 @@ public String index(HttpSession session, Model model,
         return "redirect:/login";
     }
 
-  
     System.out.println("URL completa: " + request.getRequestURL());
     System.out.println("URI: " + request.getRequestURI());
     System.out.println("Método HTTP: " + request.getMethod());
@@ -72,18 +75,54 @@ public String index(HttpSession session, Model model,
     System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
 
     if (!esAdministrador && !esGuardia) {
-        System.out.println(" Usuario sin permisos");
+        System.out.println("Usuario sin permisos");
         model.addAttribute("error", "No tiene permisos para acceder a esta sección");
         return "error";
     }
 
+    
+    List<PanelDTO> paneles = new ArrayList<>();
+    
+    if (esGuardia) {
+        try {
+            System.out.println(" Generando panel para guardia ID: " + usuarioId);
+            
+            //  estacionamientos del guardia
+            List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
+            
+            for (EstacionamientoDTO est : estacionamientosGuardia) {
+              
+                
+                PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
+                
+               
+                panel.setVehiculosActualmente(
+                    registroEstacionamientoService.obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
+                panel.setIngresosDelDia(
+                    registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
+                panel.setEgresosDelDia(
+                    registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
+                
+                paneles.add(panel);
+                
+                System.out.println(" panel creado - Vehículos adentro: " + panel.getTotalVehiculosAdentro() + 
+                                 ", Ingresos: " + panel.getTotalIngresosHoy() + 
+                                 ", Egresos: " + panel.getTotalEgresosHoy());
+            }
+            
+        } catch (Exception e) {
+            System.err.println(" Error generando panel: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+ 
     List<Vehiculo> lista;
     Map<String, String> estacionamientosOrigen = new HashMap<>(); 
-    
 
     try {
         if (esAdministrador) {
-            System.out.println(" Procesando como ADMINISTRADOR");
+            System.out.println("Procesando como ADMINISTRADOR");
             if (buscar != null && !buscar.trim().isEmpty()) {
                 System.out.println("Admin buscando: " + buscar);
                 lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
@@ -91,21 +130,15 @@ public String index(HttpSession session, Model model,
                 System.out.println("Admin obteniendo todos los vehículos");
                 lista = vehiculoService.obtenerTodos();
             }
-        
-            
         } else {
-           
-            
             if (buscar != null && !buscar.trim().isEmpty()) {
                 System.out.println("Guardia buscando: " + buscar);
                 lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
             } else {
                 System.out.println("Guardia obteniendo TODOS sus vehículos registrados");
-              
                 lista = vehiculoService.obtenerTodosVehiculosPorGuardia(usuarioId);
             }
             
-         
             for (Vehiculo vehiculo : lista) {
                 try {
                     String estacionamientoOrigen = vehiculoService.obtenerEstacionamientoOrigenVehiculo(
@@ -119,19 +152,22 @@ public String index(HttpSession session, Model model,
         }
         
     } catch (Exception e) {
-        System.err.println(" Error al obtener vehículos: " + e.getMessage());
+        System.err.println("Error al obtener vehículos: " + e.getMessage());
         e.printStackTrace();
         lista = List.of();
         model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
     }
 
-    System.out.println(" Total vehículos encontrados: " + lista.size());
+    System.out.println("Total vehículos encontrados: " + lista.size());
     if (esGuardia) {
-        System.out.println(" Estacionamientos origen mapeados: " + estacionamientosOrigen.size());
+        System.out.println("Estacionamientos origen mapeados: " + estacionamientosOrigen.size());
+        System.out.println("paneles creados: " + paneles.size());
     }
 
  
+    model.addAttribute("paneles", paneles);
     
+ 
     model.addAttribute("vehiculos", lista);
     model.addAttribute("buscar", buscar);
     model.addAttribute("rol", rol);
@@ -139,12 +175,10 @@ public String index(HttpSession session, Model model,
     model.addAttribute("esGuardia", esGuardia);
     model.addAttribute("nombreCompleto", nombreCompleto);
     model.addAttribute("estacionamientosOrigen", estacionamientosOrigen);
-    
 
-  
-    
-    return "vehiculos";
+    return "vehiculos";  
 }
+
 
    
 
@@ -204,6 +238,6 @@ public String index(HttpSession session, Model model,
         return Collections.emptyList(); // Devuelve lista vacía en ese caso
     }
         System.out.println("ESTACIONAMIENOT: "+est.getIdEst());
-        return registroestacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
+        return registroEstacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
     }
 }

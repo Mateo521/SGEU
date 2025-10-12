@@ -12,6 +12,10 @@
     <main layout:fragment="content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
 
+
+
+
+
         <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-6 mb-8 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
@@ -36,6 +40,20 @@
 
 
         <div class="container mx-auto px-4 py-4">
+
+
+
+
+
+
+
+
+
+          <div th:insert="~{fragments/ingresoegreso :: panel}"></div>
+
+
+
+
 
             <div th:if="${success}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                 <div class="flex items-center">
