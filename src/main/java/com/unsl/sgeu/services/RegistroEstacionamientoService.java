@@ -4,68 +4,71 @@ import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
 import com.unsl.sgeu.config.SessionInterceptor;
 import com.unsl.sgeu.controllers.LoginController;
+import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.transaction.annotation.Propagation;
 import jakarta.servlet.http.HttpSession;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import com.unsl.sgeu.services.EstadoVehiculo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+@SessionAttributes
 @Service
 public class RegistroEstacionamientoService {
-
 
     @Autowired
     private RegistroEstacionamientoRepository registroRepo;
     @Autowired
     private VehiculoRepository vehiculoRepo;
 
+    @Autowired
+    private EstacionamientoService estacionamientoService;
 
-     public RegistroEstacionamiento registrarEntrada(String patente, HttpSession session) {
+    public RegistroEstacionamiento registrarEntrada(String patente, Estacionamiento est) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         registro.setTipo("ENTRADA");
-        Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
         System.out.println(est.getIdEst());
-        registro.setId(est.getIdEst());
+        registro.setIdEstacionamiento(est.getIdEst());
         registro.setModo("MANUAL");
         return registroRepo.save(registro);
     }
 
-     public RegistroEstacionamiento registrarSalida(String patente, HttpSession session) {
+    public RegistroEstacionamiento registrarSalida(String patente, Estacionamiento est) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         registro.setTipo("SALIDA");
-        registro.setId(((Estacionamiento)session.getAttribute("estacionamiento")).getIdEst());
+        registro.setIdEstacionamiento(est.getIdEst());
         registro.setModo("MANUAL");
         return registroRepo.save(registro);
-     }
+    }
 
-    public boolean esPar(String patente){
+    public boolean esPar(String patente) {
 
-       long cantidad = registroRepo.countByPatente(patente);
+        long cantidad = registroRepo.countByPatente(patente);
         return cantidad % 2 == 0;
     }
 
-    
-     public List<String> obtenerPatentesAdentroMasDeCuatroHoras() {
-        return registroRepo.findPatentesAdentroMasDeCuatroHoras();
+    public List<String> obtenerPatentesAdentroMasDeCuatroHoras(Estacionamiento est) {
+        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getIdEst());
     }
-
-
-
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void eliminarRegistrosPorPatente(String patente) {
@@ -80,7 +83,7 @@ public class RegistroEstacionamientoService {
                 int eliminados = registroRepo.deleteByPatente(patente);
                 System.out.println("Registros eliminados: " + eliminados);
 
-                // Verificar que se eliminaronn 
+                // Verificar que se eliminaronn
                 long cantidadDespues = registroRepo.countByPatente(patente);
                 System.out.println("Registros restantes: " + cantidadDespues);
 
@@ -135,6 +138,189 @@ public class RegistroEstacionamientoService {
         }
     }
 
+    public EstadoVehiculo obtenerEstadoActualVehiculo(String patente) {
+        try {
+            System.out.println("Verificando estado actual del vehículo: " + patente);
+
+            EstadoVehiculo estado = new EstadoVehiculo(patente);
+
+            List<RegistroEstacionamiento> registros = registroRepo.findByPatenteOrderByFechaHoraDesc(patente);
+
+            if (registros.isEmpty()) {
+                System.out.println("No hay registros para la patente: " + patente);
+                estado.setTieneRegistros(false);
+                estado.setEstaEstacionado(false);
+                estado.setNombreEstacionamiento("Sin registros");
+                return estado;
+            }
+
+            RegistroEstacionamiento ultimoRegistro = registros.get(0);
+
+            estado.setTieneRegistros(true);
+            estado.setUltimoRegistro(ultimoRegistro);
+            estado.setIdEstacionamiento(ultimoRegistro.getIdEstacionamiento());
+            estado.setFechaUltimoRegistro(ultimoRegistro.getFechaHora().toString());
+
+            boolean estaAdentro = "ENTRADA".equals(ultimoRegistro.getTipo());
+            estado.setEstaEstacionado(estaAdentro);
+
+            String nombreEstacionamiento = "Desconocido";
+            try {
+                EstacionamientoDTO estDto = estacionamientoService.obtener(ultimoRegistro.getIdEstacionamiento());
+                if (estDto != null) {
+                    nombreEstacionamiento = estDto.getNombre();
+                }
+            } catch (Exception e) {
+                System.err.println("Error obteniendo nombre del estacionamiento: " + e.getMessage());
+                nombreEstacionamiento = "Estacionamiento ID: " + ultimoRegistro.getIdEstacionamiento();
+            }
+
+            estado.setNombreEstacionamiento(nombreEstacionamiento);
+
+            long cantidadLong = registroRepo.countByPatente(patente);
+            estado.setCantidadRegistros((int) cantidadLong);
+
+            System.out.println("Estado del vehículo " + patente + ":");
+            System.out.println("   - Último movimiento: " + ultimoRegistro.getTipo());
+            System.out.println("   - Está adentro: " + estaAdentro);
+            System.out.println("   - Estacionamiento: " + nombreEstacionamiento);
+            System.out.println("   - Total registros: " + estado.getCantidadRegistros());
+
+            return estado;
+
+        } catch (Exception e) {
+            System.err.println(" Error al obtener estado del vehículo " + patente + ": " + e.getMessage());
+            e.printStackTrace();
+
+            EstadoVehiculo estadoError = new EstadoVehiculo(patente);
+            estadoError.setTieneRegistros(false);
+            estadoError.setEstaEstacionado(false);
+            estadoError.setNombreEstacionamiento("Error");
+            return estadoError;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento) {
+    try {
+        System.out.println("🚗 Obteniendo vehículos actualmente en estacionamiento ID: " + idEstacionamiento);
+        
+        // Obtener todas las patentes que están "adentro" usando tu método existente
+        List<String> patentesAdentro = registroRepo.findPatentesAdentroMasDeCuatroHoras(idEstacionamiento);
+        
+        // También necesitamos las que están adentro hace menos de 4 horas
+        List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
+        
+        // Obtener todos los registros del estacionamiento de hoy
+        LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+        
+        List<RegistroEstacionamiento> registrosHoy = registroRepo.findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
+            idEstacionamiento, inicioDelDia, finDelDia);
+        
+        // Agrupar por patente y verificar cuáles están adentro
+        Map<String, RegistroEstacionamiento> ultimosPorPatente = new HashMap<>();
+        
+        for (RegistroEstacionamiento registro : registrosHoy) {
+            String patente = registro.getPatente();
+            if (!ultimosPorPatente.containsKey(patente)) {
+                ultimosPorPatente.put(patente, registro);
+            }
+        }
+        
+        // Filtrar solo los que tienen ENTRADA como último movimiento
+        for (RegistroEstacionamiento registro : ultimosPorPatente.values()) {
+            if ("ENTRADA".equals(registro.getTipo())) {
+                vehiculosAdentro.add(registro);
+            }
+        }
+        
+        // Ordenar por fecha más reciente
+        vehiculosAdentro.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
+        
+        System.out.println("✅ Encontrados " + vehiculosAdentro.size() + " vehículos actualmente en el estacionamiento");
+        return vehiculosAdentro;
+        
+    } catch (Exception e) {
+        System.err.println("❌ Error obteniendo vehículos en estacionamiento: " + e.getMessage());
+        e.printStackTrace();
+        return new ArrayList<>();
+    }
+}
+
+// Obtener egresos del día actual
+public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
+    try {
+        System.out.println("🚪 Obteniendo egresos del día para estacionamiento ID: " + idEstacionamiento);
+        
+        LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+        
+        List<RegistroEstacionamiento> egresos = registroRepo.findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
+            idEstacionamiento, "SALIDA", inicioDelDia, finDelDia);
+        
+        System.out.println("✅ Encontrados " + egresos.size() + " egresos del día");
+        return egresos;
+        
+    } catch (Exception e) {
+        System.err.println("❌ Error obteniendo egresos del día: " + e.getMessage());
+        e.printStackTrace();
+        return new ArrayList<>();
+    }
+}
+
+// Obtener ingresos del día actual
+public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento) {
+    try {
+        System.out.println("🚪 Obteniendo ingresos del día para estacionamiento ID: " + idEstacionamiento);
+        
+        LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+        
+        List<RegistroEstacionamiento> ingresos = registroRepo.findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
+            idEstacionamiento, "ENTRADA", inicioDelDia, finDelDia);
+        
+        System.out.println("✅ Encontrados " + ingresos.size() + " ingresos del día");
+        return ingresos;
+        
+    } catch (Exception e) {
+        System.err.println("❌ Error obteniendo ingresos del día: " + e.getMessage());
+        e.printStackTrace();
+        return new ArrayList<>();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public EstadoVehiculo obtenerEstadoDetallado(String patente) {
         try {
             System.out.println("Obteniendo estado detallado para: " + patente);
@@ -151,7 +337,7 @@ public class RegistroEstacionamientoService {
                 estado.setUltimoRegistro(ultimoRegistro);
                 estado.setEstaEstacionado("ingreso".equals(ultimoRegistro.getTipo()));
 
-                // Formatear fecha  .
+                // Formatear fecha .
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 estado.setFechaUltimoRegistro(ultimoRegistro.getFechaHora().format(formatter));
             }
@@ -163,7 +349,7 @@ public class RegistroEstacionamientoService {
             return new EstadoVehiculo(patente);
         }
     }
- 
+
     public String generarMensajeError(String patente) {
         try {
             EstadoVehiculo estado = obtenerEstadoDetallado(patente);

@@ -5,10 +5,14 @@ import com.unsl.sgeu.models.RegistroEstacionamiento;
 public class EstadoVehiculo {
     private String patente;
     private boolean tieneRegistros;
-    private boolean estaEstacionado;
+    private boolean estaEstacionado;  
     private int cantidadRegistros;
     private RegistroEstacionamiento ultimoRegistro;
     private String fechaUltimoRegistro;
+    
+    
+    private Long idEstacionamiento;
+    private String nombreEstacionamiento;
     
     public EstadoVehiculo() {}
     
@@ -19,7 +23,15 @@ public class EstadoVehiculo {
         this.cantidadRegistros = 0;
     }
     
-    // Getters y Setters
+   
+    public EstadoVehiculo(boolean estaAdentro, Long idEstacionamiento, String nombreEstacionamiento) {
+        this.estaEstacionado = estaAdentro;
+        this.idEstacionamiento = idEstacionamiento;
+        this.nombreEstacionamiento = nombreEstacionamiento;
+        this.tieneRegistros = (idEstacionamiento != null);
+    }
+    
+    // Getters y Setters existentes
     public String getPatente() { return patente; }
     public void setPatente(String patente) { this.patente = patente; }
     
@@ -37,4 +49,20 @@ public class EstadoVehiculo {
     
     public String getFechaUltimoRegistro() { return fechaUltimoRegistro; }
     public void setFechaUltimoRegistro(String fechaUltimoRegistro) { this.fechaUltimoRegistro = fechaUltimoRegistro; }
+    
+     
+    public Long getIdEstacionamiento() { return idEstacionamiento; }
+    public void setIdEstacionamiento(Long idEstacionamiento) { this.idEstacionamiento = idEstacionamiento; }
+    
+    public String getNombreEstacionamiento() { return nombreEstacionamiento; }
+    public void setNombreEstacionamiento(String nombreEstacionamiento) { this.nombreEstacionamiento = nombreEstacionamiento; }
+    
+ 
+    public boolean isEstaAdentro() { 
+        return this.estaEstacionado; 
+    }
+    
+    public void setEstaAdentro(boolean estaAdentro) { 
+        this.estaEstacionado = estaAdentro; 
+    }
 }

@@ -12,7 +12,7 @@ public class Vehiculo {
     @JoinColumn(name = "dni_duenio", referencedColumnName = "dni", insertable = false, updatable = false)
     private Persona propietario;
 
-    // ✅ AGREGAR GETTER:
+    
     public Persona getPropietario() {
         return propietario;
     }
@@ -80,7 +80,7 @@ public class Vehiculo {
         this.color = color;
     }
 
-    // ✅ DEBE ACEPTAR Integer
+  
     public Integer getIdVehiculoTipo() {
         return idVehiculoTipo;
     }

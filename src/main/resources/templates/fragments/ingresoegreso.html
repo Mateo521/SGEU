@@ -1,0 +1,145 @@
+    <div th:fragment="panel" th:if="${esGuardia and not #lists.isEmpty(paneles)}" class="mb-8">
+        <h2 class="text-3xl font-bold text-blue-600 mb-6 flex items-center">
+            <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Ingreso y egreso del día
+        </h2>
+        
+        <div th:each="panel : ${paneles}" class="mb-6">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+             
+                <div class="bg-blue-600 text-white px-6 py-4">
+                    <h4 class="text-xl font-semibold flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        <span th:text="${panel.nombreEstacionamiento}">Estacionamiento</span>
+                    </h4>
+                </div>
+                
+                <div class="p-6">
+                  
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      
+                        <div class="bg-green-500 text-white rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold" th:text="${panel.totalVehiculosAdentro}">0</div>
+                            <p class="text-sm flex items-center justify-center mt-2">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
+                                </svg>
+                                Vehículos Actualmente
+                            </p>
+                        </div>
+                        
+                       
+                        <div class="bg-blue-500 text-white rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold" th:text="${panel.totalIngresosHoy}">0</div>
+                            <p class="text-sm flex items-center justify-center mt-2">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                                </svg>
+                                Ingresos Hoy
+                            </p>
+                        </div>
+                        
+                        
+                        <div class="bg-yellow-500 text-white rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold" th:text="${panel.totalEgresosHoy}">0</div>
+                            <p class="text-sm flex items-center justify-center mt-2">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Egresos Hoy
+                            </p>
+                        </div>
+                    </div>
+                    
+                     
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                         
+                        <div>
+                            <h5 class="text-lg font-semibold text-green-600 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
+                                </svg>
+                                Vehículos Actualmente
+                            </h5>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-green-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Patente</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Hora Ingreso</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">Tiempo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr th:each="vehiculo : ${panel.vehiculosActualmente}" class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="font-semibold text-gray-900" th:text="${vehiculo.patente}">ABC123</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600" 
+                                                th:text="${#temporals.format(vehiculo.fechaHora, 'HH:mm')}">10:30</td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <span th:text="${T(java.time.Duration).between(vehiculo.fechaHora, T(java.time.LocalDateTime).now()).toHours()}">2</span>h 
+                                                    <span th:text="${T(java.time.Duration).between(vehiculo.fechaHora, T(java.time.LocalDateTime).now()).toMinutesPart()}">30</span>m
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(panel.vehiculosActualmente)}">
+                                            <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+                                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                No hay vehículos en el estacionamiento
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                      
+                        <div>
+                            <h5 class="text-lg font-semibold text-yellow-600 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Egresos del Día
+                            </h5>
+                            <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                                    <thead class="bg-yellow-50 sticky top-0">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Patente</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Hora Salida</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr th:each="egreso : ${panel.egresosDelDia}" class="hover:bg-gray-50">
+                                            <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900" th:text="${egreso.patente}">ABC123</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600" 
+                                                th:text="${#temporals.format(egreso.fechaHora, 'HH:mm')}">14:30</td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(panel.egresosDelDia)}">
+                                            <td colspan="2" class="px-4 py-8 text-center text-gray-500">
+                                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                No hay egresos hoy
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Separador -->
+        <div class="border-t border-gray-300 my-8"></div>
+    </div>
