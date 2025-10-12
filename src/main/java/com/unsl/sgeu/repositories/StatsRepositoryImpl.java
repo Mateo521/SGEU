@@ -138,25 +138,7 @@ public class StatsRepositoryImpl implements StatsRepository {
         return res;
     }
 
-    @Override
-    public Double promedioEstancia(LocalDate desde, LocalDate hasta, Long estId) {
-        // Suponemos que registros alternan entre IN y OUT; agrupamos por patente y calculamos diferencias de pares (simplificado)
-        String base = "SELECT AVG(TIMESTAMPDIFF(MINUTE, t.inicio, t.fin))/60.0 AS horas_promedio FROM ( SELECT patente, MIN(r.fecha_hora) AS inicio, MAX(r.fecha_hora) AS fin FROM registro_estacionamiento r";
-    java.util.List<String> conds = new java.util.ArrayList<>();
-    if(desde != null) conds.add("r.fecha_hora >= :desde");
-    if(hasta != null) conds.add("r.fecha_hora <= :hasta");
-    conds.add("(:estId IS NULL OR r.id_est = :estId)");
-    String inner = base + " WHERE " + String.join(" AND ", conds) + " GROUP BY patente ) t";
 
-    Query q = em.createNativeQuery(inner);
-    if(desde != null) q.setParameter("desde", toStart(desde));
-    if(hasta != null) q.setParameter("hasta", toEnd(hasta));
-    q.setParameter("estId", estId);
-
-        Object single = q.getSingleResult();
-        if(single == null) return 0.0;
-        return ((Number)single).doubleValue();
-    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -247,4 +229,40 @@ public class StatsRepositoryImpl implements StatsRepository {
         }
         return res;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> distribucionPorTipoVehiculo(LocalDate desde, LocalDate hasta, Long estId) {
+        String base = "SELECT COALESCE(t.nombre, v.tipo) AS tipo, COUNT(*) AS cantidad FROM registro_estacionamiento r " +
+                "JOIN vehiculo v ON v.patente = r.patente LEFT JOIN vehiculo_tipo t ON t.id_vehiculo_tipo = v.id_vehiculo_tipo";
+        java.util.List<String> conds = new java.util.ArrayList<>();
+        if(desde != null) conds.add("r.fecha_hora >= :desde");
+        if(hasta != null) conds.add("r.fecha_hora <= :hasta");
+        conds.add("(:estId IS NULL OR r.id_est = :estId)");
+        String sql = base + " WHERE " + String.join(" AND ", conds) + " GROUP BY tipo ORDER BY cantidad DESC";
+
+        Query q = em.createNativeQuery(sql);
+        if(desde != null) q.setParameter("desde", toStart(desde));
+        if(hasta != null) q.setParameter("hasta", toEnd(hasta));
+        q.setParameter("estId", estId);
+
+        List<Object[]> rows = (List<Object[]>) q.getResultList();
+        long total = 0;
+        for(Object[] r: rows) total += ((Number)r[1]).longValue();
+
+        List<Map<String,Object>> res = new ArrayList<>();
+        for(Object[] r: rows){
+            String tipo = r[0]==null?"Desconocido":r[0].toString();
+            long cnt = ((Number)r[1]).longValue();
+            double pct = total==0?0.0:(cnt*100.0/total);
+            Map<String,Object> m = new HashMap<>();
+            m.put("tipo", tipo);
+            m.put("cantidad", cnt);
+            m.put("porcentaje", Math.round(pct*100.0)/100.0);
+            res.add(m);
+        }
+        return res;
+    }
+
+    
 }

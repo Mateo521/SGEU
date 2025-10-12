@@ -18,8 +18,7 @@ public interface StatsRepository {
     // Horarios pico de ingresos (por hora)
     List<Map<String, Object>> horariosPicoIngresos(LocalDate desde, LocalDate hasta, int topN, Long estacionamientoId);
 
-    // Promedio de estancia de vehiculos (horas)
-    Double promedioEstancia(LocalDate desde, LocalDate hasta, Long estacionamientoId);
+    // (promedioEstancia eliminado)
 
     // Porcentaje de ocupacion por estacionamiento
     List<Map<String, Object>> porcentajeOcupacionPorEstacionamiento(LocalDate desde, LocalDate hasta, Long estacionamientoId);
@@ -29,4 +28,7 @@ public interface StatsRepository {
 
     // Cantidad de ingresos/egresos hecho de forma MANUAL o QR
     List<Map<String, Object>> conteoManualVsQr(LocalDate desde, LocalDate hasta, Long estacionamientoId);
+
+    // Distribución de ingresos por tipo de vehículo
+    List<Map<String, Object>> distribucionPorTipoVehiculo(LocalDate desde, LocalDate hasta, Long estacionamientoId);
 }

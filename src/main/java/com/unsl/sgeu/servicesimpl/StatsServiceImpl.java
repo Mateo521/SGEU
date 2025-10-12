@@ -38,11 +38,6 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public Double promedioEstancia(LocalDate desde, LocalDate hasta, Long estacionamientoId) {
-        return statsRepository.promedioEstancia(desde, hasta, estacionamientoId);
-    }
-
-    @Override
     public List<Map<String, Object>> porcentajeOcupacionPorEstacionamiento(LocalDate desde, LocalDate hasta, Long estacionamientoId) {
         return statsRepository.porcentajeOcupacionPorEstacionamiento(desde, hasta, estacionamientoId);
     }
@@ -55,5 +50,10 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<Map<String, Object>> conteoManualVsQr(LocalDate desde, LocalDate hasta, Long estacionamientoId) {
         return statsRepository.conteoManualVsQr(desde, hasta, estacionamientoId);
+    }
+
+    @Override
+    public List<Map<String, Object>> distribucionPorTipoVehiculo(LocalDate desde, LocalDate hasta, Long estacionamientoId) {
+        return statsRepository.distribucionPorTipoVehiculo(desde, hasta, estacionamientoId);
     }
 }

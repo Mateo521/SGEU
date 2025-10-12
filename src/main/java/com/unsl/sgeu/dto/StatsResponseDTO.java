@@ -8,7 +8,6 @@ public class StatsResponseDTO {
     private List<EvolucionDTO> evolucion;
     private List<ModoConteoDTO> modoConteo;
     private List<HorarioDTO> horariosPico;
-    private Double promedioEstancia;
     // arrays para graficas
     private List<String> categoriasLabels;
     private List<Number> categoriasData;
@@ -18,6 +17,7 @@ public class StatsResponseDTO {
     private List<EstacionamientoStatsDTO> porcentajeOcupacion;
     private List<String> evolucionLabels;
     private List<Number> evolucionData;
+    private List<TipoVehiculoDTO> distribucionTipoVehiculo;
 
     public StatsResponseDTO() {}
 
@@ -32,8 +32,7 @@ public class StatsResponseDTO {
     public void setModoConteo(List<ModoConteoDTO> modoConteo) { this.modoConteo = modoConteo; }
     public List<HorarioDTO> getHorariosPico() { return horariosPico; }
     public void setHorariosPico(List<HorarioDTO> horariosPico) { this.horariosPico = horariosPico; }
-    public Double getPromedioEstancia() { return promedioEstancia; }
-    public void setPromedioEstancia(Double promedioEstancia) { this.promedioEstancia = promedioEstancia; }
+    
     public List<String> getCategoriasLabels() { return categoriasLabels; }
     public void setCategoriasLabels(List<String> categoriasLabels) { this.categoriasLabels = categoriasLabels; }
     public List<Number> getCategoriasData() { return categoriasData; }
@@ -48,4 +47,6 @@ public class StatsResponseDTO {
     public void setEvolucionLabels(List<String> evolucionLabels) { this.evolucionLabels = evolucionLabels; }
     public List<Number> getEvolucionData() { return evolucionData; }
     public void setEvolucionData(List<Number> evolucionData) { this.evolucionData = evolucionData; }
+    public List<TipoVehiculoDTO> getDistribucionTipoVehiculo() { return distribucionTipoVehiculo; }
+    public void setDistribucionTipoVehiculo(List<TipoVehiculoDTO> distribucionTipoVehiculo) { this.distribucionTipoVehiculo = distribucionTipoVehiculo; }
 }

@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.List;
-import java.util.stream.Collectors;
+ 
 import com.unsl.sgeu.dto.*;
 
 @Controller
@@ -21,7 +20,6 @@ public class StatsController {
 
     private final StatsService statsService;
     private final EstacionamientoRepository estacionamientoRepository;
-
     public StatsController(StatsService statsService, EstacionamientoRepository estacionamientoRepository){
         this.statsService = statsService;
         this.estacionamientoRepository = estacionamientoRepository;
@@ -47,8 +45,7 @@ public class StatsController {
         model.addAttribute("porcentajeCategorias", dto.getCategorias());
         model.addAttribute("estacionamientoTop", dto.getEstacionamientoTop());
         model.addAttribute("diaSemanaTop", dto.getHorariosPico()); // nota: reuso para mostrar
-        model.addAttribute("horariosPico", dto.getHorariosPico());
-        model.addAttribute("promedioEstancia", dto.getPromedioEstancia());
+    model.addAttribute("horariosPico", dto.getHorariosPico());
         model.addAttribute("ocupacionPorEst", dto.getEstacionamientoTop()!=null?java.util.List.of(dto.getEstacionamientoTop()):java.util.List.of());
         model.addAttribute("evolucion", dto.getEvolucion());
         model.addAttribute("modoConteo", dto.getModoConteo());
@@ -87,6 +84,8 @@ public class StatsController {
     }
 
     // Nota: la API de estacionamientos ya está disponible en EstacionamientoController (/api/estacionamientos)
+
+    
 
     // Construye y mapea la respuesta a DTO (evita llamadas duplicadas)
     private StatsResponseDTO buildStatsDto(LocalDate desde, LocalDate hasta, Long estId){
@@ -174,8 +173,21 @@ public class StatsController {
         }
         dto.setHorariosPico(horariosList);
 
-        dto.setPromedioEstancia(statsService.promedioEstancia(desde,hasta,estId));
+    // Promedio de estancia eliminado por solicitud del usuario
 
+        // Distribucion por tipo de vehiculo
+        var distrib = statsService.distribucionPorTipoVehiculo(desde,hasta,estId);
+        var tipoList = new java.util.ArrayList<TipoVehiculoDTO>();
+        for(var m: distrib){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String tipo = map.getOrDefault("tipo","Desconocido").toString();
+            Long cnt = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            Double pct = ((Number)map.getOrDefault("porcentaje",0)).doubleValue();
+            tipoList.add(new TipoVehiculoDTO(tipo, cnt, pct));
+        }
+        dto.setDistribucionTipoVehiculo(tipoList);
+
+    
         return dto;
     }
 }
