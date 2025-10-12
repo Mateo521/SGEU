@@ -79,10 +79,9 @@ public class VehiculoService {
     }
 
     public void probarEstadoVehiculo(String patente) {
-        System.out.println("🧪 PRUEBA - Verificando estado de: " + patente);
         EstadoVehiculo estado = registroEstacionamientoService.obtenerEstadoActualVehiculo(patente);
 
-        System.out.println("📊 RESULTADO:");
+     
         System.out.println("   - Patente: " + estado.getPatente());
         System.out.println("   - Tiene registros: " + estado.isTieneRegistros());
         System.out.println("   - Está estacionado: " + estado.isEstaEstacionado());
