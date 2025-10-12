@@ -23,4 +23,17 @@ public class EmpleadoController {
         List<EmpleadoDTO> guardias = empleadoServices.listarGuardias();
         return ResponseEntity.ok(guardias);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmpleadoDTO> actualizarEmpleado(
+            @PathVariable Long id,
+            @RequestBody EmpleadoDTO dto) {
+        try {
+            EmpleadoDTO actualizado = empleadoServices.actualizarEmpleado(id, dto);
+            return ResponseEntity.ok(actualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

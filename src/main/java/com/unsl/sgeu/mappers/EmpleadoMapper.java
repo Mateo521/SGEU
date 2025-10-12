@@ -1,4 +1,3 @@
-// src/main/java/com/unsl/sgeu/mappers/EmpleadoMapper.java
 package com.unsl.sgeu.mappers;
 
 import com.unsl.sgeu.dto.EmpleadoDTO;
@@ -14,6 +13,7 @@ public class EmpleadoMapper {
         return nombre + " " + apellido;
     }
 
+    /** 🔁 Entidad → DTO */
     public static EmpleadoDTO toDTO(Empleado e) {
         if (e == null) return null;
         return new EmpleadoDTO(
@@ -22,5 +22,23 @@ public class EmpleadoMapper {
                 e.getNombreUsuario(),
                 e.getCorreo()
         );
+    }
+
+    /** 🔁 DTO → Entidad */
+    public static void updateEntityFromDTO(Empleado e, EmpleadoDTO dto) {
+        if (dto == null || e == null) return;
+
+        // Nombre completo: separar si viene junto
+        if (dto.getNombreCompleto() != null && !dto.getNombreCompleto().isBlank()) {
+            String[] partes = dto.getNombreCompleto().trim().split(" ", 2);
+            e.setNombre(partes[0]);
+            if (partes.length > 1) e.setApellido(partes[1]);
+        }
+
+        if (dto.getNombreUsuario() != null && !dto.getNombreUsuario().isBlank())
+            e.setNombreUsuario(dto.getNombreUsuario().trim());
+
+        if (dto.getCorreo() != null && !dto.getCorreo().isBlank())
+            e.setCorreo(dto.getCorreo().trim());
     }
 }
