@@ -161,9 +161,7 @@
                                 <!--th th:if="${esGuardia}"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Registrado en</th-->
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Registrado en</th>
+                              
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     QR</th>
@@ -194,7 +192,7 @@
                                 </td>
 
                                 <!--td th:if="${esGuardia}" th:text="${estacionamientosOrigen[vehiculo.patente]}"></td-->
-                                <td th:text="${estacionamientosOrigen[vehiculo.patente]}"></td>
+                                <!--td th:text="${estacionamientosOrigen[vehiculo.patente]}"></td-->
 
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
@@ -259,7 +257,7 @@
 
 
 
-                                        <a th:if="${esAdministrador}"
+                                     <!-- th:if="${esAdministrador}" -->   <a 
                                             th:href="@{/vehiculos/editar/{patente}(patente=${vehiculo.patente})}"
                                             class="text-yellow-600 hover:text-yellow-900 p-1 rounded" title="Editar">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +278,7 @@
                                         </a>
 
 
-                                        <form th:if="${esAdministrador}"
+                                 <!-- th:if="${esAdministrador}" -->       <form 
                                             th:action="@{/vehiculos/eliminar-con-historial/{patente}(patente=${vehiculo.patente})}"
                                             method="post" class="inline">
                                             <button type="submit"

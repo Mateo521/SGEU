@@ -279,28 +279,7 @@ public class VehiculoService {
     }
 
     public List<Vehiculo> obtenerTodosVehiculosPorGuardia(Long guardiaId) {
-        try {
-            System.out.println("Obteniendo TODOS los vehículos registrados por guardia ID: " + guardiaId);
-
-            List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
-
-            if (idsEstacionamientos.isEmpty()) {
-                System.out.println("Guardia sin estacionamientos asignados");
-                return List.of();
-            }
-
-            System.out.println("Estacionamientos del guardia: " + idsEstacionamientos);
-
-            List<Vehiculo> vehiculos = vehiculoRepo.findAllVehiculosByGuardiaEstacionamientos(idsEstacionamientos);
-
-            System.out.println("Total vehículos encontrados: " + vehiculos.size());
-            return vehiculos;
-
-        } catch (Exception e) {
-            System.err.println(" Error al obtener todos los vehículos por guardia: " + e.getMessage());
-            e.printStackTrace();
-            return obtenerTodos();
-        }
+         return obtenerTodos(); 
     }
 
     public String obtenerEstacionamientoOrigenVehiculo(String patente, Long guardiaId) {
