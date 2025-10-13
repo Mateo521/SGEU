@@ -67,6 +67,7 @@ public class RegistroEstacionamientoService {
     }
 
     public List<String> obtenerPatentesAdentroMasDeCuatroHoras(Estacionamiento est) {
+        System.out.println("PASO EL ESTACIONAMIENTO NUMERO "+est.getIdEst());
         return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getIdEst());
     }
 

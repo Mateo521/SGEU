@@ -229,7 +229,7 @@ public String index(HttpSession session, Model model,
         return "ieManual"; }
         
 
-@ModelAttribute("patentesVencidas")
+/*@ModelAttribute("patentesVencidas")
     public List<String> cargarPatentesVencidas(HttpSession session) {
         Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
          if (est == null) {
@@ -239,5 +239,5 @@ public String index(HttpSession session, Model model,
     }
         System.out.println("ESTACIONAMIENOT: "+est.getIdEst());
         return registroEstacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
-    }
+    }*/
 }

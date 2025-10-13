@@ -506,41 +506,48 @@ public class VehiculoController {
         }
     }
 
-    @GetMapping("/search")
-    public String buscar(@RequestParam(value = "q", required = false) String patente,
-            @RequestParam(value = "category", required = false) String category,
-            Model model,
-            HttpSession session) {
-
-        boolean resultado = true;
+   @PostMapping("/registrar-movimiento")
+    public String registrarMovimiento(@RequestParam String patente,
+                                      @RequestParam String accion,
+                                      RedirectAttributes redirectAttributes,
+                                      HttpSession session) {
 
         Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
+        String mensaje = "";
+        boolean exito = false;
 
-        if ("Entrada".equals(category) && vehiculoService.existePatente(patente)
-                && registroestacionamientoService.esPar(patente)) {
-            // buscar vehiculo en la tabla
-            System.out.println("entro al entrada");
-            registroestacionamientoService.registrarEntrada(patente, est1);
-            model.addAttribute("category", category);
-            model.addAttribute("resultado", resultado);
-            model.addAttribute("patente", patente);
-            resultado = true;
-            return "ieManual";
-        } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)) {
-            System.out.println("entro al salida");
-            registroestacionamientoService.registrarSalida(patente, est1);
-            model.addAttribute("category", category);
-            model.addAttribute("resultado", resultado);
-            model.addAttribute("patente", patente);
-            resultado = true;
-            return "ieManual";
+        if ("ingreso".equalsIgnoreCase(accion)) {
+            // Verificamos todas las condiciones para una entrada válida
+            if (!vehiculoService.existePatente(patente)) {
+                mensaje = "La patente '" + patente + "' no está registrada en el sistema.";
+            } else if (!registroestacionamientoService.esPar(patente)) {
+                mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
+            } else {
+                // Si todo está bien, registramos la entrada
+                registroestacionamientoService.registrarEntrada(patente, est1);
+                mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
+                exito = true;
+            }
+        } else if ("egreso".equalsIgnoreCase(accion)) {
+            // Verificamos las condiciones para una salida válida
+            if (registroestacionamientoService.esPar(patente)) {
+                mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
+            } else {
+                // Si todo está bien, registramos la salida
+                registroestacionamientoService.registrarSalida(patente, est1);
+                mensaje = "Salida de '" + patente + "' registrada con éxito.";
+                exito = true;
+            }
+        } else {
+            mensaje = "Acción no válida.";
         }
-        System.out.println("no entro a ninguno");
-        resultado = false;
-        model.addAttribute("category", category);
-        model.addAttribute("resultado", resultado);
-        model.addAttribute("patente", patente);
-        return "ieManual"; // tu vista (templates/ieManual.html)
+
+        // Añadimos los atributos para el toast, que sobrevivirán a la redirección
+        redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
+        redirectAttributes.addFlashAttribute("mensaje", mensaje);
+
+        // Redirigimos a la vista del formulario (cambia "/ieManual" por tu URL GET)
+        return "redirect:/ieManual";
     }
 
 }
