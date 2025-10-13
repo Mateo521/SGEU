@@ -12,6 +12,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+
 @Service
 public class VehiculoService {
 
@@ -324,4 +331,37 @@ public class VehiculoService {
     public long contarVehiculosEnEstacionamientos(List<Long> idsEstacionamientos) {
         return obtenerPorEstacionamientos(idsEstacionamientos).size();
     }
+
+
+
+
+
+
+
+
+
+ 
+public Page<Vehiculo> obtenerTodosPaginado(Pageable pageable) {
+    System.out.println("Obteniendo página: " + pageable.getPageNumber() + 
+                      ", tamaño: " + pageable.getPageSize());
+    return vehiculoRepo.findAll(pageable);
+}
+
+public Page<Vehiculo> obtenerTodosPorGuardiaPaginado(Long guardiaId, Pageable pageable) {
+    System.out.println("Guardia " + guardiaId + " - Página: " + pageable.getPageNumber());
+    
+    return vehiculoRepo.findAll(pageable);
+}
+
+public Page<Vehiculo> buscarVehiculosPorPatentePaginado(String patente, Pageable pageable) {
+    System.out.println("Buscando '" + patente + "' - Página: " + pageable.getPageNumber());
+    return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
+}
+
+public Page<Vehiculo> buscarPorPatenteYGuardiaPaginado(String patente, Long guardiaId, Pageable pageable) {
+    System.out.println("Guardia " + guardiaId + " buscando '" + patente + "' - Página: " + pageable.getPageNumber());
+   
+    return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
+}
+
 }
