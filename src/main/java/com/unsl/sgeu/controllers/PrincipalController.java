@@ -237,7 +237,7 @@ public class PrincipalController {
         return "ieManual";
     }
 
-    @ModelAttribute("patentesVencidas")
+/*@ModelAttribute("patentesVencidas")
     public List<String> cargarPatentesVencidas(HttpSession session) {
         Estacionamiento est = (Estacionamiento) session.getAttribute("estacionamiento");
         if (est == null) {
@@ -247,5 +247,5 @@ public class PrincipalController {
         }
         System.out.println("ESTACIONAMIENOT: " + est.getIdEst());
         return registroEstacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
-    }
+    }*/
 }
