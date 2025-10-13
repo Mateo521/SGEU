@@ -89,8 +89,7 @@
 
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
     <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div class="container mx-auto px-4 py-8 border-2 border-dashed border-gray-200 rounded-2xl">
-            <!-- Header -->
+        <div class="container mx-auto px-4 py-8 rounded-2xl">
             <div class="mb-8 fade-in">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
@@ -117,7 +116,6 @@
                 </div>
             </div>
 
-            <!-- Filters and Search -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="md:col-span-2">
@@ -156,7 +154,6 @@
                 </div>
             </div>
 
-            <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white rounded-xl shadow-lg p-6 fade-in">
                     <div class="flex items-center justify-between">
@@ -219,7 +216,6 @@
                 </div>
             </div>
 
-            <!-- Table -->
             <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
                 <div class="overflow-x-auto">
                     <table class="w-full" id="employeeTable">
@@ -245,7 +241,6 @@
                         <tbody class="divide-y divide-slate-100" id="tableBody">
                             <tr th:each="e : ${empleados}" class="table-row-hover"
                                 th:attr="data-id=${e.id}, data-nombre=${e.nombre}, data-apellido=${e.apellido}, data-usuario=${e.nombreUsuario}, data-cargo=${e.rol}, data-correo=${e.correo}">
-                                <!-- Nombre completo -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div
@@ -260,24 +255,20 @@
                                     </div>
                                 </td>
 
-                                <!-- Usuario -->
                                 <td class="px-6 py-4">
                                     <span class="text-slate-600 font-medium" th:text="${e.nombreUsuario}"></span>
                                 </td>
 
-                                <!-- Cargo -->
                                 <td class="px-6 py-4">
                                     <span th:text="${e.rol}"
                                         th:classappend="${e.rol.toString() == 'Administrador'} ? 'text-xs font-medium px-3 py-1.5 rounded-full bg-purple-100 text-purple-800' : 'text-xs font-medium px-3 py-1.5 rounded-full bg-orange-100 text-orange-800'">
                                     </span>
                                 </td>
 
-                                <!-- Email -->
                                 <td class="px-6 py-4">
                                     <span class="text-slate-600" th:text="${e.correo}"></span>
                                 </td>
 
-                                <!-- Acciones -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
                                         <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
@@ -303,7 +294,6 @@
             </div>
         </div>
 
-        <!-- Edit Modal -->
         <div id="editModal"
             class="hidden fixed inset-0 z-50 modal-backdrop bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
@@ -377,7 +367,6 @@
         </div>
 
         <script>
-            // Filtrado de tabla por texto y selectores
             function filterTable() {
                 const q = document.getElementById('searchInput').value.toLowerCase().trim();
                 const cargo = document.getElementById('cargoFilter').value;
@@ -394,7 +383,6 @@
 
                     const matchesQuery = q === '' || nombre.includes(q) || apellido.includes(q) || usuario.includes(q) || correo.includes(q);
                     const matchesCargo = cargo === '' || rol.includes(cargo.toLowerCase());
-                    // status no disponible en datos; ignoramos por ahora o puedes mapearlo en backend
                     const matchesStatus = true;
 
                     const show = matchesQuery && matchesCargo && matchesStatus;
@@ -404,7 +392,6 @@
                         total++;
                         if (rol.includes('administrador') || rol.includes('admin')) admins++;
                         if (rol.includes('guardia')) guardias++;
-                        // ejemplo: consideramos todos 'online' por ahora
                         online++;
                     }
                 });
@@ -415,7 +402,6 @@
                 document.getElementById('guardiaCount').textContent = guardias;
             }
 
-            // Abrir modal y poblar formulario con atributos data-
             function openEditModal(btn) {
                 const tr = btn.closest('tr');
                 if (!tr) return;
@@ -442,16 +428,14 @@
                 document.getElementById('editModal').classList.add('hidden');
             }
 
-            // Handler para eliminar (puedes adaptar para enviar petición al backend)
-            function onDelete(btn) {
-                const tr = btn.closest('tr');
-                if (!tr) return;
-                const nombre = tr.getAttribute('data-nombre') + ' ' + tr.getAttribute('data-apellido');
-                if (!confirm(`¿Eliminar al usuario ${nombre}?`)) return;
-                // Si se desea: crear fetch('/empleados/' + id, { method: 'DELETE' })
-                tr.remove();
-                filterTable();
-            }
+            // function onDelete(btn) {
+            //     const tr = btn.closest('tr');
+            //     if (!tr) return;
+            //     const nombre = tr.getAttribute('data-nombre') + ' ' + tr.getAttribute('data-apellido');
+            //     if (!confirm(`¿Eliminar al usuario ${nombre}?`)) return;
+            //     tr.remove();
+            //     filterTable();
+            // }
 
             document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('editForm').addEventListener('submit', function (e) {
@@ -464,7 +448,6 @@
                     const cargo = document.getElementById('editCargo').value;
                     const email = document.getElementById('editEmail').value;
 
-                    // Actualizar fila correspondiente en el DOM (como ya tenés)
                     const row = document.querySelector(`#tableBody tr[data-id='${id}']`);
                     if (row) {
                         row.setAttribute('data-nombre', nombre);
@@ -483,7 +466,6 @@
                         if (emailCell) emailCell.textContent = email;
                     }
 
-                    // 🧩 === ACA VA EL FETCH ===
                     fetch(`/api/empleados/${id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -498,18 +480,15 @@
                         return response.json();
                     })
                     .then(data => {
-                        console.log('✅ Empleado actualizado en BD:', data);
-                        // opcional: mostrar un toast de éxito
                         closeEditModal();
-                        filterTable(); // refresca la tabla si corresponde
+                        filterTable();
                     })
                     .catch(error => {
-                        console.error('❌ Error en la actualización:', error);
                         alert('Ocurrió un error al guardar los cambios');
                     });
 
                 });
-                filterTable(); // Inicializa contadores al cargar la página
+                filterTable();
             });
 
         </script>
