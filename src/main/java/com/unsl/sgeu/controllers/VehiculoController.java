@@ -528,7 +528,7 @@ public class VehiculoController {
             return "ieManual";
         } else if ("Salida".equals(category) && !registroestacionamientoService.esPar(patente)) {
             System.out.println("entro al salida");
-            registroestacionamientoService.registrarSalida(patente, est1);
+            registroestacionamientoService.registrarSalida(patente, est1,0);
             model.addAttribute("category", category);
             model.addAttribute("resultado", resultado);
             model.addAttribute("patente", patente);

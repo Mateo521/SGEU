@@ -143,7 +143,7 @@ public class QRController {
 
             } else if ("Salida".equals(accion) && !registroestacionamientoService.esPar(patente)) {
 
-                registroestacionamientoService.registrarSalida(patente, estacionamiento);
+                registroestacionamientoService.registrarSalida(patente, estacionamiento, 1);
                 resultado = true;
                 mensaje = "Salida registrada correctamente";
 

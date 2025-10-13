@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @SessionAttributes
 @Service
 public class RegistroEstacionamientoService {
@@ -49,14 +50,19 @@ public class RegistroEstacionamientoService {
         return registroRepo.save(registro);
     }
 
-    public RegistroEstacionamiento registrarSalida(String patente, Estacionamiento est) {
+    public RegistroEstacionamiento registrarSalida(String patente, Estacionamiento est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         registro.setTipo("SALIDA");
         registro.setIdEstacionamiento(est.getIdEst());
-        registro.setModo("MANUAL");
+        if (modo == 0) {
+            registro.setModo("MANUAL");
+        } else {
+            registro.setModo("QR");
+        }
+
         return registroRepo.save(registro);
     }
 
@@ -200,120 +206,91 @@ public class RegistroEstacionamientoService {
         }
     }
 
+    public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento) {
+        try {
+            System.out.println("Obteniendo vehículos actualmente en estacionamiento ID: " + idEstacionamiento);
 
+            List<String> patentesAdentro = registroRepo.findPatentesAdentroMasDeCuatroHoras(idEstacionamiento);
 
+            List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
 
+            LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+            LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
 
+            List<RegistroEstacionamiento> registrosHoy = registroRepo
+                    .findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
+                            idEstacionamiento, inicioDelDia, finDelDia);
 
+            Map<String, RegistroEstacionamiento> ultimosPorPatente = new HashMap<>();
 
-
-
-
-
-
-
-
-
-
-public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento) {
-    try {
-        System.out.println("Obteniendo vehículos actualmente en estacionamiento ID: " + idEstacionamiento);
-        
-      
-        List<String> patentesAdentro = registroRepo.findPatentesAdentroMasDeCuatroHoras(idEstacionamiento);
-        
-         List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
-        
-         LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
-        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
-        
-        List<RegistroEstacionamiento> registrosHoy = registroRepo.findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
-            idEstacionamiento, inicioDelDia, finDelDia);
-        
-         Map<String, RegistroEstacionamiento> ultimosPorPatente = new HashMap<>();
-        
-        for (RegistroEstacionamiento registro : registrosHoy) {
-            String patente = registro.getPatente();
-            if (!ultimosPorPatente.containsKey(patente)) {
-                ultimosPorPatente.put(patente, registro);
+            for (RegistroEstacionamiento registro : registrosHoy) {
+                String patente = registro.getPatente();
+                if (!ultimosPorPatente.containsKey(patente)) {
+                    ultimosPorPatente.put(patente, registro);
+                }
             }
-        }
-        
-         for (RegistroEstacionamiento registro : ultimosPorPatente.values()) {
-            if ("ENTRADA".equals(registro.getTipo())) {
-                vehiculosAdentro.add(registro);
+
+            for (RegistroEstacionamiento registro : ultimosPorPatente.values()) {
+                if ("ENTRADA".equals(registro.getTipo())) {
+                    vehiculosAdentro.add(registro);
+                }
             }
+
+            vehiculosAdentro.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
+
+            System.out.println(
+                    " Encontrados " + vehiculosAdentro.size() + " vehículos actualmente en el estacionamiento");
+            return vehiculosAdentro;
+
+        } catch (Exception e) {
+            System.err.println(" Error obteniendo vehículos en estacionamiento: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-        
-         vehiculosAdentro.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
-        
-        System.out.println(" Encontrados " + vehiculosAdentro.size() + " vehículos actualmente en el estacionamiento");
-        return vehiculosAdentro;
-        
-    } catch (Exception e) {
-        System.err.println(" Error obteniendo vehículos en estacionamiento: " + e.getMessage());
-        e.printStackTrace();
-        return new ArrayList<>();
     }
-}
 
-// Obtener egresos del día actual
-public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
-    try {
-        System.out.println(" Obteniendo egresos del día para estacionamiento ID: " + idEstacionamiento);
-        
-        LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
-        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
-        
-        List<RegistroEstacionamiento> egresos = registroRepo.findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
-            idEstacionamiento, "SALIDA", inicioDelDia, finDelDia);
-        
-        System.out.println(" Encontrados " + egresos.size() + " egresos del día");
-        return egresos;
-        
-    } catch (Exception e) {
-        System.err.println(" Error obteniendo egresos del día: " + e.getMessage());
-        e.printStackTrace();
-        return new ArrayList<>();
+    // Obtener egresos del día actual
+    public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
+        try {
+            System.out.println(" Obteniendo egresos del día para estacionamiento ID: " + idEstacionamiento);
+
+            LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+            LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+
+            List<RegistroEstacionamiento> egresos = registroRepo
+                    .findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
+                            idEstacionamiento, "SALIDA", inicioDelDia, finDelDia);
+
+            System.out.println(" Encontrados " + egresos.size() + " egresos del día");
+            return egresos;
+
+        } catch (Exception e) {
+            System.err.println(" Error obteniendo egresos del día: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
-}
 
-public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento) {
-    try {
-        System.out.println(" Obteniendo ingresos del día para estacionamiento ID: " + idEstacionamiento);
-        
-        LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
-        LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
-        
-        List<RegistroEstacionamiento> ingresos = registroRepo.findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
-            idEstacionamiento, "ENTRADA", inicioDelDia, finDelDia);
-        
-        System.out.println(" Encontrados " + ingresos.size() + " ingresos del día");
-        return ingresos;
-        
-    } catch (Exception e) {
-        System.err.println(" Error obteniendo ingresos del día: " + e.getMessage());
-        e.printStackTrace();
-        return new ArrayList<>();
+    public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento) {
+        try {
+            System.out.println(" Obteniendo ingresos del día para estacionamiento ID: " + idEstacionamiento);
+
+            LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
+            LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+
+            List<RegistroEstacionamiento> ingresos = registroRepo
+                    .findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
+                            idEstacionamiento, "ENTRADA", inicioDelDia, finDelDia);
+
+            System.out.println(" Encontrados " + ingresos.size() + " ingresos del día");
+            return ingresos;
+
+        } catch (Exception e) {
+            System.err.println(" Error obteniendo ingresos del día: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public EstadoVehiculo obtenerEstadoDetallado(String patente) {
         try {
