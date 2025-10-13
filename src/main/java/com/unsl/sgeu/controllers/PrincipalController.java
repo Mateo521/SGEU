@@ -63,7 +63,7 @@ public class PrincipalController {
             System.out.println("Acceso no autorizado. Redirigiendo a login.");
             return "redirect:/login";
         }
-
+  
         System.out.println("URL completa: " + request.getRequestURL());
         System.out.println("URI: " + request.getRequestURI());
         System.out.println("Método HTTP: " + request.getMethod());
