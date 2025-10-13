@@ -83,7 +83,6 @@
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
     <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="container mx-auto px-4 py-8">
-            <!-- Header -->
             <div class="mb-8 fade-in">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
@@ -101,7 +100,6 @@
                 </div>
             </div>
 
-            <!-- Filtros -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
                 <form id="filtro" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
@@ -136,9 +134,7 @@
 
             <div id="info" class="text-center text-blue-600 font-medium mb-6 text-lg"></div>
 
-            <!-- Grid superior: 3 columnas -->
             <div class="grid lg:grid-cols-3 gap-6 mb-6">
-                <!-- Categorías -->
                 <div class="glass-card rounded-xl p-6 fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-slate-800 flex items-center">
@@ -166,7 +162,6 @@
                     </div>
                 </div>
 
-                <!-- Tipo de Vehículo -->
                 <div class="glass-card rounded-xl p-6 fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-slate-800 flex items-center">
@@ -193,7 +188,6 @@
                     </div>
                 </div>
 
-                <!-- Modo de Acceso -->
                 <div class="glass-card rounded-xl p-6 fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-slate-800 flex items-center">
@@ -219,9 +213,7 @@
                 </div>
             </div>
 
-            <!-- Grid medio: 2 columnas -->
             <div class="grid lg:grid-cols-2 gap-6 mb-6">
-                <!-- Ocupación -->
                 <div class="glass-card rounded-xl p-6 fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-bold text-slate-800 flex items-center">
@@ -250,7 +242,6 @@
                     </div>
                 </div>
 
-                <!-- Horarios pico -->
                 <div class="glass-card rounded-xl p-6 fade-in">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xl font-bold text-slate-800 flex items-center">
@@ -276,7 +267,6 @@
                 </div>
             </div>
 
-            <!-- Evolución diaria - Full Width -->
             <div class="glass-card rounded-xl p-6 mb-6 fade-in">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-xl font-bold text-slate-800 flex items-center">
@@ -472,7 +462,6 @@
                 }
             };
 
-            // Categorías
             const categoriasRows = [];
             (data.categorias||[]).forEach(c => {
                 categoriasRows.push(`
@@ -496,7 +485,6 @@
                 tbody.innerHTML = categoriasRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
             }
 
-            // Chart Categorías
             const categoriasLabels = data.categoriasLabels || (data.categorias||[]).map(c=>c.categoria);
             const categoriasData = data.categoriasData || (data.categorias||[]).map(c=>c.cantidad);
             const ctxC = document.getElementById('chartCategorias').getContext('2d');
@@ -527,7 +515,6 @@
                 }
             });
 
-            // Tipo de Vehículo
             const vehRows = [];
             const vehData = data.distribucionTipoVehiculo || data.tipoVehiculo || [];
             vehData.forEach(v => {
@@ -544,7 +531,6 @@
             const tbodyVeh = document.querySelector('#tablaVehiculo tbody');
             tbodyVeh.innerHTML = vehRows.map(r => `<tr class="table-row-hover">${r}</tr>`).join('');
 
-            // Chart Tipo Vehículo
             const vehLabels = vehData.map(v => v.tipo);
             const vehCounts = vehData.map(v => v.cantidad);
             const ctxV = document.getElementById('chartVehiculo').getContext('2d');
@@ -574,7 +560,6 @@
                 }
             });
 
-            // Modos
             const modoRows = [];
             (data.conteoModos||data.modoConteo||[]).forEach(m => {
                 const icon = m.modo === 'MANUAL' ? 'fa-hand-pointer' : 'fa-qrcode';
@@ -598,7 +583,6 @@
                 tbody.innerHTML = modoRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
             }
 
-            // Chart Modo
             const modoData = data.conteoModos || data.modoConteo || [];
             const ctxM = document.getElementById('chartModo').getContext('2d');
             chartInstances.modo = new Chart(ctxM, { 
@@ -649,7 +633,6 @@
                 } 
             });
 
-            // Ocupación
             const ocupacionRows = [];
             const ocupList = (data.porcentajeOcupacion && data.porcentajeOcupacion.length>0) ? data.porcentajeOcupacion : null;
             if(ocupList){
@@ -677,7 +660,6 @@
                 tbody.innerHTML = ocupacionRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
             }
 
-            // Chart Ocupación
             const ocupLabels = data.ocupacionLabels || (data.porcentajeOcupacion||[]).map(e=>e.nombre);
             const ocupData = data.ocupacionData || (data.porcentajeOcupacion||[]).map(e=>e.porcentaje);
             const ctxO = document.getElementById('chartOcupacion').getContext('2d');
@@ -686,7 +668,7 @@
                 data:{ 
                     labels:ocupLabels, 
                     datasets:[{ 
-                        label:'% Ocupación', 
+                        label:'% Ocupación con respecto a capacidad', 
                         data:ocupData,
                         backgroundColor: ocupData.map((_, i) => {
                             const colors = [
@@ -719,7 +701,6 @@
                 } 
             });
 
-            // Evolución
             const evolucionRows = [];
             (data.evolucion||[]).forEach(d => {
                 evolucionRows.push(`
@@ -742,7 +723,6 @@
                 tbody.innerHTML = evolucionRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
             }
 
-            // Chart Evolución
             const evoLabels = data.evolucionLabels || (data.evolucion||[]).map(d=>d.dia);
             const evoData = data.evolucionData || (data.evolucion||[]).map(d=>d.cantidad);
             const ctxE = document.getElementById('chartEvolucion').getContext('2d');
@@ -793,7 +773,6 @@
                 } 
             });
 
-            // Horarios
             const horariosRows = [];
             (data.horariosPico||[]).forEach(h => {
                 horariosRows.push(`
@@ -815,7 +794,6 @@
                 tbody.innerHTML = horariosRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
             }
 
-            // Chart Horarios
             const horarios = data.horariosPico || [];
             const ctxH = document.getElementById('chartHorarios').getContext('2d');
             chartInstances.horarios = new Chart(ctxH, { 
