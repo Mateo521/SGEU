@@ -2,8 +2,6 @@ package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
-import com.unsl.sgeu.config.SessionInterceptor;
-import com.unsl.sgeu.controllers.LoginController;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.transaction.annotation.Propagation;
-import jakarta.servlet.http.HttpSession;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import com.unsl.sgeu.services.EstadoVehiculo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

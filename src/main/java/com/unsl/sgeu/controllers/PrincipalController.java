@@ -1,34 +1,24 @@
 package com.unsl.sgeu.controllers;
 
 import com.unsl.sgeu.dto.EstacionamientoDTO;
-import com.unsl.sgeu.models.DetallesInfo;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.Map;
-
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import com.unsl.sgeu.dto.PanelDTO;

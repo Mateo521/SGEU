@@ -1,11 +1,5 @@
 package com.unsl.sgeu;
 
-import com.unsl.sgeu.models.Categoria;
-import com.unsl.sgeu.models.Empleado;
-import com.unsl.sgeu.models.Persona;
-import com.unsl.sgeu.models.Rol;
-import com.unsl.sgeu.models.Vehiculo;
-import com.unsl.sgeu.models.VehiculoTipo;
 import com.unsl.sgeu.repositories.EmpleadoRepository;
 import com.unsl.sgeu.repositories.PersonaRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
@@ -40,28 +34,7 @@ public class SgeuApplication {
             VehiculoService vehiculoService
     ) {
         return args -> {
-            // ===== 1) Catálogo =====
-            Categoria catEstudiante = categoriaService.getOrCreateByNombre("estudiante");
-            VehiculoTipo tipoAuto   = vehiculoTipoService.getOrCreateByNombre("auto");
-
-        
-     
-         
-           
-            // ===== 5) Empleado admin =====
-            String user = "admin";
-            Empleado admin = empleadoRepo.findByNombreUsuario(user);
-            if (admin == null) {
-                Empleado e = new Empleado();
-                e.setNombre("Gero");
-                e.setApellido("Arias");
-                e.setCorreo("gero@example.com");
-                e.setNombreUsuario(user);
-                e.setContrasenia("admin123"); // TODO: en producción encriptar
-                e.setRol(Rol.Administrador);          // <--- enum, no int
-                empleadoRepo.save(e);
-            }
-
+            System.out.println("⏳ Iniciando seed: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin...");
             System.out.println("✅ Seed listo: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin.");
         };
     }

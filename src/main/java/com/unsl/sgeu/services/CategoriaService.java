@@ -3,7 +3,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.unsl.sgeu.*;
 import com.unsl.sgeu.models.Categoria;
 import com.unsl.sgeu.repositories.CategoriaRepository;
 

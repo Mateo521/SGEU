@@ -1,6 +1,5 @@
 package com.unsl.sgeu.repositories;
 
-import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.RegistroEstacionamiento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -1,15 +1,9 @@
 package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.models.Persona;
-import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.PersonaRepository;
-import com.unsl.sgeu.repositories.VehiculoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
