@@ -137,7 +137,7 @@ public class QRController {
             if ("Entrada".equals(accion) && vehiculoService.existePatente(patente)
                     && registroestacionamientoService.esPar(patente)) {
 
-                registroestacionamientoService.registrarEntrada(patente, estacionamiento);
+                registroestacionamientoService.registrarEntrada(patente, estacionamiento , 1);
                 resultado = true;
                 mensaje = "Entrada registrada correctamente";
 

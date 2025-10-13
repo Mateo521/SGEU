@@ -19,6 +19,8 @@ import com.unsl.sgeu.services.EstadoVehiculo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,16 +39,21 @@ public class RegistroEstacionamientoService {
     @Autowired
     private EstacionamientoService estacionamientoService;
 
-    public RegistroEstacionamiento registrarEntrada(String patente, Estacionamiento est) {
+    public RegistroEstacionamiento registrarEntrada(String patente, Estacionamiento est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
+        System.out.println(""+registro.getFechaHora().toString());
         registro.setTipo("ENTRADA");
         System.out.println(est.getIdEst());
         registro.setIdEstacionamiento(est.getIdEst());
-        registro.setModo("MANUAL");
+        if (modo == 0) {
+            registro.setModo("MANUAL");
+        } else {
+            registro.setModo("QR");
+        }
         return registroRepo.save(registro);
     }
 
@@ -55,6 +62,7 @@ public class RegistroEstacionamientoService {
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
+        System.out.println(""+registro.getFechaHora().toString());
         registro.setTipo("SALIDA");
         registro.setIdEstacionamiento(est.getIdEst());
         if (modo == 0) {
@@ -67,13 +75,13 @@ public class RegistroEstacionamientoService {
     }
 
     public boolean esPar(String patente) {
-
+        
         long cantidad = registroRepo.countByPatente(patente);
         return cantidad % 2 == 0;
     }
 
     public List<String> obtenerPatentesAdentroMasDeCuatroHoras(Estacionamiento est) {
-        System.out.println("PASO EL ESTACIONAMIENTO NUMERO "+est.getIdEst());
+        System.out.println("PASO EL ESTACIONAMIENTO NUMERO " + est.getIdEst());
         return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getIdEst());
     }
 
@@ -211,16 +219,12 @@ public class RegistroEstacionamientoService {
         try {
             System.out.println("Obteniendo vehículos actualmente en estacionamiento ID: " + idEstacionamiento);
 
-            List<String> patentesAdentro = registroRepo.findPatentesAdentroMasDeCuatroHoras(idEstacionamiento);
-
             List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
 
-            LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
-            LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
+  
+             
 
-            List<RegistroEstacionamiento> registrosHoy = registroRepo
-                    .findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
-                            idEstacionamiento, inicioDelDia, finDelDia);
+            List<RegistroEstacionamiento> registrosHoy = registroRepo.findRegistrosDePatentesImpares(idEstacionamiento);
 
             Map<String, RegistroEstacionamiento> ultimosPorPatente = new HashMap<>();
 
@@ -255,12 +259,10 @@ public class RegistroEstacionamientoService {
         try {
             System.out.println(" Obteniendo egresos del día para estacionamiento ID: " + idEstacionamiento);
 
-            LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
-            LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
-
+           
             List<RegistroEstacionamiento> egresos = registroRepo
-                    .findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
-                            idEstacionamiento, "SALIDA", inicioDelDia, finDelDia);
+                    .findRegistrosDePatentePares(
+                            idEstacionamiento);
 
             System.out.println(" Encontrados " + egresos.size() + " egresos del día");
             return egresos;

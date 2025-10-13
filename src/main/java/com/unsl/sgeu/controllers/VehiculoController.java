@@ -524,7 +524,7 @@ public class VehiculoController {
                 mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
             } else {
                 // Si todo está bien, registramos la entrada
-                registroestacionamientoService.registrarEntrada(patente, est1);
+                registroestacionamientoService.registrarEntrada(patente, est1 , 0);
                 mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
                 exito = true;
             }
@@ -534,7 +534,7 @@ public class VehiculoController {
                 mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
             } else {
                 // Si todo está bien, registramos la salida
-                registroestacionamientoService.registrarSalida(patente, est1);
+                registroestacionamientoService.registrarSalida(patente, est1 , 0);
                 mensaje = "Salida de '" + patente + "' registrada con éxito.";
                 exito = true;
             }
