@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>SGEU - Universidad Nacional de San Luis
     </title>
-
-    <link rel="icon" type="image/x-icon" href="/images/escudo-unsl.png" />
+    <base href="/sgeu/">
+    <link rel="icon" type="image/x-icon" href="images/escudo-unsl.png" />
 
 </head>
 
@@ -46,25 +46,25 @@
 
 
 
-<script>
-    /**
-     * Función que crea y muestra un toast individual para una matrícula específica.
-     * (Esta función no cambia)
-     */
-    const mostrarToastPorPatente = (patente) => {
-        const toastId = 'toast-' + patente.replace(/[^a-zA-Z0-9]/g, '');
-        if (document.getElementById(toastId)) {
-            return;
-        }
+    <script>
+        /**
+         * Función que crea y muestra un toast individual para una matrícula específica.
+         * (Esta función no cambia)
+         */
+        const mostrarToastPorPatente = (patente) => {
+            const toastId = 'toast-' + patente.replace(/[^a-zA-Z0-9]/g, '');
+            if (document.getElementById(toastId)) {
+                return;
+            }
 
-        const toastDiv = document.createElement('div');
-        toastDiv.id = toastId;
-        toastDiv.className = 'fixed top-4 right-4 bg-orange-50 border-l-4 border-orange-500 text-orange-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
-        
-        const toastsVisibles = document.querySelectorAll('.fixed.top-4.right-4').length;
-        toastDiv.style.transform = `translateY(${toastsVisibles * 75}px)`;
+            const toastDiv = document.createElement('div');
+            toastDiv.id = toastId;
+            toastDiv.className = 'fixed top-4 right-4 bg-orange-50 border-l-4 border-orange-500 text-orange-800 p-4 rounded-lg shadow-lg z-50 max-w-md animate-slide-in';
 
-        toastDiv.innerHTML = `
+            const toastsVisibles = document.querySelectorAll('.fixed.top-4.right-4').length;
+            toastDiv.style.transform = `translateY(${toastsVisibles * 75}px)`;
+
+            toastDiv.innerHTML = `
             <div class="flex items-center">
                 <svg class="w-6 h-6 mr-3 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 <div>
@@ -74,41 +74,41 @@
                 <button onclick="document.getElementById('${toastId}').remove()" class="ml-4 text-orange-500 hover:text-orange-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
         `;
-        
-        document.body.appendChild(toastDiv);
-    };
 
-    /**
-     * Función asíncrona que consulta la API del backend.
-     * (Esta función no cambia)
-     */
-    const verificarVencidos = async () => {
-        try {
-            const response = await fetch('/api/alertas/vencidas');
-            if (!response.ok) return;
-            const patentes = await response.json();
+            document.body.appendChild(toastDiv);
+        };
 
-            if (patentes.length > 0) {
-                patentes.forEach(patente => {
-                    mostrarToastPorPatente(patente);
-                });
+        /**
+         * Función asíncrona que consulta la API del backend.
+         * (Esta función no cambia)
+         */
+        const verificarVencidos = async () => {
+            try {
+                const response = await fetch('/api/alertas/vencidas');
+                if (!response.ok) return;
+                const patentes = await response.json();
+
+                if (patentes.length > 0) {
+                    patentes.forEach(patente => {
+                        mostrarToastPorPatente(patente);
+                    });
+                }
+            } catch (error) {
+                console.error('Error de conexión al verificar alertas:', error);
             }
-        } catch (error) {
-            console.error('Error de conexión al verificar alertas:', error);
-        }
-    };
+        };
 
-    // --- TEMPORIZADOR PURO ---
-    
-    // Define el intervalo de tiempo en milisegundos (30 minutos)
-    const tiempo = 10000; 
-    
-    // Establecemos el temporizador. La primera ejecución ocurrirá DESPUÉS de que pase el primer intervalo.
-    setInterval(verificarVencidos, tiempo);
+        // --- TEMPORIZADOR PURO ---
 
-    console.log(`La verificación de vehículos vencidos se ejecutará por primera vez en ${tiempo / 60000} minutos y luego se repetirá.`);
+        // Define el intervalo de tiempo en milisegundos (30 minutos)
+        const tiempo = 10000;
 
-</script>
+        // Establecemos el temporizador. La primera ejecución ocurrirá DESPUÉS de que pase el primer intervalo.
+        setInterval(verificarVencidos, tiempo);
+
+        console.log(`La verificación de vehículos vencidos se ejecutará por primera vez en ${tiempo / 60000} minutos y luego se repetirá.`);
+
+    </script>
 </body>
 
 </html>

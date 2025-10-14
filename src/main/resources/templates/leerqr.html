@@ -58,7 +58,7 @@
                                 clearTimeout(clearTimeoutId);
                             }
 
-                            fetch("/qr/procesar", {
+                            fetch("qr/procesar", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ codigo: code.data })
@@ -159,7 +159,7 @@
                     button.disabled = true;
                     button.innerHTML = '⏳ Procesando...';
 
-                    fetch("/qr/procesar-accion", {
+                    fetch("qr/procesar-accion", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ 
