@@ -1,27 +1,101 @@
-<!-- Estacionamientos - UI estilo "Asignar Estacionamientos" -->
+<!-- Estacionamientos - UI mejorada -->
 <div th:fragment="estacionamientos-config">
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .table-row-hover {
+      transition: all 0.2s ease;
+    }
+
+    .table-row-hover:hover {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+      transform: scale(1.005);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-content {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .status-badge {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.85;
+      }
+    }
+  </style>
 
   <!-- Barra superior -->
-  <div class="mb-6 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/70 p-4">
-    <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-      <div class="flex-1 flex gap-3">
-        <div class="relative flex-1">
-          <input id="pk-search" type="text" placeholder="Buscar por nombre o código..."
-                 class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">🔎</span>
+  <div class="mb-6 bg-white rounded-xl shadow-lg p-6 fade-in ">
+    <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end justify-between">
+      <div class="flex-1">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">
+          <svg class="w-4 h-4 inline mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Buscar Estacionamiento
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input id="pk-search" type="text" placeholder="Buscar por nombre, dirección o capacidad..."
+                 class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder:text-slate-400" />
         </div>
       </div>
 
-      <button id="pk-add"
-              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white shadow-md hover:bg-indigo-700 transition">
-        <span class="text-lg leading-none">＋</span> Agregar estacionamiento
-      </button>
+      <div class="flex items-end">
+        <button id="pk-add"
+                class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transform transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Agregar Estacionamiento
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Tabla -->
-  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-    <div class="overflow-x-auto">
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
+    <div class="overflow-hidden">
       <table class="w-full" id="parkingTable">
         <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
           <tr>
@@ -36,47 +110,94 @@
       </table>
     </div>
 
-    <div class="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200">
-      <div class="text-slate-600 text-sm">
-        Total de estacionamientos: <span class="font-semibold text-slate-900" id="pk-total">0</span>
+    <div class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200 gap-3">
+      <div class="flex items-center gap-2 text-slate-600 text-sm">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        Total de estacionamientos: <span class="font-bold text-slate-900" id="pk-total">0</span>
       </div>
-      <div class="text-slate-500 text-xs">
-        Última actualización: <span id="pk-lastUpdate"></span>
+      <div class="flex items-center gap-2 text-slate-500 text-xs">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Última actualización: <span id="pk-lastUpdate" class="font-medium"></span>
       </div>
     </div>
   </div>
 
   <!-- Modal Agregar/Editar -->
-  <div id="editParkingModal" class="fixed inset-0 hidden z-50 items-center justify-center bg-black/40 p-4">
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-      <div class="flex items-center justify-between px-6 py-4 border-b">
-        <h3 class="text-lg font-semibold text-slate-900" id="pk-modal-title">Nuevo Estacionamiento</h3>
-        <button id="pk-close" class="text-slate-500 hover:text-slate-700 text-xl">&times;</button>
+  <div id="editParkingModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center bg-black/50 p-4">
+    <div class="modal-content w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2" id="pk-modal-title">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nuevo Estacionamiento
+        </h3>
+        <button id="pk-close" class="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <form id="editParkingForm" class="px-6 py-5 space-y-4">
         <input type="hidden" id="editId">
+        
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Nombre</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Nombre del Estacionamiento
+          </label>
           <input id="editNombre" type="text" required
-                 class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Dirección</label>
-          <input id="editDireccion" type="text" required
-                 class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Capacidad</label>
-          <input id="editCapacidad" type="number" min="1" required
-                 class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: Estacionamiento Norte">
         </div>
 
-        <div class="pt-2 flex justify-end gap-2">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Dirección
+          </label>
+          <input id="editDireccion" type="text" required
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: Av. Corrientes 1234">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Capacidad Total
+          </label>
+          <input id="editCapacidad" type="number" min="1" required
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: 100">
+          <p class="mt-1 text-xs text-slate-500 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Número de espacios disponibles
+          </p>
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row justify-end gap-3">
           <button type="button" id="pk-cancel"
-                  class="px-4 py-2 rounded-xl border border-slate-200 text-sm text-slate-700 hover:bg-slate-50">Cancelar</button>
+                  class="px-6 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition-all duration-200 hover:scale-105">
+            Cancelar
+          </button>
           <button type="submit"
-                  class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700">Guardar</button>
+                  class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 hover:scale-105 shadow-lg">
+            Guardar
+          </button>
         </div>
       </form>
     </div>
@@ -88,15 +209,15 @@
       const API = '/api/estacionamientos';
 
       // === Estado
-      let estacionamientos = [];     // fuente de verdad
-      let filtro = '';               // texto del buscador
+      let estacionamientos = [];
+      let filtro = '';
 
       // === Helpers
       const $ = (sel) => document.querySelector(sel);
       function nowTime() { return new Date().toLocaleTimeString('es-AR'); }
       function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
       function badgeEstado(v){
-        return `<span class="px-2 py-1 rounded-full text-xs font-semibold border ${v ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">
+        return `<span class="status-badge px-3 py-1.5 rounded-full text-xs font-bold border-2 ${v ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">
                   ${v ? 'Activo' : 'Inactivo'}
                 </span>`;
       }
@@ -108,7 +229,6 @@
 
       // === Render
       function render(list = estacionamientos) {
-        // aplica filtro de texto (nombre o direccion o capacidad o código si existiera)
         const q = filtro.toLowerCase();
         const filtered = !q ? list : list.filter(e =>
           (e.nombre||'').toLowerCase().includes(q) ||
@@ -119,40 +239,86 @@
 
         const tbody = $('#tableBody');
         if (!filtered.length) {
-          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">
-                               <div class="text-4xl mb-2">📭</div><div class="text-lg">Sin resultados</div>
-                             </td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-16 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <div class="text-lg font-semibold text-slate-600">Sin resultados</div>
+              <p class="text-sm text-slate-400">Intenta con otra búsqueda</p>
+            </div>
+          </td></tr>`;
         } else {
-          tbody.innerHTML = filtered.map(e => `
-            <tr class="hover:bg-slate-50 transition-colors">
-              <td class="px-6 py-4 ${e.estado===false?'text-slate-400 line-through':''}">${esc(e.nombre)}</td>
-              <td class="px-6 py-4 ${e.estado===false?'text-slate-400':''}" title="${esc(e.direccion||'')}">${esc(e.direccion||'')}</td>
-              <td class="px-6 py-4 ${e.estado===false?'text-slate-400':''}">${esc(e.capacidad)}</td>
+          tbody.innerHTML = filtered.map(e => {
+            const isInactive = e.estado === false;
+            return `
+            <tr class="table-row-hover">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <span class="text-slate-900 font-semibold ${isInactive?'line-through text-slate-400':''}">${esc(e.nombre)}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 ${isInactive?'text-slate-400':'text-slate-600'}">
+                  <svg class="w-4 h-4 ${isInactive?'text-slate-300':'text-blue-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span class="font-medium">${esc(e.direccion||'-')}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${isInactive?'bg-slate-50 text-slate-400':'bg-blue-50 text-blue-700'} border ${isInactive?'border-slate-200':'border-blue-200'} font-semibold">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  ${esc(e.capacidad)}
+                </span>
+              </td>
               <td class="px-6 py-4">${badgeEstado(e.estado!==false)}</td>
               <td class="px-6 py-4">
                 <div class="flex justify-end gap-2">
-                  <button data-edit="${e.id}" class="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50">✏️</button>
-                  <button data-toggle="${e.id}" class="p-2 rounded-lg border ${e.estado===false?'border-emerald-300 text-emerald-700 hover:bg-emerald-50':'border-red-300 text-red-600 hover:bg-red-50'}">
-                    ${e.estado===false?'Activar':'Desactivar'}
+                  <button data-edit="${e.id}" title="Editar" class="p-2 rounded-lg border-2 border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button data-toggle="${e.id}" title="${isInactive?'Activar':'Desactivar'}" class="p-2 rounded-lg border-2 transition-all ${isInactive?'border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300':'border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300'}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      ${isInactive ? 
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />' : 
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />'
+                      }
+                    </svg>
                   </button>
                 </div>
               </td>
             </tr>
-          `).join('');
+          `}).join('');
         }
 
         $('#pk-total').textContent = filtered.length.toString();
         $('#pk-lastUpdate').textContent = nowTime();
 
-        // wire de acciones por fila
         tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(+b.dataset.edit));
         tbody.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleEstado(+b.dataset.toggle));
       }
 
       // === Carga
       async function loadEstacionamientos(){
-        estacionamientos = await api('GET', API) || [];
-        render();
+        try {
+          estacionamientos = await api('GET', API) || [];
+          render();
+        } catch(error) {
+          console.error('Error cargando estacionamientos:', error);
+          estacionamientos = [];
+          render();
+        }
       }
 
       // === Modal
@@ -160,23 +326,38 @@
       const form  = $('#editParkingForm');
 
       function openAdd(){
-        $('#pk-modal-title').textContent = 'Nuevo Estacionamiento';
+        $('#pk-modal-title').innerHTML = `
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nuevo Estacionamiento
+        `;
         form.reset();
         $('#editId').value = '';
         modal.classList.remove('hidden'); modal.classList.add('flex');
       }
+
       function openEdit(id){
         const e = estacionamientos.find(x => x.id === id); if(!e) return;
-        $('#pk-modal-title').textContent = 'Editar Estacionamiento';
+        $('#pk-modal-title').innerHTML = `
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Editar Estacionamiento
+        `;
         $('#editId').value = e.id;
         $('#editNombre').value = e.nombre || '';
         $('#editDireccion').value = e.direccion || '';
         $('#editCapacidad').value = e.capacidad || 1;
         modal.classList.remove('hidden'); modal.classList.add('flex');
       }
-      function closeModal(){ modal.classList.add('hidden'); modal.classList.remove('flex'); }
 
-      // === Guardar (create/update)
+      function closeModal(){ 
+        modal.classList.add('hidden'); 
+        modal.classList.remove('flex'); 
+      }
+
+      // === Guardar
       form.addEventListener('submit', async (ev)=>{
         ev.preventDefault();
         const id = $('#editId').value.trim();
@@ -188,8 +369,11 @@
         try{
           if(id){ await api('PUT', `${API}/${parseInt(id,10)}`, payload); }
           else  { await api('POST', API, payload); }
-          closeModal(); await loadEstacionamientos();
-        }catch(err){ alert(err.message); }
+          closeModal(); 
+          await loadEstacionamientos();
+        }catch(err){ 
+          alert('Error: ' + err.message); 
+        }
       });
 
       // === Activar / Desactivar
@@ -197,25 +381,37 @@
         const e = estacionamientos.find(x=>x.id===id); if(!e) return;
         const nuevo = !(e.estado!==false);
         const texto = nuevo ? 'activar' : 'desactivar';
-        if(!confirm(`¿Seguro que querés ${texto} este estacionamiento?`)) return;
+        if(!confirm(`¿Está seguro de que desea ${texto} este estacionamiento?`)) return;
         try{
           await api('PATCH', `${API}/${id}/estado`, { estado: nuevo });
           await loadEstacionamientos();
-        }catch(err){ alert(err.message); }
+        }catch(err){ 
+          alert('Error: ' + err.message); 
+        }
       }
 
-      // === Búsqueda (arreglada) con debounce
-      let t;
+      // === Búsqueda con debounce
+      let searchTimeout;
       $('#pk-search').addEventListener('input', (e)=>{
-        clearTimeout(t);
-        t = setTimeout(()=>{ filtro = e.target.value || ''; render(); }, 250);
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(()=>{ 
+          filtro = e.target.value || ''; 
+          render(); 
+        }, 250);
       });
 
       // === Wire UI
-      $('#pk-add').onclick   = openAdd;
+      $('#pk-add').onclick = openAdd;
       $('#pk-close').onclick = closeModal;
-      $('#pk-cancel').onclick= closeModal;
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+      $('#pk-cancel').onclick = closeModal;
+      document.addEventListener('keydown', e => { 
+        if (e.key === 'Escape') closeModal(); 
+      });
+
+      // === Update time
+      setInterval(() => { 
+        $('#pk-lastUpdate').textContent = nowTime(); 
+      }, 1000);
 
       // === Init
       document.addEventListener('DOMContentLoaded', loadEstacionamientos);

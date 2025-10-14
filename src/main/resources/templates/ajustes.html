@@ -45,7 +45,7 @@
                         <p class="text-sm text-gray-600">Alta, edición y baja de estacionamientos del sistema</p>
                     </div>
                 </div>
-                <div class="min-h-32 border-2 border-dashed border-gray-200 rounded-xl p-0 text-gray-400 text-sm">
+                <div class="min-h-32 rounded-xl p-0 text-gray-400 text-sm">
                     <div th:replace="estacionamientos :: estacionamientos-config"></div>
                 </div>
             </section>
@@ -71,26 +71,6 @@
                 <div th:replace="asignarestacionamientos :: contenido"></div>
             </section>
 
-
-
-            <!-- Sección de Datos 
-            <section id="data-section"
-                class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 p-8">
-                <div class="flex items-center gap-4 pb-6 mb-6 border-b border-gray-200">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-br from-pink-400 to-yellow-400 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-                        📊
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-1">Gestión de Datos</h2>
-                        <p class="text-sm text-gray-600">Importa, exporta y gestiona tus datos</p>
-                    </div>
-                </div>
-                <div
-                    class="min-h-32 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-xl p-6 text-gray-400 text-sm">
-                    Componente de gestión de datos
-                </div>
-            </section>-->
 
         </div>
         <script th:if="${registerError}">

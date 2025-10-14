@@ -1,192 +1,219 @@
 <div th:fragment="header">
-  <header class="sm:relative absolute">
+  <style>
+    .nav-link {
+      transition: all 0.2s ease;
+    }
 
+    .nav-link:hover {
+      background: linear-gradient(90deg, rgba(155, 185, 231, 0.1) 0%, rgba(51, 54, 234, 0.5) 100%);
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, #3b82f6 0%, #9333ea 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .nav-link.active svg {
+      color: white !important;
+    }
+
+    .nav-badge {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
+    }
+
+    .sidebar-logo {
+      background: linear-gradient(135deg, #9a9ea3 0%, #3e88ff 100%);
+    }
+  </style>
+
+  <header class="sm:relative absolute">
+    <!-- Mobile menu button -->
     <button data-drawer-target="cta-button-sidebar" data-drawer-toggle="cta-button-sidebar"
       aria-controls="cta-button-sidebar" type="button"
-      class="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
-      <span class="sr-only">Open sidebar</span>
-      <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg">
-        <path clip-rule="evenodd" fill-rule="evenodd"
-          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
-        </path>
+      class="inline-flex items-center p-3 mt-2 ms-3 text-slate-600 rounded-lg sm:hidden hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+      <span class="sr-only">Abrir menú</span>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
+    <!-- Sidebar -->
     <aside id="cta-button-sidebar"
-      class="relative top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+      class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform -translate-x-full sm:translate-x-0 sm:relative sm:z-auto bg-gray-100 border-r border-slate-300 shadow-xl"
       aria-label="Sidebar">
-      <div class="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800  md:top-0 top-[-50px] absolute">
-        <ul class="space-y-2 font-medium">
+      <div class="h-full px-4 py-6">
+
+        <!-- Logo/Header -->
+        <div class="mb-8 pb-6 border-b border-slate-200">
+          <div class="sidebar-logo w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-slate-800">Sistema de Estacionamiento</h2>
+          <p class="text-sm text-slate-500 mt-1">Gestión y control</p>
+        </div>
+
+        <!-- Navigation -->
+        <ul class="space-y-2">
           <li>
-            <a href="/"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-
-
-              <svg
-                class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            <a href="/" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
               </svg>
-
-              <span class="ms-3">Inicio</span>
-              <span id="patentes-badge" th:if="${!#lists.isEmpty(patentesVencidas)}"
-                th:text="${#lists.size(patentesVencidas)}"
-                class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300"></span>
+              <span class="flex-1">Inicio</span>
+              <span th:if="${!#lists.isEmpty(patentesVencidas)}" th:text="${#lists.size(patentesVencidas)}"
+                class="nav-badge inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full"></span>
             </a>
           </li>
-
 
           <li>
             <a href="/ieManual"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
-                <path
-                  d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
-                <path
-                  d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">I/E Manual</span>
+              <span class="flex-1">I/E Manual</span>
             </a>
           </li>
-
 
           <li>
-            <a href="/leerqr"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
+            <a href="/leerqr" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4h6v6H4V4Zm10 10h6v6h-6v-6Zm0-10h6v6h-6V4Zm-4 10h.01v.01H10V14Zm0 4h.01v.01H10V18Zm-3 2h.01v.01H7V20Zm0-4h.01v.01H7V16Zm-3 2h.01v.01H4V18Zm0-4h.01v.01H4V14Z" />
-                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
-                  d="M7 7h.01v.01H7V7Zm10 10h.01v.01H17V17Z" />
               </svg>
-
-              <span class="flex-1 ms-3 whitespace-nowrap">Leer QR</span>
+              <span class="flex-1">Leer QR</span>
             </a>
           </li>
+
           <li>
             <a href="/vehiculos/agregar"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M16 12h4m-2 2v-4M4 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
-
-              <span class="flex-1 ms-3 whitespace-nowrap">Registrar vehículo</span>
+              <span class="flex-1">Registrar Vehículo</span>
             </a>
           </li>
+
           <li>
             <a href="/estadisticas"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-
-
-
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21">
-                <path
-                  d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
-                <path
-                  d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Datos</span>
+              <span class="flex-1">Estadísticas</span>
               <span
-                class="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">+6</span>
+                class="nav-badge inline-flex items-center justify-center px-2.5 py-0.5 text-xs font-bold text-blue-700 bg-blue-100 rounded-full">+6</span>
             </a>
           </li>
-       
+
           <li>
             <a href="/table_user"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-                <path
-                  d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Usuarios</span>
+              <span class="flex-1">Usuarios</span>
             </a>
           </li>
-          <li>
-            <a href="/ajustes"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
-                  d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2" />
-              </svg>
 
-              <span class="flex-1 ms-3 whitespace-nowrap">Ajustes</span>
+          <li>
+            <a href="/ajustes" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span class="flex-1">Ajustes</span>
             </a>
           </li>
-          <li>
+
+          <!-- Divider -->
+          <li class="pt-4 mt-4 border-t border-slate-200">
             <a th:href="@{/logout}"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+              class="nav-link flex items-center gap-3 p-3 text-red-600 rounded-xl font-medium group hover:bg-red-50">
+              <svg class="w-5 h-5 text-red-500 group-hover:text-red-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Cerrar sesión</span>
+              <span class="flex-1">Cerrar Sesión</span>
             </a>
           </li>
+
           <li>
-            <a href="#"
-              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-              <svg
-                class="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z" />
-                <path
-                  d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z" />
-                <path
-                  d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z" />
+            <a href="#" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+              <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span class="flex-1 ms-3 whitespace-nowrap">Ayuda</span>
+              <span class="flex-1">Ayuda</span>
             </a>
           </li>
         </ul>
-        <div id="dropdown-cta" class="p-4 mt-6 rounded-lg bg-blue-50 dark:bg-blue-900" role="alert">
-          <div class="flex items-center mb-3">
-            <span
-              class="bg-orange-100 text-orange-800 text-sm font-semibold me-2 px-2.5 py-0.5 rounded-sm dark:bg-orange-200 dark:text-orange-900">ABCD</span>
+
+        <!-- Info Card -->
+        <!-- <div id="dropdown-cta" class="mt-6 p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-100 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <span class="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-lg shadow-md">
+              NUEVO
+            </span>
             <button type="button"
-              class="ms-auto -mx-1.5 -my-1.5 bg-blue-50 inline-flex justify-center items-center w-6 h-6 text-blue-900 rounded-lg focus:ring-2 focus:ring-blue-400 p-1 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-400 dark:hover:bg-blue-800"
-              data-dismiss-target="#dropdown-cta" aria-label="Close">
+              class="text-slate-400 hover:text-slate-600 transition-colors p-1 hover:bg-white rounded-lg"
+              data-dismiss-target="#dropdown-cta" aria-label="Cerrar">
               <span class="sr-only">Cerrar</span>
-              <svg class="w-2.5 h-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          <p class="mb-3 text-sm text-blue-800 dark:text-blue-400">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae molestias ab consequuntur quas dolor
-            ipsum praesentium facilis temporibus earum consequatur in dicta ipsam, non ullam dolorem maiores ducimus
-            modi perferendis.
+          <h4 class="font-bold text-slate-800 mb-2">¡Funciones nuevas disponibles!</h4>
+          <p class="text-sm text-slate-600 mb-3 leading-relaxed">
+            Descubre las últimas mejoras en el sistema de gestión de estacionamientos y optimiza tu flujo de trabajo.
           </p>
-          <a class="text-sm text-blue-800 underline font-medium hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-            href="#">Ver más</a>
-        </div>
+          <a class="inline-flex items-center gap-2 text-sm text-blue-600 font-semibold hover:text-blue-700 transition-colors group"
+            href="#">
+            Ver más
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div> -->
       </div>
     </aside>
-
-
-
   </header>
 </div>
