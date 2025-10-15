@@ -57,7 +57,7 @@ class QRVehiculoManager {
             qrError.style.display = 'none';
             
            
-            qrImage.src = `/qr-codes/qr_${this.currentData.patente}.png`;
+            qrImage.src = `qr-codes/qr_${this.currentData.patente}.png`;
             
             // Manejar errores de cargaa
             qrImage.onload = function() {
@@ -65,7 +65,7 @@ class QRVehiculoManager {
             };
             
             qrImage.onerror = function() {
-                console.error('Error cargando imagen QR:', `/qr-codes/${this.currentData.patente}.png`);
+                console.error('Error cargando imagen QR:', `qr-codes/${this.currentData.patente}.png`);
                 qrImage.style.display = 'none';
                 qrError.style.display = 'block';
                 qrError.textContent = 'Error al cargar la imagen QR';
@@ -120,7 +120,7 @@ class QRVehiculoManager {
     
     imprimirConImagenExistente(data) {
   
-        const qrImageSrc = `/qr-codes/qr_${data.patente}.png`;
+        const qrImageSrc = `qr-codes/qr_${data.patente}.png`;
         console.log('🖨️ Usando imagen QR:', qrImageSrc);
         this.crearDocumentoImpresion(data, qrImageSrc);
     }

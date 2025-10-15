@@ -1,464 +1,420 @@
-<!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-
-<body>
-  <div th:fragment="estacionamientos-config">
-
-    <!-- Toolbar -->
-    <div class="p-6">
-      <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-        <div class="relative w-full md:w-80">
-          <input id="pk-search" type="text" placeholder="Buscar por nombre o código..."
-            class="w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 px-4 py-2.5">
-          <div class="absolute right-3 top-2.5 text-gray-400">🔎</div>
-        </div>
-        <div class="flex-1"></div>
-        <button id="pk-add"
-          class="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5">
-          ➕ Agregar estacionamiento
-        </button>
-      </div>
-    </div>
-
-    <!-- Tabla de Estacionamientos -->
-<div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
-  <div class="overflow-x-auto">
-    <table class="w-full" id="parkingTable">
-      <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-        <tr>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Nombre</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Dirección</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Capacidad</th>
-          <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Acciones</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100" id="tableBody">
-        <!-- Filas dinámicas -->
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Modal Editar Estacionamiento -->
-<div id="editParkingModal"
-  class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full">
-    <div class="p-6 border-b border-slate-200 flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-        ✏️ Editar Estacionamiento
-      </h2>
-      <button onclick="closeEditParkingModal()" class="text-slate-400 hover:text-slate-600">
-        ✕
-      </button>
-    </div>
-
-    <form id="editParkingForm" class="p-6 space-y-4">
-      <input type="hidden" id="editId">
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Nombre</label>
-        <input id="editNombre" type="text" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Dirección</label>
-        <input id="editDireccion" type="text" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Capacidad</label>
-        <input id="editCapacidad" type="number" min="1" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div class="flex gap-3 pt-4">
-        <button type="submit"
-          class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 font-semibold">
-          Guardar Cambios
-        </button>
-        <button type="button" onclick="closeEditParkingModal()"
-          class="flex-1 bg-slate-100 text-slate-700 px-6 py-3 rounded-xl hover:bg-slate-200 font-semibold">
-          Cancelar
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script>
-  const API = '/api/estacionamientos';
-
-  const tableBody   = document.getElementById('tableBody');
-  const editModal   = document.getElementById('editParkingModal');
-  const editForm    = document.getElementById('editParkingForm');
-  const addBtn      = document.getElementById('pk-add');
-  const modalTitle  = document.querySelector('#editParkingModal h2');
-
-  let estacionamientos = []; // ahora siempre viene del backend
-
-  // -------- Helpers API --------
-  async function api(method, url, body) {
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined
-    });
-    // fetch no lanza error en 4xx/5xx, chequeamos manual
-    if (!res.ok) {
-      let msg = 'Error en la solicitud';
-      try { const j = await res.json(); msg = j.message || JSON.stringify(j); } catch {}
-      throw new Error(msg);
-    }
-    // si hay contenido, devolvelo; en 204 no hay body
-    const ct = res.headers.get('content-type') || '';
-    return ct.includes('application/json') ? res.json() : null;
-  }
-
-  // -------- Cargar y renderizar --------
-  async function loadEstacionamientos() {
-    const data = await api('GET', API);
-    estacionamientos = data;          // se espera un array de DTOs
-    renderTable();
-  }
-
-  function renderTable() {
-    tableBody.innerHTML = estacionamientos.map(e => `
-      <tr class="${e.estado === false ? 'bg-slate-50' : ''}">
-        <td class="px-6 py-4 ${e.estado === false ? 'text-slate-400 line-through' : ''}">${e.nombre}</td>
-        <td class="px-6 py-4 ${e.estado === false ? 'text-slate-400' : ''}">${e.direccion}</td>
-        <td class="px-6 py-4 ${e.estado === false ? 'text-slate-400' : ''}">${e.capacidad}</td>
-        <td class="px-6 py-4 flex gap-2">
-          <button onclick="openEditParkingModal(${e.id})"
-                  class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Editar</button>
-          <button onclick="toggleEstado(${e.id}, ${e.estado !== false})"
-                  class="px-3 py-1.5 ${e.estado === false ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-red-500 hover:bg-red-600'} text-white rounded-lg">
-            ${e.estado === false ? 'Activar' : 'Desactivar'}
-          </button>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  // -------- Modales (mismo modal para agregar/editar) --------
-  function openEditParkingModal(id) {
-    const e = estacionamientos.find(x => x.id === id);
-    document.getElementById('editId').value         = e.id;
-    document.getElementById('editNombre').value     = e.nombre;
-    document.getElementById('editDireccion').value  = e.direccion;
-    document.getElementById('editCapacidad').value  = e.capacidad;
-    modalTitle.innerHTML = '✏️ Editar Estacionamiento';
-    editModal.classList.remove('hidden');
-  }
-
-  function openAddParkingModal() {
-    document.getElementById('editId').value         = '';
-    document.getElementById('editNombre').value     = '';
-    document.getElementById('editDireccion').value  = '';
-    document.getElementById('editCapacidad').value  = '';
-    modalTitle.innerHTML = '➕ Agregar Estacionamiento';
-    editModal.classList.remove('hidden');
-  }
-  function closeEditParkingModal() { editModal.classList.add('hidden'); }
-  addBtn.addEventListener('click', openAddParkingModal);
-
-  // -------- Submit (crea o edita según haya id) --------
-  editForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const idStr      = document.getElementById('editId').value.trim();
-    const payload = {
-      nombre   : document.getElementById('editNombre').value.trim(),
-      direccion: document.getElementById('editDireccion').value.trim(),
-      capacidad: parseInt(document.getElementById('editCapacidad').value, 10),
-      // podés enviar estado si querés, pero no es necesario al crear
-    };
-
-    try {
-      if (idStr) {
-        const id = parseInt(idStr, 10);
-        await api('PUT', `${API}/${id}`, payload);
-      } else {
-        await api('POST', API, payload);
+<!-- Estacionamientos - UI mejorada -->
+<div th:fragment="estacionamientos-config">
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
       }
-      closeEditParkingModal();
-      await loadEstacionamientos(); // refresca la tabla desde la BD
-    } catch (err) {
-      alert(err.message);
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-  });
 
-  // -------- Activar / Desactivar --------
-  async function toggleEstado(id, estabaActivo) {
-    const nuevo = !estabaActivo;
-    const texto = nuevo ? 'activar' : 'desactivar';
-    if (!confirm(`¿Seguro que querés ${texto} este estacionamiento?`)) return;
-    try {
-      await api('PATCH', `${API}/${id}/estado`, { estado: nuevo });
-      await loadEstacionamientos();
-    } catch (err) {
-      alert(err.message);
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
     }
-  }
-  // expone para los botones inline
-  window.openEditParkingModal = openEditParkingModal;
-  window.toggleEstado = toggleEstado;
 
-  // -------- Primera carga --------
-  document.addEventListener('DOMContentLoaded', loadEstacionamientos);
-</script>
+    .table-row-hover {
+      transition: all 0.2s ease;
+    }
 
+    .table-row-hover:hover {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+      transform: scale(1.005);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
 
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.2s ease-out;
+    }
 
+    .modal-content {
+      animation: slideUp 0.3s ease-out;
+    }
 
-  <!-- Paginación -->
-  <div id="pk-pager" class="flex items-center justify-between mt-4 text-sm text-gray-600">
-    <div id="pk-count"></div>
-    <div class="flex items-center gap-2">
-      <button id="pk-prev" class="px-3 py-1.5 rounded-lg border hover:bg-gray-50">Anterior</button>
-      <span id="pk-page" class="px-2"></span>
-      <button id="pk-next" class="px-3 py-1.5 rounded-lg border hover:bg-gray-50">Siguiente</button>
-    </div>
-  </div>
-  </div>
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-  <!-- Modal
-  <div id="pk-modal" class="hidden fixed inset-0 z-50">
-    <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
-    <div class="relative mx-auto mt-16 w-full max-w-2xl">
-      <div class="bg-white rounded-2xl shadow-xl">
-        <div class="flex items-center justify-between px-6 py-4 border-b">
-          <h3 id="pk-modal-title" class="text-lg font-semibold text-gray-900">Nuevo Estacionamiento</h3>
-          <button id="pk-close" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+    .status-badge {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.85;
+      }
+    }
+  </style>
+
+  <!-- Barra superior -->
+  <div class="mb-6 bg-white rounded-xl shadow-lg p-6 fade-in ">
+    <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end justify-between">
+      <div class="flex-1">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">
+          <svg class="w-4 h-4 inline mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Buscar Estacionamiento
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input id="pk-search" type="text" placeholder="Buscar por nombre, dirección o capacidad..."
+                 class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder:text-slate-400" />
         </div>
-        <form id="pk-form" class="px-6 py-5 space-y-4">
-          <input type="hidden" name="id">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label class="block">
-              <span class="text-sm text-gray-700">Nombre *</span>
-              <input name="nombre" required class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-            </label>
-            <label class="block">
-              <span class="text-sm text-gray-700">Código</span>
-              <input name="codigo" placeholder="CENTRO / NORTE" class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
-            </label>
-            <label class="block">
-              <span class="text-sm text-gray-700">Capacidad *</span>
-              <input name="capacidad" type="number" min="0" value="0" required class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2">
-            </label>
-            <label class="block">
-              <span class="text-sm text-gray-700">Ocupadas</span>
-              <input name="ocupadas" type="number" min="0" value="0" class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2">
-            </label>
-            <label class="md:col-span-2 block">
-              <span class="text-sm text-gray-700">Dirección</span>
-              <input name="direccion" class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2">
-            </label>
-            <label class="flex items-center gap-2">
-              <input name="activo" type="checkbox" class="rounded border-gray-300" checked>
-              <span class="text-sm text-gray-700">Activo</span>
-            </label>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="block">
-                <span class="text-sm text-gray-700">Lat</span>
-                <input name="lat" type="number" step="any" class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2">
-              </label>
-              <label class="block">
-                <span class="text-sm text-gray-700">Lng</span>
-                <input name="lng" type="number" step="any" class="mt-1 w-full rounded-xl border-gray-200 px-3 py-2">
-              </label>
-            </div>
-          </div>
-          <div id="pk-error" class="hidden text-sm text-red-600"></div>
-          <div class="flex justify-end gap-3 pt-3 border-t">
-            <button type="button" id="pk-cancel" class="px-4 py-2 rounded-xl border hover:bg-gray-50">Cancelar</button>
-            <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">Guardar cambios</button>
-          </div>
-        </form>
+      </div>
+
+      <div class="flex items-end">
+        <button id="pk-add"
+                class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transform transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Agregar Estacionamiento
+        </button>
       </div>
     </div>
   </div>
- -->
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden fade-in">
+    <div class="overflow-hidden">
+      <table class="w-full" id="parkingTable">
+        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Nombre</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Dirección</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Capacidad</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="tableBody"><!-- filas JS --></tbody>
+      </table>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-200 gap-3">
+      <div class="flex items-center gap-2 text-slate-600 text-sm">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        Total de estacionamientos: <span class="font-bold text-slate-900" id="pk-total">0</span>
+      </div>
+      <div class="flex items-center gap-2 text-slate-500 text-xs">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Última actualización: <span id="pk-lastUpdate" class="font-medium"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Agregar/Editar -->
+  <div id="editParkingModal" class="modal-backdrop fixed inset-0 hidden z-50 items-center justify-center bg-black/50 p-4">
+    <div class="modal-content w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2" id="pk-modal-title">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nuevo Estacionamiento
+        </h3>
+        <button id="pk-close" class="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="editParkingForm" class="px-6 py-5 space-y-4">
+        <input type="hidden" id="editId">
+        
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Nombre del Estacionamiento
+          </label>
+          <input id="editNombre" type="text" required
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: Estacionamiento Norte">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Dirección
+          </label>
+          <input id="editDireccion" type="text" required
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: Av. Corrientes 1234">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Capacidad Total
+          </label>
+          <input id="editCapacidad" type="number" min="1" required
+                 class="w-full px-4 py-2.5 bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 placeholder="Ej: 100">
+          <p class="mt-1 text-xs text-slate-500 flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Número de espacios disponibles
+          </p>
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row justify-end gap-3">
+          <button type="button" id="pk-cancel"
+                  class="px-6 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition-all duration-200 hover:scale-105">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 hover:scale-105 shadow-lg">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
-    // ===== Config =====
-    const PK_API = '/api/estacionamientos';          // ajustá si cambia
-    const PK_PAGE_SIZE = 10;
+    (function () {
+      // === Endpoints
+      const API = 'api/estacionamientos';
 
-    // ===== Estado =====
-    let pkState = { page: 0, size: PK_PAGE_SIZE, sort: 'nombre,asc', q: '' };
+      // === Estado
+      let estacionamientos = [];
+      let filtro = '';
 
-    // ===== Util =====
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => document.querySelectorAll(sel);
-    const esc = (s) => (s ?? '').toString().replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-    const fmtCap = (o, c) => `${o ?? 0}/${c ?? 0}`;
-
-    function badgeActivo(v) {
-      return `<span class="px-2 py-1 rounded-full text-xs ${v ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
-    ${v ? 'Activo' : 'Inactivo'}
-  </span>`;
-    }
-
-    // ===== Render =====
-    function renderRows(rows) {
-      const tbody = $('#pk-tbody');
-      if (!rows || rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-6 text-center text-gray-500">Sin resultados</td></tr>`;
-        return;
+      // === Helpers
+      const $ = (sel) => document.querySelector(sel);
+      function nowTime() { return new Date().toLocaleTimeString('es-AR'); }
+      function esc(s){return (s??'').toString().replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+      function badgeEstado(v){
+        return `<span class="status-badge px-3 py-1.5 rounded-full text-xs font-bold border-2 ${v ? 'bg-green-100 text-green-700 border-green-200' : 'bg-slate-100 text-slate-700 border-slate-200'}">
+                  ${v ? 'Activo' : 'Inactivo'}
+                </span>`;
       }
-      tbody.innerHTML = rows.map(r => `
-    <tr class="hover:bg-gray-50">
-      <td class="px-4 py-3">${badgeActivo(r.activo)}</td>
-      <td class="px-4 py-3 font-medium text-gray-900">${esc(r.nombre)}</td>
-      <td class="px-4 py-3">${esc(r.codigo ?? '')}</td>
-      <td class="px-4 py-3">${fmtCap(r.ocupadas, r.capacidad)}</td>
-      <td class="px-4 py-3 max-w-[320px] truncate" title="${esc(r.direccion ?? '')}">${esc(r.direccion ?? '')}</td>
-      <td class="px-4 py-3 text-right">
-        <button class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 mr-2" data-edit="${r.id}">✏️ Editar</button>
-        <button class="px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50" data-del="${r.id}">🗑️ Eliminar</button>
-      </td>
-    </tr>`).join('');
-    }
-
-    function renderPager(meta) {
-      $('#pk-count').textContent = `${(meta.totalElements ?? 0)} registros`;
-      $('#pk-page').textContent = `Página ${((meta.number ?? 0) + 1)} de ${(meta.totalPages ?? 1)}`;
-      $('#pk-prev').disabled = (meta.number ?? 0) <= 0;
-      $('#pk-next').disabled = (meta.number ?? 0) >= ((meta.totalPages ?? 1) - 1);
-    }
-
-    // ===== Data =====
-    async function loadData() {
-      try {
-        const qs = new URLSearchParams({
-          page: pkState.page,
-          size: pkState.size,
-          sort: pkState.sort,
-          q: pkState.q
-        });
-        const res = await fetch(`${PK_API}?${qs.toString()}`);
-        if (!res.ok) throw new Error('No se pudo consultar la API');
-        const data = await res.json();
-        renderRows(data.content);
-        renderPager(data);
-        bindRowActions(data.content);
-      } catch (e) {
-        renderRows([]);
-        renderPager({ totalElements: 0, totalPages: 1, number: 0 });
-        console.error(e);
+      async function api(method, url, body){
+        const res = await fetch(url, { method, headers:{'Content-Type':'application/json','Accept':'application/json'}, body: body?JSON.stringify(body):undefined });
+        if(!res.ok){ let t='Error en la solicitud'; try{const j=await res.json(); t=j.message||JSON.stringify(j);}catch{} throw new Error(t); }
+        return res.headers.get('content-type')?.includes('application/json') ? res.json() : null;
       }
-    }
 
-    function bindRowActions(rows) {
-      $('#pk-tbody').onclick = (ev) => {
-        const idEdit = ev.target.getAttribute('data-edit');
-        const idDel = ev.target.getAttribute('data-del');
-        if (idEdit) {
-          const row = rows.find(r => String(r.id) === String(idEdit));
-          openModal(row);
-        } else if (idDel) {
-          confirmDelete(idDel);
+      // === Render
+      function render(list = estacionamientos) {
+        const q = filtro.toLowerCase();
+        const filtered = !q ? list : list.filter(e =>
+          (e.nombre||'').toLowerCase().includes(q) ||
+          (e.direccion||'').toLowerCase().includes(q) ||
+          String(e.capacidad||'').includes(q) ||
+          String(e.codigo||'').toLowerCase().includes(q)
+        );
+
+        const tbody = $('#tableBody');
+        if (!filtered.length) {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-16 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+              <div class="text-lg font-semibold text-slate-600">Sin resultados</div>
+              <p class="text-sm text-slate-400">Intenta con otra búsqueda</p>
+            </div>
+          </td></tr>`;
+        } else {
+          tbody.innerHTML = filtered.map(e => {
+            const isInactive = e.estado === false;
+            return `
+            <tr class="table-row-hover">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <span class="text-slate-900 font-semibold ${isInactive?'line-through text-slate-400':''}">${esc(e.nombre)}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2 ${isInactive?'text-slate-400':'text-slate-600'}">
+                  <svg class="w-4 h-4 ${isInactive?'text-slate-300':'text-blue-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span class="font-medium">${esc(e.direccion||'-')}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${isInactive?'bg-slate-50 text-slate-400':'bg-blue-50 text-blue-700'} border ${isInactive?'border-slate-200':'border-blue-200'} font-semibold">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  ${esc(e.capacidad)}
+                </span>
+              </td>
+              <td class="px-6 py-4">${badgeEstado(e.estado!==false)}</td>
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <button data-edit="${e.id}" title="Editar" class="p-2 rounded-lg border-2 border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button data-toggle="${e.id}" title="${isInactive?'Activar':'Desactivar'}" class="p-2 rounded-lg border-2 transition-all ${isInactive?'border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300':'border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300'}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      ${isInactive ? 
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />' : 
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />'
+                      }
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `}).join('');
         }
-      };
-    }
 
-    // ===== Modal =====
-    const modal = $('#pk-modal');
-    const form = $('#pk-form');
-    function openModal(row) {
-      $('#pk-modal-title').textContent = row ? 'Editar Estacionamiento' : 'Nuevo Estacionamiento';
-      form.reset();
-      $('#pk-error').classList.add('hidden');
-      form.id.value = row?.id ?? '';
-      form.nombre.value = row?.nombre ?? '';
-      form.codigo.value = row?.codigo ?? '';
-      form.capacidad.value = row?.capacidad ?? 0;
-      form.ocupadas.value = row?.ocupadas ?? 0;
-      form.direccion.value = row?.direccion ?? '';
-      form.activo.checked = row?.activo ?? true;
-      form.lat.value = row?.lat ?? '';
-      form.lng.value = row?.lng ?? '';
-      modal.classList.remove('hidden');
-    }
-    function closeModal() { modal.classList.add('hidden'); }
-    $('#pk-add').onclick = () => openModal(null);
-    $('#pk-close').onclick = closeModal;
-    $('#pk-cancel').onclick = closeModal;
+        $('#pk-total').textContent = filtered.length.toString();
+        $('#pk-lastUpdate').textContent = nowTime();
 
-    // Validación simple
-    function validateForm() {
-      const cap = Number(form.capacidad.value || 0);
-      const oc = Number(form.ocupadas.value || 0);
-      if (oc > cap) {
-        $('#pk-error').textContent = 'Las plazas ocupadas no pueden superar la capacidad total.';
-        $('#pk-error').classList.remove('hidden');
-        return false;
+        tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(+b.dataset.edit));
+        tbody.querySelectorAll('[data-toggle]').forEach(b => b.onclick = () => toggleEstado(+b.dataset.toggle));
       }
-      $('#pk-error').classList.add('hidden');
-      return true;
-    }
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      if (!validateForm()) return;
-      const payload = {
-        id: form.id.value || null,
-        nombre: form.nombre.value?.trim(),
-        codigo: form.codigo.value?.trim() || null,
-        capacidad: Number(form.capacidad.value || 0),
-        ocupadas: Number(form.ocupadas.value || 0),
-        direccion: form.direccion.value?.trim() || null,
-        activo: !!form.activo.checked,
-        lat: form.lat.value ? Number(form.lat.value) : null,
-        lng: form.lng.value ? Number(form.lng.value) : null
-      };
-      const method = payload.id ? 'PUT' : 'POST';
-      const url = payload.id ? `${PK_API}/${payload.id}` : PK_API;
-
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-          const msg = await res.text();
-          throw new Error(msg || 'Error al guardar');
+      // === Carga
+      async function loadEstacionamientos(){
+        try {
+          estacionamientos = await api('GET', API) || [];
+          render();
+        } catch(error) {
+          console.error('Error cargando estacionamientos:', error);
+          estacionamientos = [];
+          render();
         }
-        closeModal();
-        await loadData();
-      } catch (err) {
-        $('#pk-error').textContent = ('' + err.message).slice(0, 200);
-        $('#pk-error').classList.remove('hidden');
       }
-    };
 
-    // Eliminar
-    async function confirmDelete(id) {
-      if (!confirm('¿Eliminar este estacionamiento?')) return;
-      try {
-        const res = await fetch(`${PK_API}/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('No se pudo eliminar');
-        await loadData();
-      } catch (e) { alert(e.message); }
-    }
+      // === Modal
+      const modal = $('#editParkingModal');
+      const form  = $('#editParkingForm');
 
-    // Buscador con debounce
-    let t;
-    $('#pk-search').addEventListener('input', (e) => {
-      clearTimeout(t);
-      t = setTimeout(() => { pkState.page = 0; pkState.q = e.target.value.trim(); loadData(); }, 300);
-    });
+      function openAdd(){
+        $('#pk-modal-title').innerHTML = `
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nuevo Estacionamiento
+        `;
+        form.reset();
+        $('#editId').value = '';
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+      }
 
-    // Paginación
-    $('#pk-prev').onclick = () => { if (pkState.page > 0) { pkState.page--; loadData(); } };
-    $('#pk-next').onclick = () => { pkState.page++; loadData(); };
+      function openEdit(id){
+        const e = estacionamientos.find(x => x.id === id); if(!e) return;
+        $('#pk-modal-title').innerHTML = `
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Editar Estacionamiento
+        `;
+        $('#editId').value = e.id;
+        $('#editNombre').value = e.nombre || '';
+        $('#editDireccion').value = e.direccion || '';
+        $('#editCapacidad').value = e.capacidad || 1;
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+      }
 
-    // Primera carga
-    document.addEventListener('DOMContentLoaded', loadData);
+      function closeModal(){ 
+        modal.classList.add('hidden'); 
+        modal.classList.remove('flex'); 
+      }
+
+      // === Guardar
+      form.addEventListener('submit', async (ev)=>{
+        ev.preventDefault();
+        const id = $('#editId').value.trim();
+        const payload = {
+          nombre: $('#editNombre').value.trim(),
+          direccion: $('#editDireccion').value.trim(),
+          capacidad: parseInt($('#editCapacidad').value, 10)
+        };
+        try{
+          if(id){ await api('PUT', `${API}/${parseInt(id,10)}`, payload); }
+          else  { await api('POST', API, payload); }
+          closeModal(); 
+          await loadEstacionamientos();
+        }catch(err){ 
+          alert('Error: ' + err.message); 
+        }
+      });
+
+      // === Activar / Desactivar
+      async function toggleEstado(id){
+        const e = estacionamientos.find(x=>x.id===id); if(!e) return;
+        const nuevo = !(e.estado!==false);
+        const texto = nuevo ? 'activar' : 'desactivar';
+        if(!confirm(`¿Está seguro de que desea ${texto} este estacionamiento?`)) return;
+        try{
+          await api('PATCH', `${API}/${id}/estado`, { estado: nuevo });
+          await loadEstacionamientos();
+        }catch(err){ 
+          alert('Error: ' + err.message); 
+        }
+      }
+
+      // === Búsqueda con debounce
+      let searchTimeout;
+      $('#pk-search').addEventListener('input', (e)=>{
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(()=>{ 
+          filtro = e.target.value || ''; 
+          render(); 
+        }, 250);
+      });
+
+      // === Wire UI
+      $('#pk-add').onclick = openAdd;
+      $('#pk-close').onclick = closeModal;
+      $('#pk-cancel').onclick = closeModal;
+      document.addEventListener('keydown', e => { 
+        if (e.key === 'Escape') closeModal(); 
+      });
+
+      // === Update time
+      setInterval(() => { 
+        $('#pk-lastUpdate').textContent = nowTime(); 
+      }, 1000);
+
+      // === Init
+      document.addEventListener('DOMContentLoaded', loadEstacionamientos);
+    })();
   </script>
-</body>
-
-</html>
+</div>

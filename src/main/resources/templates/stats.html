@@ -378,7 +378,7 @@
 
         async function fetchEstacionamientos(){
             try{
-                const resp = await fetch('/api/estacionamientos');
+                const resp = await fetch('api/estacionamientos');
                 if(!resp.ok) return [];
                 const json = await resp.json();
                 return json || [];
@@ -426,7 +426,7 @@
             if(p.hasta) q.set('hasta', p.hasta);
             if(p.estId) q.set('estId', p.estId);
             try{
-                const resp = await fetch('/estadisticas?' + q.toString(), { headers: { 'Accept':'application/json' } });
+                const resp = await fetch('estadisticas?' + q.toString(), { headers: { 'Accept':'application/json' } });
                 if(!resp.ok){ info.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Error cargando datos: ' + resp.status; return; }
                 const json = await resp.json();
                 const data = json.data || json;

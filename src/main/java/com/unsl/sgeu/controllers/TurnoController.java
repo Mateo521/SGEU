@@ -5,6 +5,7 @@ import com.unsl.sgeu.dto.*;
 import com.unsl.sgeu.services.TurnoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin // si la UI corre en otro host/puerto
@@ -18,6 +19,11 @@ public class TurnoController {
         this.service = service;
     }
 
+    @PutMapping("/{id}/finalizar")
+    public TurnoDTO finalizar(@PathVariable Long id) {
+        return service.finalizar(id);
+    }
+
     // GET /api/turnos?empleadoId=&estId=&fecha=&page=&size=
     @GetMapping
     public Page<TurnoDTO> list(
@@ -25,8 +31,7 @@ public class TurnoController {
             @RequestParam(required = false) Long estId,
             @RequestParam(required = false) String fecha,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size
-    ) {
+            @RequestParam(required = false) Integer size) {
         return service.list(empleadoId, estId, fecha, page, size);
     }
 
@@ -38,16 +43,20 @@ public class TurnoController {
             @RequestParam(required = false) String desde,
             @RequestParam(required = false) String hasta,
             @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size
-    ) {
+            @RequestParam(required = false) Integer size) {
         return service.listRange(empleadoId, estId, desde, hasta, page, size);
     }
 
     @GetMapping("/{id}")
-    public TurnoDTO get(@PathVariable Long id) { return service.get(id); }
+    public TurnoDTO get(@PathVariable Long id) {
+        return service.get(id);
+    }
 
     @PostMapping
-    public TurnoDTO create(@Valid @RequestBody TurnoCreateDTO dto) { return service.create(dto); }
+    public ResponseEntity<TurnoDTO> create(@Valid @RequestBody TurnoCreateDTO dto) {
+        TurnoDTO created = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created); // 201
+    }
 
     @PutMapping("/{id}")
     public TurnoDTO update(@PathVariable Long id, @Valid @RequestBody TurnoCreateDTO dto) {
@@ -55,5 +64,8 @@ public class TurnoController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) { service.delete(id); }
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build(); // 204
+    }
 }

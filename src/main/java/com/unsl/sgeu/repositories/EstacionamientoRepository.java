@@ -9,4 +9,5 @@ public interface EstacionamientoRepository extends JpaRepository<Estacionamiento
     List<Estacionamiento> findByEstadoTrue();   // activos
     List<Estacionamiento> findByEstadoFalse();  // desactivados
     boolean existsByNombreIgnoreCase(String nombre);
+    
 }

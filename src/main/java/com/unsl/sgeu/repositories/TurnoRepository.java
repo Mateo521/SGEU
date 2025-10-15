@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional; // <--- IMPORT NUEVO
 
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
@@ -60,4 +61,6 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
   @Query("SELECT t FROM Turno t WHERE t.empleado.id = :empleadoId")
   List<Turno> findByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
+  // ====== NUEVO: obtener la asignación abierta (fecha_fin = NULL) del guardia ======
+  Optional<Turno> findByEmpleadoIdAndFechaFinIsNull(Long empleadoId);
 }
