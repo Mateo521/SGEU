@@ -141,11 +141,14 @@
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
               Estacionamiento</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Turno</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha inicio
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha fin</th>
             <th class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estado</th>
             <th class="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
+
         <tbody class="divide-y divide-slate-100" id="ae-tbody"><!-- filas JS --></tbody>
       </table>
     </div>
@@ -280,89 +283,137 @@
       }
       function today() { return new Date().toISOString().slice(0, 10); }
       function nowTime() { return new Date().toLocaleTimeString('es-AR'); }
-      function statusFor(hIn, hOut) {
-        const [a] = hIn.split(':'), [b] = hOut.split(':'), h = new Date().getHours();
-        if (h >= +a && h < +b) return { t: 'Activo', cls: 'bg-green-100 text-green-700 border-green-200' };
-        if (h < +a) return { t: 'Próximo', cls: 'bg-blue-100 text-blue-700 border-blue-200' };
+      function tomorrow() {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().slice(0, 10);
+      }
+      function sortActivosPrimero(list) {
+        return [...list].sort((a, b) => {
+          // Activo primero (fechaFin null)
+          const aActivo = a.fechaFin == null ? 1 : 0;
+          const bActivo = b.fechaFin == null ? 1 : 0;
+          if (aActivo !== bActivo) return bActivo - aActivo; // bActivo(1) arriba
+
+          // Dentro del mismo grupo, más reciente primero por fechaInicio
+          // (ambas vienen como 'YYYY-MM-DD')
+          if (a.fechaInicio !== b.fechaInicio) return b.fechaInicio.localeCompare(a.fechaInicio);
+
+          // Como desempate, por horaIngreso desc
+          return (b.horaIngreso || '').localeCompare(a.horaIngreso || '');
+        });
+      }
+
+
+      function statusFor(hIn, hOut, fechaInicio, fechaFin) {
+        // Si no tiene fecha de fin => ACTIVO
+        if (fechaFin == null) {
+          return { t: 'Activo', cls: 'bg-green-100 text-green-700 border-green-200' };
+        }
+        // Si tiene fecha de fin => FINALIZADO
         return { t: 'Finalizado', cls: 'bg-slate-100 text-slate-700 border-slate-200' };
       }
+
+
       function shiftFrom(hIn, hOut) { return `${hIn} - ${hOut}`; }
       function splitShift(s) { const m = s.match(/(\d{2}:\d{2}).+(\d{2}:\d{2})/); return m ? { in: m[1], out: m[2] } : { in: '08:00', out: '14:00' }; }
 
       // === Render
       function render(list = turnos) {
         const tbody = $('ae-tbody');
+
         if (!list.length) {
-          tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-16 text-center">
-            <div class="flex flex-col items-center gap-3">
-              <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
-              <div class="text-lg font-semibold text-slate-600">No hay asignaciones</div>
-              <p class="text-sm text-slate-400">Presiona "Nueva Asignación" para comenzar</p>
-            </div>
-          </td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-16 text-center">
+      <div class="flex flex-col items-center gap-3">
+        <svg class="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <div class="text-lg font-semibold text-slate-600">No hay asignaciones</div>
+        <p class="text-sm text-slate-400">Presiona "Nueva Asignación" para comenzar</p>
+      </div>
+    </td></tr>`;
         } else {
-          tbody.innerHTML = list.map(t => {
-            const st = statusFor(t.horaIngreso, t.horaSalida);
-            const initials = (t.empleadoNombre || '').split(' ').map(n => n[0] || '').join('').slice(0, 2).toUpperCase();
+          // Orden: Activos (fechaFin == null) primero
+          const ordered = sortActivosPrimero(list);
+
+          tbody.innerHTML = ordered.map(t => {
+            const st = statusFor(t.horaIngreso, t.horaSalida, t.fechaInicio, t.fechaFin);
+            const initials = (t.empleadoNombre || '')
+              .split(' ')
+              .map(n => n[0] || '')
+              .join('')
+              .slice(0, 2)
+              .toUpperCase();
+
+            // mostrar botón Finalizar solo si está activo (fechaFin null)
+            const endBtn = t.fechaFin == null ? `
+  <button data-end="${t.id}" title="Finalizar turno"
+    class="p-2 rounded-lg border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    </svg>
+  </button>` : '';
+
             return `
-            <tr class="table-row-hover">
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-md">
-                    ${initials || 'G'}
-                  </div>
-                  <span class="text-slate-900 font-semibold">${t.empleadoNombre || '-'}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  ${t.estacionamientoNombre || '-'}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="text-slate-700 font-medium flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  ${shiftFrom(t.horaIngreso, t.horaSalida)}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="text-slate-600 font-medium">${t.fechaInicio}</span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="status-badge px-3 py-1.5 rounded-full text-xs font-bold border-2 ${st.cls}">
-                  ${st.t}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex justify-end gap-2">
-                  <button data-edit="${t.id}" title="Editar" class="p-2 rounded-lg border-2 border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                  </button>
-                  <button data-del="${t.id}" title="Eliminar" class="p-2 rounded-lg border-2 border-slate-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>`;
+      <tr class="table-row-hover">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-sm font-bold shadow-md">
+              ${initials || 'G'}
+            </div>
+            <span class="text-slate-900 font-semibold">${t.empleadoNombre || '-'}</span>
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 text-sm font-medium">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            ${t.estacionamientoNombre || '-'}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <span class="text-slate-700 font-medium flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            ${t.horaIngreso} - ${t.horaSalida}
+          </span>
+        </td>
+        <td class="px-6 py-4"><span class="text-slate-600 font-medium">${t.fechaInicio}</span></td>
+        <td class="px-6 py-4"><span class="text-slate-600 font-medium">${t.fechaFin ?? '-'}</span></td>
+        <td class="px-6 py-4">
+          <span class="status-badge px-3 py-1.5 rounded-full text-xs font-bold border-2 ${st.cls}">
+            ${st.t}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <div class="flex justify-end gap-2">
+            <button data-edit="${t.id}" title="Editar"
+              class="p-2 rounded-lg border-2 border-slate-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            ${endBtn}
+          </div>
+        </td>
+      </tr>`;
           }).join('');
         }
+
         $('ae-total').textContent = list.length.toString();
         $('ae-lastUpdate').textContent = nowTime();
 
         tbody.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openEdit(+b.dataset.edit));
-        tbody.querySelectorAll('[data-del]').forEach(b => b.onclick = () => delTurno(+b.dataset.del));
+        tbody.querySelectorAll('[data-end]').forEach(b => b.onclick = () => endTurno(+b.dataset.end));
+
       }
+
+
 
       // === Combos
       async function loadCombos() {
@@ -406,7 +457,9 @@
           Nueva asignación
         `;
         $('ae-modalGuard').value = ''; $('ae-modalParking').value = '';
-        $('ae-modalShift').value = '08:00 - 14:00'; $('ae-modalDate').value = today();
+        $('ae-modalShift').value = '08:00 - 14:00';
+        $('ae-modalDate').value = tomorrow(); // antes: today()
+
         loadCombos();
         $('ae-modal').classList.remove('hidden'); $('ae-modal').classList.add('flex');
       }
@@ -527,6 +580,29 @@
         await loadCombos();
         await loadTurnos();
       })();
+      async function endTurno(id) {
+        if (!confirm('¿Finalizar este turno con la fecha de hoy?')) return;
+
+        try {
+          const res = await fetch(`${API_TURNOS}/${id}/finalizar`, { method: 'PUT' });
+
+          if (!res.ok) {
+            const text = await res.text();
+            alert(`No se pudo finalizar el turno. Código ${res.status}.\n${text || 'Sin detalle'}`);
+            return;
+          }
+
+          await loadTurnos(); // refresca la tabla
+        } catch (e) {
+          alert(`No se pudo finalizar el turno. ${e?.message || ''}`);
+          console.error(e);
+        }
+      }
+
     })();
+
+    
+
+
   </script>
 </div>
