@@ -20,15 +20,9 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
 
     long countByPatente(String patente);
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
     long countByPatenteAndIdEstacionamiento(String patente, Long idEstacionamiento);
 
 
->>>>>>> Stashed changes
     @Modifying
     @Query("DELETE FROM RegistroEstacionamiento r WHERE r.patente = :patente")
     int deleteByPatente(@Param("patente") String patente);
