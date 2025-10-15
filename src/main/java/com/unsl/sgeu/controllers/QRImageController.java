@@ -76,7 +76,7 @@ public ResponseEntity<Resource> obtenerQRPorPatente(@PathVariable String patente
         Resource resource = new FileSystemResource(archivoEncontrado.get());
         String filename = archivoEncontrado.get().getFileName().toString();
         
-        System.out.println("✅ Sirviendo QR: " + filename + " para patente: " + patente);
+        System.out.println("Sirviendo QR: " + filename + " para patente: " + patente);
         
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)

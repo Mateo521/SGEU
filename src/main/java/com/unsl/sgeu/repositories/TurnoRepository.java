@@ -44,14 +44,21 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
           FROM Turno t
           WHERE t.empleado.nombreUsuario = :usuario
             AND t.fechaInicio <= CURRENT_DATE
-            AND (t.fechaFin IS NULL OR t.fechaFin >= CURRENT_DATE)
+            AND t.fechaFin IS NULL
       """)
   Estacionamiento findEstacionamientoActivoByEmpleadoUsuario(@Param("usuario") String usuario);
+  /*
+   * @Query("SELECT DISTINCT t.estacionamiento.id FROM Turno t WHERE t.empleado.id = :empleadoId"
+   * )
+   * List<Long> findEstacionamientoIdsByEmpleadoId(@Param("empleadoId") Long
+   * empleadoId);
+   */
 
-  @Query("SELECT DISTINCT t.estacionamiento.id FROM Turno t WHERE t.empleado.id = :empleadoId")
+  @Query("SELECT DISTINCT t.estacionamiento.id FROM Turno t " +
+      "WHERE t.empleado.id = :empleadoId AND t.fechaFin IS NULL")
   List<Long> findEstacionamientoIdsByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
-  @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId")
+  @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId AND t.fechaFin IS NULL")
   List<Estacionamiento> findEstacionamientosByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
   @Query("SELECT COUNT(t) > 0 FROM Turno t WHERE t.empleado.id = :empleadoId AND t.estacionamiento.id = :estacionamientoId")
@@ -61,6 +68,7 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
   @Query("SELECT t FROM Turno t WHERE t.empleado.id = :empleadoId")
   List<Turno> findByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
-  // ====== NUEVO: obtener la asignación abierta (fecha_fin = NULL) del guardia ======
+  // ====== NUEVO: obtener la asignación abierta (fecha_fin = NULL) del guardia
+  // ======
   Optional<Turno> findByEmpleadoIdAndFechaFinIsNull(Long empleadoId);
 }

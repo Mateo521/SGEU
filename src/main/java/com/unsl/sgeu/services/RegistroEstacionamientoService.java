@@ -356,6 +356,7 @@ public class RegistroEstacionamientoService {
    public boolean estacionamientoIsFull (Estacionamiento est){
 
         List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getIdEst());
+        System.out.println(est.getIdEst());
         System.out.println("Patentes adentro"+Re.size()+"Capacidad del estacionamiento "+ est.getCapacidad());
         return Re.size() == est.getCapacidad();
 
