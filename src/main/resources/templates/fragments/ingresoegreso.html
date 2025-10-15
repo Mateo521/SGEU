@@ -1,19 +1,94 @@
 <div th:fragment="panel" th:if="${esGuardia and not #lists.isEmpty(paneles)}" class="mb-8">
-    <h2 class="text-3xl font-bold text-blue-600 mb-6 flex items-center">
-        <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-            </path>
-        </svg>
-        Ingreso y egreso del día
-    </h2>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    <div th:each="panel : ${paneles}" class="mb-6">
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        @keyframes slideIn {
+            from {
+                transform: translateX(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
 
-            <div class="bg-blue-600 text-white px-6 py-4">
-                <h4 class="text-xl font-semibold flex items-center">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        @keyframes countUp {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .count-animation {
+            animation: countUp 0.6s ease-out;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-hover:hover {
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+
+    <!-- Header Principal -->
+    <div class="mb-8 fade-in">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                    </path>
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-bold text-slate-800">Panel de Control</h2>
+                <p class="text-slate-500 text-sm sm:text-base">Ingreso y egreso del día</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel por cada estacionamiento -->
+    <div th:each="panel, iterStat : ${paneles}" class="mb-8 slide-in" th:style="'animation-delay: ' + ${iterStat.index * 0.1} + 's'">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
+            <!-- Header del Panel -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-5">
+                <h4 class="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                         </path>
@@ -22,146 +97,188 @@
                 </h4>
             </div>
 
-            <div class="p-6">
+            <div class="p-4 sm:p-6 lg:p-8">
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- Tarjetas de Estadísticas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
 
-                    <div class="bg-green-500 text-white rounded-lg p-4 text-center">
-                        <div class="text-3xl font-bold" th:text="${panel.totalVehiculosAdentro}">0</div>
-                        <p class="text-sm flex items-center justify-center mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Vehículos Actualmente -->
+                    <div class="stat-card bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-5 sm:p-6 shadow-md">
+                        <div class="flex items-center justify-between mb-3">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
                             </svg>
+                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl sm:text-5xl font-bold mb-2 count-animation" th:text="${panel.totalVehiculosAdentro}">0</div>
+                        <p class="text-green-50 text-sm sm:text-base font-medium">
                             Vehículos Actualmente
                         </p>
                     </div>
 
-
-                    <div class="bg-blue-500 text-white rounded-lg p-4 text-center">
-                        <div class="text-3xl font-bold" th:text="${panel.totalIngresosHoy}">0</div>
-                        <p class="text-sm flex items-center justify-center mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Ingresos Hoy -->
+                    <div class="stat-card bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-5 sm:p-6 shadow-md">
+                        <div class="flex items-center justify-between mb-3">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
                                 </path>
                             </svg>
+                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl sm:text-5xl font-bold mb-2 count-animation" th:text="${panel.totalIngresosHoy}">0</div>
+                        <p class="text-blue-50 text-sm sm:text-base font-medium">
                             Ingresos Hoy
                         </p>
                     </div>
 
-
-                    <div class="bg-yellow-500 text-white rounded-lg p-4 text-center">
-                        <div class="text-3xl font-bold" th:text="${panel.totalEgresosHoy}">0</div>
-                        <p class="text-sm flex items-center justify-center mt-2">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Egresos Hoy -->
+                    <div class="stat-card bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-xl p-5 sm:p-6 shadow-md">
+                        <div class="flex items-center justify-between mb-3">
+                            <svg class="w-8 h-8 sm:w-10 sm:h-10 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                                 </path>
                             </svg>
+                            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="text-4xl sm:text-5xl font-bold mb-2 count-animation" th:text="${panel.totalEgresosHoy}">0</div>
+                        <p class="text-amber-50 text-sm sm:text-base font-medium">
                             Egresos Hoy
                         </p>
                     </div>
                 </div>
 
+                <!-- Tablas de Datos -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    <div>
-                        <h5 class="text-lg font-semibold text-green-600 mb-3 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
-                            </svg>
-                            Vehículos Actualmente
+                    <!-- Vehículos Actualmente -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-6 border-2 border-slate-200">
+                        <h5 class="text-lg sm:text-xl font-bold text-green-600 mb-4 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z"></path>
+                                </svg>
+                            </div>
+                            <span>Vehículos Actualmente</span>
                         </h5>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                                <thead class="bg-green-50">
-                                    <tr>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
-                                            Patente</th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
-                                            Hora Ingreso</th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-green-700 uppercase tracking-wider">
-                                            Tiempo</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr th:each="vehiculo : ${panel.vehiculosActualmente}" class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap">
-                                            <span class="font-semibold text-gray-900"
-                                                th:text="${vehiculo.patente}">ABC123</span>
-                                        </td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"
-                                            th:text="${#temporals.format(vehiculo.fechaHora, 'HH:mm')}">10:30</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(panel.vehiculosActualmente)}">
-                                        <td colspan="3" class="px-4 py-8 text-center text-gray-500">
-                                            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                </path>
-                                            </svg>
-                                            No hay vehículos en el estacionamiento
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="overflow-x-auto rounded-lg border border-slate-200">
+                            <div class="max-h-96 overflow-y-auto">
+                                <table class="min-w-full bg-white">
+                                    <thead class="bg-green-50 sticky top-0">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-green-700 uppercase tracking-wider">
+                                                Patente
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-green-700 uppercase tracking-wider">
+                                                Hora Ingreso
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-green-700 uppercase tracking-wider">
+                                                Estado
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <tr th:each="vehiculo : ${panel.vehiculosActualmente}" class="table-row-hover bg-white">
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="font-bold text-slate-900 text-sm sm:text-base"
+                                                    th:text="${vehiculo.patente}">ABC123</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span class="text-sm text-slate-600" th:text="${#temporals.format(vehiculo.fechaHora, 'HH:mm')}">10:30</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                                                    Activo
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(panel.vehiculosActualmente)}">
+                                            <td colspan="3" class="px-4 py-12 text-center">
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                    <p class="text-slate-500 font-medium">No hay vehículos en el estacionamiento</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
-
-                    <div>
-                        <h5 class="text-lg font-semibold text-yellow-600 mb-3 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                                </path>
-                            </svg>
-                            Egresos del Día
+                    <!-- Egresos del Día -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-6 border-2 border-slate-200">
+                        <h5 class="text-lg sm:text-xl font-bold text-amber-600 mb-4 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                    </path>
+                                </svg>
+                            </div>
+                            <span>Egresos del Día</span>
                         </h5>
-                        <div class="overflow-x-auto max-h-80 overflow-y-auto">
-                            <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                                <thead class="bg-yellow-50 sticky top-0">
-                                    <tr>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">
-                                            Patente</th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">
-                                            Hora Salida</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr th:each="egreso : ${panel.egresosDelDia}" class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900"
-                                            th:text="${egreso.patente}">ABC123</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600"
-                                            th:text="${#temporals.format(egreso.fechaHora, 'HH:mm')}">14:30</td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(panel.egresosDelDia)}">
-                                        <td colspan="2" class="px-4 py-8 text-center text-gray-500">
-                                            <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                </path>
-                                            </svg>
-                                            No hay egresos hoy
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="overflow-x-auto rounded-lg border border-slate-200">
+                            <div class="max-h-96 overflow-y-auto">
+                                <table class="min-w-full bg-white">
+                                    <thead class="bg-amber-50 sticky top-0">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-amber-700 uppercase tracking-wider">
+                                                Patente
+                                            </th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-amber-700 uppercase tracking-wider">
+                                                Hora Salida
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200">
+                                        <tr th:each="egreso : ${panel.egresosDelDia}" class="table-row-hover bg-white">
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <span class="font-bold text-slate-900 text-sm sm:text-base" 
+                                                    th:text="${egreso.patente}">ABC123</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span class="text-sm text-slate-600" 
+                                                        th:text="${#temporals.format(egreso.fechaHora, 'HH:mm')}">14:30</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(panel.egresosDelDia)}">
+                                            <td colspan="2" class="px-4 py-12 text-center">
+                                                <div class="flex flex-col items-center gap-3">
+                                                    <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                            </path>
+                                                        </svg>
+                                                    </div>
+                                                    <p class="text-slate-500 font-medium">No hay egresos hoy</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -170,5 +287,5 @@
     </div>
 
     <!-- Separador -->
-    <div class="border-t border-gray-300 my-8"></div>
+    <div class="border-t-2 border-slate-200 my-8"></div>
 </div>
