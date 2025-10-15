@@ -507,20 +507,27 @@ public class VehiculoController {
     }
 
    @PostMapping("/registrar-movimiento")
-    public String registrarMovimiento(@RequestParam String patente,
+    public String registrarMovimiento(@RequestParam String patente1,
                                       @RequestParam String accion,
                                       RedirectAttributes redirectAttributes,
                                       HttpSession session) {
-
+        String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
+        patente = patente.toUpperCase();
         Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
         String mensaje = "";
         boolean exito = false;
 
         if ("ingreso".equalsIgnoreCase(accion)) {
+            if(registroestacionamientoService.estacionamientoIsFull(est1)){
+                mensaje = "Estacionamiento lleno";
+                redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
+                redirectAttributes.addFlashAttribute("mensaje", mensaje);   
+                return "redirect:/ieManual";
+            }
             // Verificamos todas las condiciones para una entrada válida
-            if (!vehiculoService.existePatente(patente)) {
+            else if (!vehiculoService.existePatente(patente)) {
                 mensaje = "La patente '" + patente + "' no está registrada en el sistema.";
-            } else if (!registroestacionamientoService.esPar(patente)) {
+            } else if (!registroestacionamientoService.esPar(patente, est1)) {
                 mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
             } else {
                 // Si todo está bien, registramos la entrada
@@ -530,7 +537,7 @@ public class VehiculoController {
             }
         } else if ("egreso".equalsIgnoreCase(accion)) {
             // Verificamos las condiciones para una salida válida
-            if (registroestacionamientoService.esPar(patente)) {
+            if (registroestacionamientoService.esPar(patente, est1)) {
                 mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
             } else {
                 // Si todo está bien, registramos la salida
