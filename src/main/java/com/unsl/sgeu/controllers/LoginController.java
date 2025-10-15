@@ -31,8 +31,10 @@ public class LoginController {
         String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);
         String nombreCompleto = empleadoServices.obtenerNombrePorUsuario(nombreUsuario);
         Long usuarioId = empleadoServices.obtenerIdPorUsuario(nombreUsuario);
-        String estacionamiento = empleadoServices.obtenerNombreEstacionamientoActivo(nombreUsuario);
+        Estacionamiento estacionamiento = empleadoServices.obtenerEstacionamientoActivo(nombreUsuario);
 
+
+         System.out.println("estacionamiento antes::" + estacionamiento);
         // Guardamos en sesión lo necesario
         session.setAttribute("usuarioId", usuarioId);
         session.setAttribute("user", nombreUsuario);

@@ -98,9 +98,8 @@ public class EmpleadoServices {
                 .orElse("Nombre no encontrado");
     }
 
-    public String obtenerNombreEstacionamientoActivo(String usuario) {
-        Estacionamiento est = turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(usuario);
-        return est != null ? est.getNombre() : "Ninguno";
+    public Estacionamiento obtenerEstacionamientoActivo(String usuario) {
+        return turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(usuario);
     }
 
     public Long obtenerIdPorUsuario(String nombreUsuario) {
