@@ -20,7 +20,7 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
 
     long countByPatente(String patente);
 
-
+    long countByPatenteAndIdEstacionamiento(String patente, Long idEstacionamiento);
 
     @Modifying
     @Query("DELETE FROM RegistroEstacionamiento r WHERE r.patente = :patente")
@@ -37,13 +37,13 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
     List<RegistroEstacionamiento> findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
             Long idEstacionamiento, String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
-            
     // Buscar por est y rango de fechas
     List<RegistroEstacionamiento> findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
             Long idEstacionamiento, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
 
-@Query(value = """
+
+            @Query(value = """
   SELECT re.*
   FROM registro_estacionamiento re
   WHERE re.id_est = :idEst
@@ -66,6 +66,5 @@ List<RegistroEstacionamiento> findRegistrosDePatentesImpares(@Param("idEst") Lon
   ORDER BY  re.fecha_hora DESC LIMIT  5 ;
 """, nativeQuery = true)
 List<RegistroEstacionamiento> findRegistrosDePatentePares(@Param("idEst") Long idEst);
-
 
 }
