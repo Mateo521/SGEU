@@ -2,6 +2,7 @@ package com.unsl.sgeu.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 @Entity
 @Table(name = "registro_estacionamiento")
 public class RegistroEstacionamiento {
@@ -34,7 +35,7 @@ public class RegistroEstacionamiento {
     public void setPatente(String patente) { this.patente = patente; }
     
     public LocalDateTime getFechaHora() { return fechaHora; }
-    public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
+    public void setFechaHora(LocalDateTime zonedDateTime) { this.fechaHora = zonedDateTime; }
     
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }

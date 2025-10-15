@@ -20,7 +20,6 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
 
     long countByPatente(String patente);
 
-    long countByPatenteAndIdEstacionamiento(String patente, Long idEstacionamiento);
 
 
     @Modifying
@@ -38,8 +37,35 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
     List<RegistroEstacionamiento> findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
             Long idEstacionamiento, String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
 
+            
     // Buscar por est y rango de fechas
     List<RegistroEstacionamiento> findByIdEstacionamientoAndFechaHoraBetweenOrderByFechaHoraDesc(
             Long idEstacionamiento, LocalDateTime fechaInicio, LocalDateTime fechaFin);
+
+
+@Query(value = """
+  SELECT re.*
+  FROM registro_estacionamiento re
+  WHERE re.id_est = :idEst
+    AND re.patente IN (
+      SELECT re2.patente
+      FROM registro_estacionamiento re2
+      WHERE re2.id_est = :idEst
+      GROUP BY re2.patente
+      HAVING COUNT(*) % 2 = 1
+    )
+  ORDER BY re.patente, re.fecha_hora
+""", nativeQuery = true)
+List<RegistroEstacionamiento> findRegistrosDePatentesImpares(@Param("idEst") Long idEst);
+
+@Query(value = """
+  SELECT re.*
+  FROM registro_estacionamiento re
+  WHERE re.id_est = :idEst
+    AND re.tipo_movimiento = "SALIDA"
+  ORDER BY  re.fecha_hora DESC LIMIT  5 ;
+""", nativeQuery = true)
+List<RegistroEstacionamiento> findRegistrosDePatentePares(@Param("idEst") Long idEst);
+
 
 }

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-wrapper {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .stat-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .table-row-hover {
+            transition: all 0.2s ease;
+        }
+
+        .table-row-hover:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            transform: scale(1.01);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .pagination-btn {
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="container mx-auto px-4 py-8">
+            <div class="mb-8 fade-in">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-4xl font-bold text-slate-800 flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            Panel de Estadísticas
+                        </h1>
+                        <p class="text-slate-500 mt-2">Análisis y métricas del sistema de estacionamiento</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
+                <form id="filtro" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fas fa-calendar-alt mr-2"></i>Desde
+                        </label>
+                        <input type="date" id="desde" name="desde" 
+                               class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fas fa-calendar-alt mr-2"></i>Hasta
+                        </label>
+                        <input type="date" id="hasta" name="hasta" 
+                               class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"/>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            <i class="fas fa-parking mr-2"></i>Estacionamiento
+                        </label>
+                        <select id="estId" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                            <option value="">Todos los estacionamientos</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg font-semibold">
+                            <i class="fas fa-search mr-2"></i>Aplicar Filtros
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="info" class="text-center text-blue-600 font-medium mb-6 text-lg"></div>
+
+            <div class="grid lg:grid-cols-3 gap-6 mb-6">
+                <div class="glass-card rounded-xl p-6 fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Categorías
+                        </h3>
+                        <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
+                            <i class="fas fa-users mr-1"></i><span id="totalCategorias">0</span>
+                        </span>
+                    </div>
+                    <div class="chart-wrapper mb-4">
+                        <canvas id="chartCategorias"></canvas>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" id="tablaCategorias">
+                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Categoría</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">Cant.</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">%</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100"></tbody>
+                        </table>
+                        <div id="paginationCategorias" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-car-side mr-2 text-blue-600"></i>Tipo Vehículo
+                        </h3>
+                        <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                        </span>
+                    </div>
+                    <div class="chart-wrapper mb-4">
+                        <canvas id="chartVehiculo"></canvas>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" id="tablaVehiculo">
+                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Tipo</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">Cant.</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">%</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-qrcode mr-2 text-blue-600"></i>Modo Acceso
+                        </h3>
+                    </div>
+                    <div class="chart-wrapper mb-4">
+                        <canvas id="chartModo"></canvas>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm" id="tablaModo">
+                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Modo</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">Cant.</th>
+                                    <th class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">%</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100"></tbody>
+                        </table>
+                        <div id="paginationModo" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6 mb-6">
+                <div class="glass-card rounded-xl p-6 fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-chart-bar mr-2 text-blue-600"></i>Ocupación
+                        </h3>
+                        <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
+                            <i class="fas fa-building mr-1"></i><span id="totalOcupacion">0</span>
+                        </span>
+                    </div>
+                    <div class="chart-wrapper mb-4">
+                        <canvas id="chartOcupacion"></canvas>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full" id="tablaOcupacion">
+                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Estacionamiento</th>
+                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Capacidad</th>
+                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Ingresos</th>
+                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">%</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100"></tbody>
+                        </table>
+                        <div id="paginationOcupacion" class="flex justify-center gap-2 mt-4"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-clock mr-2 text-blue-600"></i>Horarios Pico
+                        </h3>
+                        <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">Top 5</span>
+                    </div>
+                    <div class="chart-wrapper mb-4">
+                        <canvas id="chartHorarios"></canvas>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full" id="tablaHorarios">
+                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                                <tr>
+                                    <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Hora</th>
+                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100"></tbody>
+                        </table>
+                        <div id="paginationHorarios" class="flex justify-center gap-2 mt-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 mb-6 fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-chart-line mr-2 text-blue-600"></i>Evolución Diaria
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
+                        <i class="fas fa-calendar-day mr-1"></i><span id="totalEvolucion">0</span> días
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-4">
+                    <canvas id="chartEvolucion"></canvas>
+                </div>
+                <div class="overflow-hidden">
+                    <table class="w-full" id="tablaEvolucion">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha</th>
+                                <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100"></tbody>
+                    </table>
+                    <div id="paginationEvolucion" class="flex justify-center gap-2 mt-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        let chartInstances = {};
+        const ROWS_PER_PAGE = 6;
+        let paginationData = {};
+
+        function createPagination(tableId, data) {
+            const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
+            
+            if (totalPages <= 1) {
+                document.getElementById('pagination' + tableId).innerHTML = '';
+                return;
+            }
+
+            if (!paginationData[tableId]) {
+                paginationData[tableId] = { currentPage: 1, data: data };
+            } else {
+                paginationData[tableId].data = data;
+            }
+
+            const currentPage = paginationData[tableId].currentPage;
+            const container = document.getElementById('pagination' + tableId);
+            
+            let html = `
+                <button onclick="changePage('${tableId}', ${currentPage - 1})" 
+                        class="pagination-btn p-2 rounded-lg border-2 border-slate-200 font-semibold text-sm hover:bg-slate-100"
+                        ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `
+                        <button onclick="changePage('${tableId}', ${i})" 
+                                class="pagination-btn px-3 py-2 rounded-lg border-2 font-semibold text-sm ${i === currentPage ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-transparent' : 'border-slate-200 hover:bg-slate-100'}">
+                            ${i}
+                        </button>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += '<span class="px-1 text-slate-400 text-sm">...</span>';
+                }
+            }
+
+            html += `
+                <button onclick="changePage('${tableId}', ${currentPage + 1})" 
+                        class="pagination-btn p-2 rounded-lg border-2 border-slate-200 font-semibold text-sm hover:bg-slate-100"
+                        ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function changePage(tableId, page) {
+            const data = paginationData[tableId].data;
+            const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
+            
+            if (page < 1 || page > totalPages) return;
+            
+            paginationData[tableId].currentPage = page;
+            renderTablePage(tableId, data);
+            createPagination(tableId, data);
+        }
+
+        function renderTablePage(tableId, data) {
+            const currentPage = paginationData[tableId].currentPage;
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = start + ROWS_PER_PAGE;
+            const pageData = data.slice(start, end);
+
+            const tbody = document.querySelector(`#tabla${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'table-row-hover';
+                tr.innerHTML = row;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function fetchEstacionamientos(){
+            try{
+                const resp = await fetch('/api/estacionamientos');
+                if(!resp.ok) return [];
+                const json = await resp.json();
+                return json || [];
+            }catch(e){ return []; }
+        }
+
+        function getQueryParams(){
+            const params = new URLSearchParams(window.location.search);
+            return {
+                desde: params.get('desde') || '',
+                hasta: params.get('hasta') || '',
+                estId: params.get('estId') || ''
+            };
+        }
+
+        function setFormFromParams(){
+            const p = getQueryParams();
+            document.getElementById('desde').value = p.desde;
+            document.getElementById('hasta').value = p.hasta;
+            document.getElementById('estId').value = p.estId;
+        }
+
+        async function load(){
+            const info = document.getElementById('info');
+            info.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando estacionamientos...';
+            const ests = await fetchEstacionamientos();
+            const sel = document.getElementById('estId');
+            sel.querySelectorAll('option:not([value=""])').forEach(o=>o.remove());
+            for(const e of ests){
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                opt.textContent = e.nombre;
+                sel.appendChild(opt);
+            }
+            setFormFromParams();
+            await cargarDatos();
+        }
+
+        async function cargarDatos(){
+            const info = document.getElementById('info');
+            info.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cargando datos...';
+            const p = getQueryParams();
+            const q = new URLSearchParams();
+            if(p.desde) q.set('desde', p.desde);
+            if(p.hasta) q.set('hasta', p.hasta);
+            if(p.estId) q.set('estId', p.estId);
+            try{
+                const resp = await fetch('/estadisticas?' + q.toString(), { headers: { 'Accept':'application/json' } });
+                if(!resp.ok){ info.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Error cargando datos: ' + resp.status; return; }
+                const json = await resp.json();
+                const data = json.data || json;
+                renderAll(data);
+                info.textContent = '';
+            }catch(e){ info.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>No se pudo conectar al servidor'; }
+        }
+
+        function renderAll(data){
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+            chartInstances = {};
+            paginationData = {};
+
+            const chartDefaults = {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#475569',
+                            font: { size: 11, weight: '600', family: 'Inter' },
+                            padding: 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 12,
+                        titleFont: { size: 13, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        borderColor: 'rgba(148, 163, 184, 0.2)',
+                        borderWidth: 1
+                    }
+                }
+            };
+
+            const categoriasRows = [];
+            (data.categorias||[]).forEach(c => {
+                categoriasRows.push(`
+                    <td class="py-3 px-3 font-medium text-sm text-slate-700">${c.categoria}</td>
+                    <td class="py-3 px-2 text-center font-semibold text-blue-600 text-sm">${c.cantidad}</td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            ${c.porcentaje}%
+                        </span>
+                    </td>
+                `);
+            });
+            document.getElementById('totalCategorias').textContent = (data.categorias||[]).reduce((sum, c) => sum + c.cantidad, 0);
+            
+            if (categoriasRows.length > 7) {
+                paginationData['Categorias'] = { currentPage: 1, data: categoriasRows };
+                renderTablePage('Categorias', categoriasRows);
+                createPagination('Categorias', categoriasRows);
+            } else {
+                const tbody = document.querySelector('#tablaCategorias tbody');
+                tbody.innerHTML = categoriasRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
+            }
+
+            const categoriasLabels = data.categoriasLabels || (data.categorias||[]).map(c=>c.categoria);
+            const categoriasData = data.categoriasData || (data.categorias||[]).map(c=>c.cantidad);
+            const ctxC = document.getElementById('chartCategorias').getContext('2d');
+            chartInstances.categorias = new Chart(ctxC, { 
+                type:'doughnut',
+                data:{ 
+                    labels:categoriasLabels, 
+                    datasets:[{ 
+                        data:categoriasData, 
+                        backgroundColor:[
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(147, 51, 234, 0.8)',
+                            'rgba(236, 72, 153, 0.8)',
+                            'rgba(251, 146, 60, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 8
+                    }] 
+                },
+                options: {
+                    ...chartDefaults,
+                    cutout: '60%',
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: { position: 'bottom', labels: { ...chartDefaults.plugins.legend.labels, padding: 8, font: { size: 10 } } }
+                    }
+                }
+            });
+
+            const vehRows = [];
+            const vehData = data.distribucionTipoVehiculo || data.tipoVehiculo || [];
+            vehData.forEach(v => {
+                vehRows.push(`
+                    <td class="py-3 px-3 font-medium text-sm text-slate-700">${v.tipo}</td>
+                    <td class="py-3 px-2 text-center font-semibold text-blue-600 text-sm">${v.cantidad}</td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            ${v.porcentaje}%
+                        </span>
+                    </td>
+                `);
+            });
+            const tbodyVeh = document.querySelector('#tablaVehiculo tbody');
+            tbodyVeh.innerHTML = vehRows.map(r => `<tr class="table-row-hover">${r}</tr>`).join('');
+
+            const vehLabels = vehData.map(v => v.tipo);
+            const vehCounts = vehData.map(v => v.cantidad);
+            const ctxV = document.getElementById('chartVehiculo').getContext('2d');
+            chartInstances.vehiculo = new Chart(ctxV, {
+                type: 'pie',
+                data: { 
+                    labels: vehLabels, 
+                    datasets: [{ 
+                        data: vehCounts, 
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(147, 51, 234, 0.8)',
+                            'rgba(236, 72, 153, 0.8)',
+                            'rgba(251, 146, 60, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 8
+                    }] 
+                },
+                options: { 
+                    ...chartDefaults, 
+                    plugins: { 
+                        ...chartDefaults.plugins, 
+                        legend: { position: 'bottom', labels: { ...chartDefaults.plugins.legend.labels, padding: 8, font: { size: 10 } } } 
+                    } 
+                }
+            });
+
+            const modoRows = [];
+            (data.conteoModos||data.modoConteo||[]).forEach(m => {
+                const icon = m.modo === 'MANUAL' ? 'fa-hand-pointer' : 'fa-qrcode';
+                modoRows.push(`
+                    <td class="py-3 px-3 font-medium text-sm text-slate-700"><i class="fas ${icon} mr-2 text-blue-600"></i>${m.modo}</td>
+                    <td class="py-3 px-2 text-center font-semibold text-blue-600 text-sm">${m.cantidad}</td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                            ${m.porcentaje}%
+                        </span>
+                    </td>
+                `);
+            });
+
+            if (modoRows.length > 7) {
+                paginationData['Modo'] = { currentPage: 1, data: modoRows };
+                renderTablePage('Modo', modoRows);
+                createPagination('Modo', modoRows);
+            } else {
+                const tbody = document.querySelector('#tablaModo tbody');
+                tbody.innerHTML = modoRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
+            }
+
+            const modoData = data.conteoModos || data.modoConteo || [];
+            const ctxM = document.getElementById('chartModo').getContext('2d');
+            chartInstances.modo = new Chart(ctxM, { 
+                type:'doughnut', 
+                data:{ 
+                    labels: modoData.map(m => m.modo),
+                    datasets:[{ 
+                        data: modoData.map(m => m.cantidad),
+                        backgroundColor:[
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(147, 51, 234, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverOffset: 8
+                    }] 
+                },
+                options: {
+                    ...chartDefaults,
+                    cutout: '60%',
+                    plugins: {
+                        ...chartDefaults.plugins,
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                padding: 8,
+                                font: { size: 10, weight: '600' },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return {
+                                                text: `${label}: ${percentage}%`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        }
+                    }
+                } 
+            });
+
+            const ocupacionRows = [];
+            const ocupList = (data.porcentajeOcupacion && data.porcentajeOcupacion.length>0) ? data.porcentajeOcupacion : null;
+            if(ocupList){
+                ocupList.forEach(e => {
+                    ocupacionRows.push(`
+                        <td class="py-3 px-4 font-medium text-slate-700">${e.nombre}</td>
+                        <td class="py-3 px-4 text-center font-semibold text-slate-600">${e.capacidad}</td>
+                        <td class="py-3 px-4 text-center font-semibold text-blue-600">${e.ingresos}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                ${e.porcentaje}%
+                            </span>
+                        </td>
+                    `);
+                });
+            }
+            document.getElementById('totalOcupacion').textContent = ocupacionRows.length;
+
+            if (ocupacionRows.length > 7) {
+                paginationData['Ocupacion'] = { currentPage: 1, data: ocupacionRows };
+                renderTablePage('Ocupacion', ocupacionRows);
+                createPagination('Ocupacion', ocupacionRows);
+            } else {
+                const tbody = document.querySelector('#tablaOcupacion tbody');
+                tbody.innerHTML = ocupacionRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
+            }
+
+            const ocupLabels = data.ocupacionLabels || (data.porcentajeOcupacion||[]).map(e=>e.nombre);
+            const ocupData = data.ocupacionData || (data.porcentajeOcupacion||[]).map(e=>e.porcentaje);
+            const ctxO = document.getElementById('chartOcupacion').getContext('2d');
+            chartInstances.ocupacion = new Chart(ctxO, { 
+                type:'bar',
+                data:{ 
+                    labels:ocupLabels, 
+                    datasets:[{ 
+                        label:'% Ocupación con respecto a capacidad', 
+                        data:ocupData,
+                        backgroundColor: ocupData.map((_, i) => {
+                            const colors = [
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(147, 51, 234, 0.8)',
+                                'rgba(236, 72, 153, 0.8)',
+                                'rgba(251, 146, 60, 0.8)'
+                            ];
+                            return colors[i % colors.length];
+                        }),
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }] 
+                }, 
+                options:{ 
+                    ...chartDefaults,
+                    indexAxis: 'y',
+                    scales:{ 
+                        x:{ 
+                            beginAtZero:true,
+                            max: 100,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { color: '#64748b', font: { size: 11 } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#334155', font: { size: 11, weight: '600' } }
+                        }
+                    }
+                } 
+            });
+
+            const evolucionRows = [];
+            (data.evolucion||[]).forEach(d => {
+                evolucionRows.push(`
+                    <td class="py-3 px-4 font-medium text-slate-700">${d.dia}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full font-semibold">
+                            ${d.cantidad}
+                        </span>
+                    </td>
+                `);
+            });
+            document.getElementById('totalEvolucion').textContent = evolucionRows.length;
+
+            if (evolucionRows.length > 7) {
+                paginationData['Evolucion'] = { currentPage: 1, data: evolucionRows };
+                renderTablePage('Evolucion', evolucionRows);
+                createPagination('Evolucion', evolucionRows);
+            } else {
+                const tbody = document.querySelector('#tablaEvolucion tbody');
+                tbody.innerHTML = evolucionRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
+            }
+
+            const evoLabels = data.evolucionLabels || (data.evolucion||[]).map(d=>d.dia);
+            const evoData = data.evolucionData || (data.evolucion||[]).map(d=>d.cantidad);
+            const ctxE = document.getElementById('chartEvolucion').getContext('2d');
+            
+            const gradient = ctxE.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(147, 51, 234, 0.05)');
+
+            chartInstances.evolucion = new Chart(ctxE, { 
+                type:'line', 
+                data:{ 
+                    labels:evoLabels, 
+                    datasets:[{ 
+                        label:'Ingresos diarios', 
+                        data:evoData, 
+                        borderColor:'#3b82f6',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#3b82f6',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#3b82f6',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }] 
+                }, 
+                options:{ 
+                    ...chartDefaults,
+                    scales:{ 
+                        y:{ 
+                            beginAtZero:true,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { color: '#64748b', font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                } 
+            });
+
+            const horariosRows = [];
+            (data.horariosPico||[]).forEach(h => {
+                horariosRows.push(`
+                    <td class="py-3 px-4 font-medium text-slate-700"><i class="fas fa-clock mr-2 text-blue-600"></i>${h.hora}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1 rounded-full font-semibold">
+                            ${h.cantidad}
+                        </span>
+                    </td>
+                `);
+            });
+
+            if (horariosRows.length > 7) {
+                paginationData['Horarios'] = { currentPage: 1, data: horariosRows };
+                renderTablePage('Horarios', horariosRows);
+                createPagination('Horarios', horariosRows);
+            } else {
+                const tbody = document.querySelector('#tablaHorarios tbody');
+                tbody.innerHTML = horariosRows.map(row => `<tr class="table-row-hover">${row}</tr>`).join('');
+            }
+
+            const horarios = data.horariosPico || [];
+            const ctxH = document.getElementById('chartHorarios').getContext('2d');
+            chartInstances.horarios = new Chart(ctxH, { 
+                type:'radar', 
+                data:{ 
+                    labels:horarios.map(h=>h.hora), 
+                    datasets:[{ 
+                        label:'Ingresos por hora', 
+                        data:horarios.map(h=>h.cantidad), 
+                        backgroundColor: 'rgba(147, 51, 234, 0.2)',
+                        borderColor: 'rgba(147, 51, 234, 1)',
+                        pointBackgroundColor: 'rgba(147, 51, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(147, 51, 234, 1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }] 
+                }, 
+                options:{ 
+                    ...chartDefaults,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { 
+                                backdropColor: 'transparent',
+                                color: '#64748b',
+                                font: { size: 10 }
+                            },
+                            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+                            pointLabels: {
+                                color: '#334155',
+                                font: { size: 11, weight: '600' }
+                            }
+                        }
+                    }
+                } 
+            });
+        }
+
+        document.getElementById('filtro').addEventListener('submit', function(e){
+            e.preventDefault();
+            const desde = document.getElementById('desde').value;
+            const hasta = document.getElementById('hasta').value;
+            const estId = document.getElementById('estId').value;
+            const params = new URLSearchParams();
+            if(desde) params.set('desde', desde);
+            if(hasta) params.set('hasta', hasta);
+            if(estId) params.set('estId', estId);
+            window.location.search = params.toString();
+        });
+
+        load();
+        </script>
+    </main>
+</body>
+</html>

@@ -21,7 +21,8 @@ public class EmpleadoServices {
     private final PasswordEncoder passwordEncoder;
     private final TurnoRepository turnoRepository;
 
-    public EmpleadoServices(EmpleadoRepository empleadoRepository,
+    public EmpleadoServices(
+            EmpleadoRepository empleadoRepository,
             PasswordEncoder passwordEncoder,
             TurnoRepository turnoRepository) {
         this.empleadoRepository = empleadoRepository;
@@ -111,7 +112,7 @@ public class EmpleadoServices {
         }
     }
 
-/**  devuelve solo guardias en formato DTO */
+    /** Devuelve solo guardias en formato DTO */
     public List<EmpleadoDTO> listarGuardias() {
         return empleadoRepository.findByRol(Rol.Guardia)
                 .stream()
@@ -119,4 +120,19 @@ public class EmpleadoServices {
                 .toList();
     }
 
+    /* ===================== UPDATE ===================== */
+
+    public EmpleadoDTO actualizarEmpleado(Long id, EmpleadoDTO dto) {
+        Empleado empleado = empleadoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Empleado no encontrado con ID: " + id));
+
+        // 🧩 Aplicar los cambios desde el DTO usando el mapper
+        EmpleadoMapper.updateEntityFromDTO(empleado, dto);
+
+        // 🗄️ Guardar los cambios en la BD
+        Empleado actualizado = empleadoRepository.save(empleado);
+
+        // 🔁 Retornar el DTO actualizado para respuesta al frontend
+        return EmpleadoMapper.toDTO(actualizado);
+    }
 }

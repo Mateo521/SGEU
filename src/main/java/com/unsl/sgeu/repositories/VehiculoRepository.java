@@ -9,6 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
 
     Vehiculo findByPatente(String patente);
@@ -52,23 +57,34 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
     List<Vehiculo> findVehiculosByEstacionamientosAndPatente(
             @Param("idsEstacionamientos") List<Long> idsEstacionamientos,
             @Param("patente") String patente);
-
+/* 
     @Query("""
             SELECT v FROM Vehiculo v
             WHERE UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%'))
             ORDER BY v.patente
             """)
     List<Vehiculo> findByPatenteContainingIgnoreCase(@Param("patente") String patente);
-
+*/
     @Query("SELECT v FROM Vehiculo v WHERE v.patente = :patente")
     Vehiculo findVehiculoByPatente(@Param("patente") String patente);
 
-    @Query("SELECT DISTINCT v FROM Vehiculo v WHERE v.patente IN " +
-            "(SELECT DISTINCT re.patente FROM RegistroEstacionamiento re WHERE re.idEstacionamiento IN :idsEstacionamientos)")
+    @Query("""
+            SELECT DISTINCT v FROM Vehiculo v
+            WHERE v.patente IN (
+                SELECT DISTINCT re.patente FROM RegistroEstacionamiento re
+                WHERE re.idEstacionamiento IN :idsEstacionamientos
+            )
+            OR v.patente IN (
+                SELECT v2.patente FROM Vehiculo v2
+                WHERE v2.patente NOT IN (
+                    SELECT DISTINCT re2.patente FROM RegistroEstacionamiento re2
+                )
+            )
+            ORDER BY v.patente
+            """)
     List<Vehiculo> findAllVehiculosByGuardiaEstacionamientos(
             @Param("idsEstacionamientos") List<Long> idsEstacionamientos);
 
-   
     @Query("SELECT e.nombre FROM RegistroEstacionamiento re " +
             "JOIN Estacionamiento e ON re.idEstacionamiento = e.idEst " +
             "WHERE re.patente = :patente AND re.idEstacionamiento IN :idsEstacionamientos " +
@@ -76,4 +92,10 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
     String findEstacionamientoOrigenByPatente(@Param("patente") String patente,
             @Param("idsEstacionamientos") List<Long> idsEstacionamientos);
 
+     
+    Page<Vehiculo> findByPatenteContainingIgnoreCase(String patente, Pageable pageable);
+
+    
+    @Query("SELECT v FROM Vehiculo v WHERE UPPER(v.patente) LIKE UPPER(CONCAT('%', :patente, '%')) ORDER BY v.patente")
+    List<Vehiculo> findByPatenteContainingIgnoreCase(@Param("patente") String patente);
 }

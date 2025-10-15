@@ -395,7 +395,7 @@ public class VehiculoController {
         return (s == null || s.isBlank()) ? "—" : s;
     }
 
-    @GetMapping("/editar/{patente}")
+    @GetMapping("vehiculos/editar/{patente}")
     public String mostrarFormularioEdicion(@PathVariable String patente,
             Model model,
             HttpSession session,
@@ -408,19 +408,19 @@ public class VehiculoController {
 
             if (!esAdministrador && !esGuardia) {
                 redirectAttributes.addFlashAttribute("error", "No tiene permisos para editar vehículos");
-                return "redirect:/vehiculos";
+                return "redirect:/";
             }
 
             Vehiculo vehiculo = vehiculoService.buscarPorPatente(patente);
             if (vehiculo == null) {
                 redirectAttributes.addFlashAttribute("error", "Vehículo no encontrado");
-                return "redirect:/vehiculos";
+                return "redirect:/";
             }
 
             Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
             if (persona == null) {
                 redirectAttributes.addFlashAttribute("error", "Propietario no encontrado");
-                return "redirect:/vehiculos";
+                return "redirect:/";
             }
 
             // Crear DTO con datoss
@@ -448,7 +448,7 @@ public class VehiculoController {
         }
     }
 
-    @PostMapping("/editar/{patenteOriginal}")
+    @PostMapping("vehiculos/editar/{patenteOriginal}")
     public String editarVehiculo(@PathVariable String patenteOriginal,
             @ModelAttribute VehiculoFormDTO form,
             RedirectAttributes redirectAttributes,
@@ -461,7 +461,7 @@ public class VehiculoController {
 
             if (!esAdministrador && !esGuardia) {
                 redirectAttributes.addFlashAttribute("error", "No tiene permisos para editar vehículos");
-                return "redirect:/vehiculos";
+                return "redirect:/";
             }
 
             // validaciones
@@ -496,13 +496,13 @@ public class VehiculoController {
                 redirectAttributes.addFlashAttribute("error", "Error al actualizar el vehículo");
             }
 
-            return "redirect:/vehiculos";
+            return "redirect:/";
 
         } catch (Exception e) {
             System.err.println("Error al editar vehículo: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error al actualizar: " + e.getMessage());
-            return "redirect:/vehiculos";
+            return "redirect:/";
         }
     }
 
@@ -531,7 +531,7 @@ public class VehiculoController {
                 mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
             } else {
                 // Si todo está bien, registramos la entrada
-                registroestacionamientoService.registrarEntrada(patente, est1);
+                registroestacionamientoService.registrarEntrada(patente, est1 , 0);
                 mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
                 exito = true;
             }
@@ -541,7 +541,7 @@ public class VehiculoController {
                 mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
             } else {
                 // Si todo está bien, registramos la salida
-                registroestacionamientoService.registrarSalida(patente, est1);
+                registroestacionamientoService.registrarSalida(patente, est1 , 0);
                 mensaje = "Salida de '" + patente + "' registrada con éxito.";
                 exito = true;
             }
