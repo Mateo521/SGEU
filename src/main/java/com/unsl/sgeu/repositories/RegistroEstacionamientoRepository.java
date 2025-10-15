@@ -21,7 +21,10 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
     long countByPatente(String patente);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     long countByPatenteAndIdEstacionamiento(String patente, Long idEstacionamiento);
 
 

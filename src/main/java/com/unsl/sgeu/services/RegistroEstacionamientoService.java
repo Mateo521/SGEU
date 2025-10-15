@@ -61,9 +61,15 @@ public class RegistroEstacionamientoService {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     public boolean esPar(String patente) {
 
         long cantidad = registroRepo.countByPatente(patente);
+=======
+    public boolean esPar(String patente, Estacionamiento est) {
+        
+        long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getIdEst());
+>>>>>>> Stashed changes
 =======
     public boolean esPar(String patente, Estacionamiento est) {
         
