@@ -74,21 +74,11 @@ public class RegistroEstacionamientoService {
         return registroRepo.save(registro);
     }
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    public boolean esPar(String patente) {
-        
-        long cantidad = registroRepo.countByPatente(patente);
-=======
+
     public boolean esPar(String patente, Estacionamiento est) {
         
         long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getIdEst());
->>>>>>> Stashed changes
-=======
-    public boolean esPar(String patente, Estacionamiento est) {
-        
-        long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getIdEst());
->>>>>>> Stashed changes
+
         return cantidad % 2 == 0;
     }
 
@@ -375,7 +365,7 @@ public class RegistroEstacionamientoService {
    public boolean estacionamientoIsFull (Estacionamiento est){
 
         List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getIdEst());
-
+        System.out.println("Patentes adentro"+Re.size()+"Capacidad del estacionamiento "+ est.getCapacidad());
         return Re.size() == est.getCapacidad();
 
     }
