@@ -40,18 +40,23 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
       Pageable pageable);
 
   @Query("""
-          SELECT t.estacionamiento
+          SELECT DISTINCT t.estacionamiento
           FROM Turno t
           WHERE t.empleado.nombreUsuario = :usuario
-            AND t.fechaInicio <= CURRENT_DATE
-            AND (t.fechaFin IS NULL OR t.fechaFin >= CURRENT_DATE)
+            AND t.fechaFin IS NULL
       """)
   Estacionamiento findEstacionamientoActivoByEmpleadoUsuario(@Param("usuario") String usuario);
 
   @Query("SELECT DISTINCT t.estacionamiento.id FROM Turno t WHERE t.empleado.id = :empleadoId")
   List<Long> findEstacionamientoIdsByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
-  @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId")
+  // @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId")
+  @Query("""
+          SELECT DISTINCT t.estacionamiento
+          FROM Turno t
+          WHERE t.empleado.nombreUsuario = :usuario
+            AND t.fechaFin IS NULL
+      """)
   List<Estacionamiento> findEstacionamientosByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
   @Query("SELECT COUNT(t) > 0 FROM Turno t WHERE t.empleado.id = :empleadoId AND t.estacionamiento.id = :estacionamientoId")
