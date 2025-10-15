@@ -34,6 +34,8 @@ public class LoginController {
 
         Estacionamiento estacionamiento = empleadoServices.obtenerEstacionamientoActivo(nombreUsuario);
 
+
+         System.out.println("estacionamiento antes::" + estacionamiento);
         // Guardamos en sesión lo necesario
         session.setAttribute("usuarioId", usuarioId);
         session.setAttribute("user", nombreUsuario);

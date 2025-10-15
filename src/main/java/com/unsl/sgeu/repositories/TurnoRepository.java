@@ -43,7 +43,6 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
           SELECT t.estacionamiento
           FROM Turno t
           WHERE t.empleado.nombreUsuario = :usuario
-            AND t.fechaInicio <= CURRENT_DATE
             AND t.fechaFin IS NULL
       """)
   Estacionamiento findEstacionamientoActivoByEmpleadoUsuario(@Param("usuario") String usuario);
