@@ -43,9 +43,9 @@ public class QRController {
     public ResponseEntity<?> leerCodigoQR(@RequestBody Map<String, String> request, HttpSession session) {
         try {
             String codigoQR = request.get("codigo");
-
             System.out.println("Código QR recibido: " + codigoQR);
-
+            Estacionamiento estacionamiento = (Estacionamiento) session.getAttribute("estacionamiento"); 
+            
             if (codigoQR == null || codigoQR.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("mensaje", "Código QR vacío"));
@@ -57,9 +57,7 @@ public class QRController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("mensaje", "Vehículo no encontrado"));
             }
-
         
-            Estacionamiento estacionamiento = (Estacionamiento) session.getAttribute("estacionamiento");
             if (estacionamiento == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("mensaje", "No hay estacionamiento seleccionado"));
@@ -73,16 +71,20 @@ public class QRController {
             response.put("dniDuenio", vehiculo.getDniDuenio());
 
           
-            boolean estaAdentro = !registroestacionamientoService.esPar(vehiculo.getPatente());
+            boolean estaAdentro = !registroestacionamientoService.esPar(vehiculo.getPatente(), estacionamiento);
             response.put("estaAdentro", estaAdentro);
 
-           
-            if (estaAdentro) {
+            if (!estaAdentro) {
+                  if(registroestacionamientoService.estacionamientoIsFull(estacionamiento)){
+                    response.put("accionDisponible", "estacionamiento lleno");
+                    response.put("mensajeAccion", "El vehículo no puede ingresar");
+                  } else{
+                response.put("accionDisponible", "Entrada");
+                response.put("mensajeAccion", "El vehículo está fuera del estacionamiento"); }}
+               
+             else {
                 response.put("accionDisponible", "Salida");
                 response.put("mensajeAccion", "El vehículo está dentro del estacionamiento");
-            } else {
-                response.put("accionDisponible", "Entrada");
-                response.put("mensajeAccion", "El vehículo está fuera del estacionamiento");
             }
 
             //  info del dueño
@@ -135,13 +137,13 @@ public class QRController {
             String mensaje = "";
 
             if ("Entrada".equals(accion) && vehiculoService.existePatente(patente)
-                    && registroestacionamientoService.esPar(patente)) {
+                    && registroestacionamientoService.esPar(patente, estacionamiento)) {
 
                 registroestacionamientoService.registrarEntrada(patente, estacionamiento);
                 resultado = true;
                 mensaje = "Entrada registrada correctamente";
 
-            } else if ("Salida".equals(accion) && !registroestacionamientoService.esPar(patente)) {
+            } else if ("Salida".equals(accion) && !registroestacionamientoService.esPar(patente, estacionamiento)) {
 
                 registroestacionamientoService.registrarSalida(patente, estacionamiento);
                 resultado = true;
