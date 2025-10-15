@@ -50,13 +50,7 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
   @Query("SELECT DISTINCT t.estacionamiento.id FROM Turno t WHERE t.empleado.id = :empleadoId")
   List<Long> findEstacionamientoIdsByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
-  // @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId")
-  @Query("""
-          SELECT DISTINCT t.estacionamiento
-          FROM Turno t
-          WHERE t.empleado.nombreUsuario = :usuario
-            AND t.fechaFin IS NULL
-      """)
+  @Query("SELECT DISTINCT t.estacionamiento FROM Turno t WHERE t.empleado.id = :empleadoId AND t.fechaFin IS NULL")
   List<Estacionamiento> findEstacionamientosByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
   @Query("SELECT COUNT(t) > 0 FROM Turno t WHERE t.empleado.id = :empleadoId AND t.estacionamiento.id = :estacionamientoId")

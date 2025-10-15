@@ -190,8 +190,8 @@ public class VehiculoController {
             HttpSession session) {
         try {
 
-            String rol = (String) session.getAttribute("rol");
-            boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+            // String rol = (String) session.getAttribute("rol");
+            // boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
             /*
              * probando control
              * if (!esAdministrador) {
