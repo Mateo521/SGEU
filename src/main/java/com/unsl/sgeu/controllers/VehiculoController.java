@@ -291,7 +291,7 @@ public class VehiculoController {
 
             }
 
-            String rutaImagenQR = "/qr-image/" + vehiculoGuardado.getCodigoQr();
+            String rutaImagenQR = "/qr-codes/qr_" + vehiculoGuardado.getPatente() + ".png";
 
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
             redirectAttributes.addFlashAttribute("codigoQR", vehiculoGuardado.getCodigoQr());
