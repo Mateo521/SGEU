@@ -100,7 +100,8 @@
           </li>
 
           <li>
-            <a th:href="@{/leerqr}" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+            <a th:href="@{/leerqr}"
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -122,7 +123,7 @@
             </a>
           </li>
 
-          <li>
+          <li th:if="${session.rol == 'Administrador'}">
             <a th:href="@{/estadisticas}"
               class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
@@ -136,7 +137,7 @@
             </a>
           </li>
 
-          <li>
+          <li th:if="${session.rol == 'Administrador'}">
             <a th:href="@{/table_user}"
               class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
@@ -148,8 +149,9 @@
             </a>
           </li>
 
-          <li>
-            <a th:href="@{/ajustes}" class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
+          <li th:if="${session.rol == 'Administrador'}">
+            <a th:href="@{/ajustes}"
+              class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
