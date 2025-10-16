@@ -26,7 +26,7 @@ public interface EstacionamientoService {
     void eliminarFisico(Long id); // opcional (borrado físico)
 
  
-       List<Long> obtenerIdsPorEmpleado(Long empleadoId);
+    List<Long> obtenerIdsPorEmpleado(Long empleadoId);
     
   
     List<EstacionamientoDTO> obtenerPorEmpleado(Long empleadoId);
