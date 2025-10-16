@@ -27,15 +27,12 @@ public class LoginController {
             return "redirect:/login?error=true";
         }
 
-        // Nuevo: obtenemos rol y nombre completo por nombre de usuario
+        // capturamos datos del empleado para pasarlos al session
         String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);
         String nombreCompleto = empleadoServices.obtenerNombrePorUsuario(nombreUsuario);
         Long usuarioId = empleadoServices.obtenerIdPorUsuario(nombreUsuario);
         Estacionamiento estacionamiento = empleadoServices.obtenerEstacionamientoActivo(nombreUsuario);
 
-
-         System.out.println("estacionamiento antes::" + estacionamiento);
-        // Guardamos en sesión lo necesario
         session.setAttribute("usuarioId", usuarioId);
         session.setAttribute("user", nombreUsuario);
         session.setAttribute("rol", rol);
@@ -49,9 +46,6 @@ public class LoginController {
         System.out.println("Nombre: " + session.getAttribute("nombreCompleto"));
         System.out.println("Estacionamiento activo: " + session.getAttribute("estacionamiento"));
         System.out.println("========================");
-
-        System.out.println("Usuario " + nombreUsuario + " inició sesión. Rol: " + rol);
-
 
         return "redirect:/?success=true";
     }

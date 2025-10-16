@@ -83,11 +83,9 @@ public class StatsController {
         return ResponseEntity.ok(Map.of("data", dto));
     }
 
-    // Nota: la API de estacionamientos ya está disponible en EstacionamientoController (/api/estacionamientos)
-
     
 
-    // Construye y mapea la respuesta a DTO (evita llamadas duplicadas)
+    // Construye y mapea la respuesta a DTO
     private StatsResponseDTO buildStatsDto(LocalDate desde, LocalDate hasta, Long estId){
         StatsResponseDTO dto = new StatsResponseDTO();
 

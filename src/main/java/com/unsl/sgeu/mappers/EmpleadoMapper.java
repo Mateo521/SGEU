@@ -13,7 +13,7 @@ public class EmpleadoMapper {
         return nombre + " " + apellido;
     }
 
-    /** 🔁 Entidad → DTO */
+    /** Entidad → DTO */
     public static EmpleadoDTO toDTO(Empleado e) {
         if (e == null) return null;
         return new EmpleadoDTO(
@@ -24,7 +24,7 @@ public class EmpleadoMapper {
         );
     }
 
-    /** 🔁 DTO → Entidad */
+    /** DTO → Entidad */
     public static void updateEntityFromDTO(Empleado e, EmpleadoDTO dto) {
         if (dto == null || e == null) return;
 

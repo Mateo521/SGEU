@@ -14,7 +14,7 @@ public class webconfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(sessionInterceptor)
-                .addPathPatterns("/**")                // todas las rutas
+                .addPathPatterns("/**")// todas las rutas
                 .excludePathPatterns(
                     "/login", "/css/**", "/js/**", "/images/**", "/webjars/**"
                 );

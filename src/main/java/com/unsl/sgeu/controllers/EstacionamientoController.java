@@ -1,4 +1,3 @@
-// Solo por si lo querés ya listo
 package com.unsl.sgeu.controllers;
 
 import com.unsl.sgeu.dto.EstacionamientoDTO;

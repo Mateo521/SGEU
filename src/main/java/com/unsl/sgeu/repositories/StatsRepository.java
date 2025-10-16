@@ -18,8 +18,6 @@ public interface StatsRepository {
     // Horarios pico de ingresos (por hora)
     List<Map<String, Object>> horariosPicoIngresos(LocalDate desde, LocalDate hasta, int topN, Long estacionamientoId);
 
-    // (promedioEstancia eliminado)
-
     // Porcentaje de ocupacion por estacionamiento
     List<Map<String, Object>> porcentajeOcupacionPorEstacionamiento(LocalDate desde, LocalDate hasta, Long estacionamientoId);
 
