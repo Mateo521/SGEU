@@ -297,7 +297,14 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("codigoQR", vehiculoGuardado.getCodigoQr());
             redirectAttributes.addFlashAttribute("imagenQR", rutaImagenQR);
             redirectAttributes.addFlashAttribute("patente", form.getPatente());
+
             redirectAttributes.addFlashAttribute("vehiculoInfo", crearInfoVehiculo(form, persona));
+
+            redirectAttributes.addFlashAttribute("modelo", form.getModelo());
+            redirectAttributes.addFlashAttribute("color", form.getColor());
+            redirectAttributes.addFlashAttribute("tipo", form.getTipoNombre());
+            redirectAttributes.addFlashAttribute("dni", form.getDni());
+            redirectAttributes.addFlashAttribute("nombre", form.getNombre());
 
             return "redirect:/vehiculos/agregar";
 

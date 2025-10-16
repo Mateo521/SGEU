@@ -152,8 +152,7 @@
                                 class="qr-container bg-white p-6 rounded-xl border-4 border-dashed border-slate-300 inline-block">
                                 <img th:if="${patente}" th:src="@{'/qr-codes/qr_' + ${patente} + '.png'}"
                                     alt="Código QR del vehículo" class="qr-image mx-auto"
-                                    style="width: 200px; height: 200px;" 
-                                    />
+                                    style="width: 200px; height: 200px;" />
                             </div>
 
                             <!-- Botones de acción -->
@@ -166,7 +165,9 @@
                                     </svg>
                                     Descargar QR
                                 </a>
-                                <button onclick="imprimirQR()"
+                                <button onclick="imprimirQR(this)" th:data-patente="${patente}" th:data-qr="${codigoQR}"
+                                    th:data-modelo="${modelo ?: 'Sin modelo'}" th:data-color="${color ?: 'Sin color'}"
+                                    th:data-tipo="${tipo ?: 'Sin tipo'}" th:data-dni="${dni ?: 'Sin DNI'}"
                                     class="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 font-semibold transition-all hover:scale-105 shadow-md">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -176,6 +177,12 @@
                                 </button>
                             </div>
                         </div>
+
+
+
+
+
+
                     </div>
 
                     <div class="text-center mt-8 pt-6 border-t border-slate-200">
