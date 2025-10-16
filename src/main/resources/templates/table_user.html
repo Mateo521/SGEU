@@ -466,7 +466,7 @@
                         if (emailCell) emailCell.textContent = email;
                     }
 
-                    fetch(`/api/empleados/${id}`, {
+                    fetch(`api/empleados/${id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

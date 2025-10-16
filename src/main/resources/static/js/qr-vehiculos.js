@@ -59,7 +59,7 @@ class QRVehiculoManager {
            
             qrImage.src = `/sgeu/qr-codes/qr_${this.currentData.patente}.png`;
 */
-            qrImage.src = `/qr-codes/qr_${this.currentData.patente}.png`;
+             qrImage.src = `/sgeu/qr-codes/qr_${this.currentData.patente}.png`;
            
             // Manejar errores de cargaa
             qrImage.onload = function() {
@@ -122,7 +122,7 @@ class QRVehiculoManager {
     
     imprimirConImagenExistente(data) {
 /*     const qrImageSrc = `/sgeu/qr-codes/qr_${data.patente}.png`; */
-        const qrImageSrc = `/qr-codes/qr_${data.patente}.png`;
+        const qrImageSrc = `/sgeu/qr-codes/qr_${data.patente}.png`;
         console.log('🖨️ Usando imagen QR:', qrImageSrc);
         this.crearDocumentoImpresion(data, qrImageSrc);
     }

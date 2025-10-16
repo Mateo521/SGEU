@@ -84,7 +84,7 @@
      */
     const verificarVencidos = async () => {
         try {
-            const response = await fetch('/api/alertas/vencidas');
+            const response = await fetch('/sgeu/api/alertas/vencidas');
             if (!response.ok) return;
             const patentes = await response.json();
 
