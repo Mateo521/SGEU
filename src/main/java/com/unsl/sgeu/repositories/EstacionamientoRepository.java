@@ -13,6 +13,11 @@ public interface EstacionamientoRepository extends JpaRepository<Estacionamiento
     // (findAll, findById, save, deleteById, etc.) para la entidad Estacionamiento.
     // Internamente usa EntityManager de JPA, por lo que no hace falta escribir SQL ni conexión manual.
 
+    List<Estacionamiento> findAll();
+    // Genera la consulta:
+    // SELECT * FROM estacionamiento
+    // Devuelve todos los registros de la tabla estacionamiento.
+
     List<Estacionamiento> findByEstadoTrue();   // activos
     // Genera la consulta:
     // SELECT * FROM estacionamiento WHERE estado = TRUE

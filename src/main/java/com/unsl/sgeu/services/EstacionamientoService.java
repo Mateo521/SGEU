@@ -15,7 +15,7 @@ public interface EstacionamientoService {
 
     EstacionamientoDTO obtener(Long id);
 
-    List<EstacionamientoDTO> listarTodos();     
+    List<EstacionamientoDTO> listarTodos();
 
     List<EstacionamientoDTO> listarActivos();
 
