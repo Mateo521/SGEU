@@ -160,7 +160,7 @@ public class StatsRepositoryImpl implements StatsRepository {
         for(Object[] r: rows){
             long ingresos = ((Number)r[3]).longValue();
             int capacidad = r[2]==null?0:((Number)r[2]).intValue();
-            double pct = capacidad==0?0.0:(ingresos*100.0/capacidad);
+            double pct = capacidad==0?0.0:Math.min(ingresos*100.0/capacidad, 100.0);
             Map<String,Object> m = new HashMap<>();
             m.put("id", ((Number)r[0]).longValue());
             m.put("nombre", r[1]);
