@@ -14,16 +14,19 @@ import java.time.ZoneId;
 @Service
 public class TurnoService {
 
-        private final TurnoRepository turnoRepo;
-        private final EmpleadoRepository empleadoRepo;
-        private final EstacionamientoRepository estRepo;
+        private final TurnoRepositoryImpl turnoRepo;
+        private final EmpleadoRepositoryImpl empleadoRepo;
+        private final EstacionamientoRepositoryImpl estRepo;
+        private final TurnoRepositoryPage turnoRepositoryPage;
 
-        public TurnoService(TurnoRepository turnoRepo,
-                        EmpleadoRepository empleadoRepo,
-                        EstacionamientoRepository estRepo) {
+        public TurnoService(TurnoRepositoryImpl turnoRepo,
+                        EmpleadoRepositoryImpl empleadoRepo,
+                        EstacionamientoRepositoryImpl estRepo,
+                        TurnoRepositoryPage turnoRepositoryPage) {
                 this.turnoRepo = turnoRepo;
                 this.empleadoRepo = empleadoRepo;
                 this.estRepo = estRepo;
+                this.turnoRepositoryPage = turnoRepositoryPage;
         }
 
         // ===================== LISTADOS =====================
@@ -31,7 +34,7 @@ public class TurnoService {
                 Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 20,
                                 Sort.by("fechaInicio").descending());
                 LocalDate f = (fecha != null && !fecha.isBlank()) ? LocalDate.parse(fecha) : null;
-                return turnoRepo.search(empleadoId, estId, f, pageable).map(TurnoMapper::toDTO);
+                return turnoRepositoryPage.search(empleadoId, estId, f, pageable).map(TurnoMapper::toDTO);
         }
 
         public Page<TurnoDTO> listRange(Long empleadoId, Long estId, String desde, String hasta, Integer page,
@@ -40,7 +43,7 @@ public class TurnoService {
                                 Sort.by("fechaInicio").descending());
                 LocalDate d = (desde != null && !desde.isBlank()) ? LocalDate.parse(desde) : null;
                 LocalDate h = (hasta != null && !hasta.isBlank()) ? LocalDate.parse(hasta) : null;
-                return turnoRepo.searchRange(empleadoId, estId, d, h, pageable).map(TurnoMapper::toDTO);
+                return turnoRepositoryPage.searchRange(empleadoId, estId, d, h, pageable).map(TurnoMapper::toDTO);
         }
 
         // ===================== CREAR =====================

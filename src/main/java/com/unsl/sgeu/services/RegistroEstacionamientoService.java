@@ -1,7 +1,9 @@
 package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
+import com.unsl.sgeu.repositories.RegistroEstacionamientoRepositoryImpl;
 import com.unsl.sgeu.repositories.VehiculoRepository;
+import com.unsl.sgeu.repositories.VehiculoRepositoryImpl;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +25,9 @@ import java.util.Map;
 public class RegistroEstacionamientoService {
 
     @Autowired
-    private RegistroEstacionamientoRepository registroRepo;
+    private RegistroEstacionamientoRepositoryImpl registroRepo;
     @Autowired
-    private VehiculoRepository vehiculoRepo;
+    private VehiculoRepositoryImpl vehiculoRepo;
 
     @Autowired
     private EstacionamientoService estacionamientoService;
@@ -361,5 +363,6 @@ public class RegistroEstacionamientoService {
         return Re.size() == est.getCapacidad();
 
     }
+    
 
 }

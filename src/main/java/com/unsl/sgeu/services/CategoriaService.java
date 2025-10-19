@@ -5,13 +5,14 @@ import org.springframework.stereotype.Service;
 
 import com.unsl.sgeu.models.Categoria;
 import com.unsl.sgeu.repositories.CategoriaRepository;
+import com.unsl.sgeu.repositories.CategoriaRepositoryImpl;
 
 @Service
 public class CategoriaService {
 
-    private final CategoriaRepository categoriaRepository;
+    private final CategoriaRepositoryImpl categoriaRepository;
 
-    public CategoriaService(CategoriaRepository categoriaRepository) {
+    public CategoriaService(CategoriaRepositoryImpl categoriaRepository) {
         this.categoriaRepository = categoriaRepository;
     }
 
