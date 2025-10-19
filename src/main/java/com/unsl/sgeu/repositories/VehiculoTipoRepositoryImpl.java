@@ -20,7 +20,7 @@ public class VehiculoTipoRepositoryImpl implements VehiculoTipoRepository {
     // -------------------- CRUD Básico --------------------
 
     @Override
-    public void save(VehiculoTipo vehiculoTipo) {
+    public VehiculoTipo save(VehiculoTipo vehiculoTipo) {
         String sql = "INSERT INTO vehiculo_tipo(nombre) VALUES (?)";
         try (Connection conn = databaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -37,6 +37,8 @@ public class VehiculoTipoRepositoryImpl implements VehiculoTipoRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        return vehiculoTipo;
     }
 
     @Override

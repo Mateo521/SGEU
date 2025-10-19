@@ -24,4 +24,5 @@ public interface TurnoRepository {
 
     void delete(Long id);
 
+    boolean existsById(Long id);
 }

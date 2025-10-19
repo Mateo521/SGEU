@@ -7,15 +7,15 @@ import java.util.List;
 public interface VehiculoRepository {
 
     // -------------------- CRUD Básico --------------------
-    void save(Vehiculo vehiculo);
+    Vehiculo save(Vehiculo vehiculo);
     void update(Vehiculo vehiculo);
-    void deleteByPatente(String patente);
+    void delete(String patente);
     Vehiculo findByPatente(String patente);
     List<Vehiculo> findAll();
 
     // -------------------- Búsquedas simples --------------------
     Vehiculo findByCodigoQr(String codigoQr);
-    List<Vehiculo> findByPatenteContaining(String patente);
+    List<Vehiculo> findByPatenteContainingIgnoreCase(String patente);
 
     // -------------------- Consultas con RegistroEstacionamiento --------------------
     List<Vehiculo> findVehiculosByEstacionamiento(Long idEstacionamiento);

@@ -4,11 +4,13 @@ import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.mappers.EstacionamientoMapper;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.repositories.EstacionamientoRepository;
+import com.unsl.sgeu.repositories.EstacionamientoRepositoryImpl;
 import com.unsl.sgeu.services.EstacionamientoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.unsl.sgeu.repositories.TurnoRepository;  
+import com.unsl.sgeu.repositories.TurnoRepository;
+import com.unsl.sgeu.repositories.TurnoRepositoryImpl;
 
 import java.util.List;
 
@@ -18,10 +20,10 @@ import static com.unsl.sgeu.mappers.EstacionamientoMapper.toDTO;
 @Transactional
 public class EstacionamientoServiceImpl implements EstacionamientoService {
 
-    private final EstacionamientoRepository repo;
-   private final TurnoRepository turnoRepository;
+    private final EstacionamientoRepositoryImpl repo;
+   private final TurnoRepositoryImpl turnoRepository;
 
-      public EstacionamientoServiceImpl(EstacionamientoRepository repo, TurnoRepository turnoRepository) {
+      public EstacionamientoServiceImpl(EstacionamientoRepositoryImpl repo, TurnoRepositoryImpl turnoRepository) {
         this.repo = repo;
         this.turnoRepository = turnoRepository;
     }

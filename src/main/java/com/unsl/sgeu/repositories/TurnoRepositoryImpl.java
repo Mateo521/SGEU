@@ -203,6 +203,25 @@ public class TurnoRepositoryImpl implements TurnoRepository {
         }
     }
 
+    @Override
+    public boolean existsById (Long id){
+        String sql = "SELECT * FROM turnos WHERE id_turno = ?";
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Mapeo de ResultSet → Turno
     private Turno mapTurno(ResultSet rs) throws SQLException {
         Turno t = new Turno();

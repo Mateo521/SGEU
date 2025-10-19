@@ -7,6 +7,10 @@ import com.unsl.sgeu.dto.VehiculoFormDTO;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.VehiculoRepository;
+import com.unsl.sgeu.repositories.VehiculoRepositoryImpl;
+import com.unsl.sgeu.repositories.VehiculoRepositoryPage;
+import com.unsl.sgeu.servicesimpl.EstacionamientoServiceImpl;
+
 import java.util.UUID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,16 +25,24 @@ import org.springframework.data.domain.Pageable;
 public class VehiculoService {
 
     @Autowired
-    private VehiculoRepository vehiculoRepo;
+    private VehiculoRepositoryImpl vehiculoRepo;
 
     @Autowired
-    private EstacionamientoService estacionamientoService;
+    private EstacionamientoServiceImpl estacionamientoService;
 
     @Autowired
     private RegistroEstacionamientoService registroEstacionamientoService;
 
+    
     @Autowired
     private PersonaService personaService;
+    
+
+    private VehiculoRepositoryPage vehiculoRepoPage;
+    @Autowired
+    public VehiculoService(VehiculoRepositoryPage vehiculoRepoPage) {
+        this.vehiculoRepoPage = vehiculoRepoPage;
+    }
 
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepo.findAll();
@@ -225,7 +237,7 @@ public class VehiculoService {
         System.out.println("Procediendo a eliminar...");
         
       
-        vehiculoRepo.deleteById(patente);
+        vehiculoRepo.delete(patente);
         
         String mensajeExito = "Vehículo " + patente + " eliminado exitosamente";
         System.out.println(mensajeExito);
@@ -266,7 +278,7 @@ public class VehiculoService {
             System.out.println(" Eliminando registros de estacionamiento para patente: " + patente);
 
             registroEstacionamientoService.eliminarRegistrosPorPatente(patente);
-            vehiculoRepo.deleteById(patente);
+            vehiculoRepo.delete(patente);
 
             return new ResultadoEliminacion(true,
                     "Vehículo " + patente + " y todo su historial eliminados completamente");
@@ -339,27 +351,28 @@ public class VehiculoService {
 
 
  
-public Page<Vehiculo> obtenerTodosPaginado(Pageable pageable) {
-    System.out.println("Obteniendo página: " + pageable.getPageNumber() + 
-                      ", tamaño: " + pageable.getPageSize());
-    return vehiculoRepo.findAll(pageable);
-}
+    public List<Vehiculo> obtenerTodos(int page, int size) {
+        int limit = size;
+        int offset = page * size;
+        return vehiculoRepoPage.obtenerTodosPaginado(limit, offset);
+    }
 
-public Page<Vehiculo> obtenerTodosPorGuardiaPaginado(Long guardiaId, Pageable pageable) {
-    System.out.println("Guardia " + guardiaId + " - Página: " + pageable.getPageNumber());
-    
-    return vehiculoRepo.findAll(pageable);
-}
+    public List<Vehiculo> obtenerPorGuardia(Long dniDuenio, int page, int size) {
+        int limit = size;
+        int offset = page * size;
+        return vehiculoRepoPage.obtenerTodosPorGuardiaPaginado(dniDuenio, limit, offset);
+    }
 
-public Page<Vehiculo> buscarVehiculosPorPatentePaginado(String patente, Pageable pageable) {
-    System.out.println("Buscando '" + patente + "' - Página: " + pageable.getPageNumber());
-    return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
-}
+    public List<Vehiculo> buscarPorPatente(String patente, int page, int size) {
+        int limit = size;
+        int offset = page * size;
+        return vehiculoRepoPage.buscarVehiculosPorPatentePaginado(patente, limit, offset);
+    }
 
-public Page<Vehiculo> buscarPorPatenteYGuardiaPaginado(String patente, Long guardiaId, Pageable pageable) {
-    System.out.println("Guardia " + guardiaId + " buscando '" + patente + "' - Página: " + pageable.getPageNumber());
-   
-    return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
-}
+    public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long dniDuenio, int page, int size) {
+        int limit = size;
+        int offset = page * size;
+        return vehiculoRepoPage.buscarPorPatenteYGuardiaPaginado(patente, dniDuenio, limit, offset);
+    }
 
 }

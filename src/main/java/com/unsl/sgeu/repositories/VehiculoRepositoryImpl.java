@@ -17,7 +17,7 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
 
     // -------------------- CRUD Básico --------------------
     @Override
-    public void save(Vehiculo vehiculo) {
+    public Vehiculo save(Vehiculo vehiculo) {
         String sql = "INSERT INTO vehiculo(patente, codigo_qr, modelo, color, id_vehiculo_tipo, dni_duenio, tipo) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = databaseConnection.getConnection();
@@ -37,6 +37,7 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return vehiculo;
     }
     @Override
     public void update(Vehiculo vehiculo) {
@@ -61,7 +62,7 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
         }
     }
     @Override
-    public void deleteByPatente(String patente) {
+    public void delete(String patente) {
         String sql = "DELETE FROM vehiculo WHERE patente = ?";
         try (Connection conn = databaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -118,7 +119,7 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
         return null;
     }
     @Override
-    public List<Vehiculo> findByPatenteContaining(String patente) {
+    public List<Vehiculo> findByPatenteContainingIgnoreCase(String patente) {
         List<Vehiculo> lista = new ArrayList<>();
         String sql = "SELECT * FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?) ORDER BY patente";
         try (Connection conn = databaseConnection.getConnection();

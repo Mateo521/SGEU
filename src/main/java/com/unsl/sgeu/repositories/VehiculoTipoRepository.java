@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface VehiculoTipoRepository {
 
     // -------------------- CRUD Básico --------------------
-    void save(VehiculoTipo vehiculoTipo);
+    VehiculoTipo save(VehiculoTipo vehiculoTipo);
     void update(VehiculoTipo vehiculoTipo);
     void deleteById(Short id);
     Optional<VehiculoTipo> findById(Short id);

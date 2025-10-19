@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 
 @Service
 public class TurnoService {
@@ -30,20 +31,25 @@ public class TurnoService {
         }
 
         // ===================== LISTADOS =====================
-        public Page<TurnoDTO> list(Long empleadoId, Long estId, String fecha, Integer page, Integer size) {
-                Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 20,
-                                Sort.by("fechaInicio").descending());
+         public List<TurnoDTO> list(Long empleadoId, Long estId, String fecha, Integer page, Integer size) {
+                int limit = (size != null ? size : 20);
+                int offset = ((page != null ? page : 0) * limit);
+
                 LocalDate f = (fecha != null && !fecha.isBlank()) ? LocalDate.parse(fecha) : null;
-                return turnoRepositoryPage.search(empleadoId, estId, f, pageable).map(TurnoMapper::toDTO);
+
+                List<Turno> turnos = turnoRepositoryPage.search(empleadoId, estId, f, limit, offset);
+                return turnos.stream().map(TurnoMapper::toDTO).toList();
         }
 
-        public Page<TurnoDTO> listRange(Long empleadoId, Long estId, String desde, String hasta, Integer page,
-                        Integer size) {
-                Pageable pageable = PageRequest.of(page != null ? page : 0, size != null ? size : 20,
-                                Sort.by("fechaInicio").descending());
+        public List<TurnoDTO> listRange(Long empleadoId, Long estId, String desde, String hasta, Integer page, Integer size) {
+                int limit = (size != null ? size : 20);
+                int offset = ((page != null ? page : 0) * limit);
+
                 LocalDate d = (desde != null && !desde.isBlank()) ? LocalDate.parse(desde) : null;
                 LocalDate h = (hasta != null && !hasta.isBlank()) ? LocalDate.parse(hasta) : null;
-                return turnoRepositoryPage.searchRange(empleadoId, estId, d, h, pageable).map(TurnoMapper::toDTO);
+
+                List<Turno> turnos = turnoRepositoryPage.searchRange(empleadoId, estId, d, h, limit, offset);
+                return turnos.stream().map(TurnoMapper::toDTO).toList();
         }
 
         // ===================== CREAR =====================
@@ -139,7 +145,7 @@ public class TurnoService {
         public void delete(Long id) {
                 if (!turnoRepo.existsById(id))
                         throw new IllegalArgumentException("Turno no encontrado");
-                turnoRepo.deleteById(id);
+                turnoRepo.delete(id);
         }
 
         public TurnoDTO get(Long id) {
