@@ -3,9 +3,10 @@ package com.unsl.sgeu.controllers;
 
 import com.unsl.sgeu.dto.*;
 import com.unsl.sgeu.services.TurnoService;
+import com.unsl.sgeu.util.Pagina;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
+import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin // si la UI corre en otro host/puerto
@@ -26,25 +27,29 @@ public class TurnoController {
 
     // GET /api/turnos?empleadoId=&estId=&fecha=&page=&size=
     @GetMapping
-    public Page<TurnoDTO> list(
+    public Pagina<TurnoDTO> list(
             @RequestParam(required = false) Long empleadoId,
             @RequestParam(required = false) Long estId,
             @RequestParam(required = false) String fecha,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) {
-        return service.list(empleadoId, estId, fecha, page, size);
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        List<TurnoDTO> turnos = service.list(empleadoId, estId, fecha, page, size);
+        long total = service.count(empleadoId, estId, fecha);
+        return new Pagina<>(turnos, page, size, total);
     }
 
     // GET /api/turnos/range?desde=2025-10-01&hasta=2025-10-31
     @GetMapping("/range")
-    public Page<TurnoDTO> listRange(
+    public Pagina<TurnoDTO> listRange(
             @RequestParam(required = false) Long empleadoId,
             @RequestParam(required = false) Long estId,
             @RequestParam(required = false) String desde,
             @RequestParam(required = false) String hasta,
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) {
-        return service.listRange(empleadoId, estId, desde, hasta, page, size);
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        List<TurnoDTO> turnos = service.listRange(empleadoId, estId, desde, hasta, page, size);
+        long total = service.countRange(empleadoId, estId, desde, hasta);
+        return new Pagina<>(turnos, page, size, total);
     }
 
     @GetMapping("/{id}")

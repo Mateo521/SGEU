@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,25 +19,26 @@ import java.util.Map;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import com.unsl.sgeu.dto.PanelDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import com.unsl.sgeu.util.Pagina;
 
 @Controller
-@SessionAttributes
+@SessionAttributes({ "user", "rol", "nombreCompleto", "usuarioId" })
 public class PrincipalController {
 
-    @Autowired
-    private RegistroEstacionamientoService registroEstacionamientoService;
-    @Autowired
-    private VehiculoService vehiculoService;
-    // Aca luego separo los 2 diferentes logins, redirigiendo a diferentes paginas
+    private final RegistroEstacionamientoService registroEstacionamientoService;
+    private final VehiculoService vehiculoService;
+    private final EstacionamientoService estacionamientoService;
 
     @Autowired
-    private EstacionamientoService estacionamientoService;
+    public PrincipalController(
+            RegistroEstacionamientoService registroEstacionamientoService,
+            VehiculoService vehiculoService,
+            EstacionamientoService estacionamientoService) {
+        this.registroEstacionamientoService = registroEstacionamientoService;
+        this.vehiculoService = vehiculoService;
+        this.estacionamientoService = estacionamientoService;
+    }
 
 
 
@@ -67,8 +66,9 @@ public class PrincipalController {
 
         System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol + " | ID: " + usuarioId);
 
-        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+    // Normalizamos a las cadenas exactas que usamos en BD: "Administrador" y "Guardia"
+    boolean esAdministrador = "Administrador".equals(rol);
+    boolean esGuardia = "Guardia".equals(rol);
 
         System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
 
@@ -117,32 +117,38 @@ public class PrincipalController {
             }
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("patente").ascending());
-        Page<Vehiculo> paginaVehiculos;
         Map<String, String> estacionamientosOrigen = new HashMap<>();
+        Pagina<Vehiculo> paginaVehiculos;
 
         try {
             if (esAdministrador) {
                 System.out.println("Procesando como ADMINISTRADOR - Página: " + page + ", Tamaño: " + size);
                 if (buscar != null && !buscar.trim().isEmpty()) {
                     System.out.println("Admin buscando paginado: " + buscar);
-                    paginaVehiculos = vehiculoService.buscarVehiculosPorPatentePaginado(buscar.trim(), pageable);
+                    List<Vehiculo> vehiculos = vehiculoService.buscarPorPatente(buscar.trim(), page, size);
+                    long total = vehiculoService.contarPorPatente(buscar.trim());
+                    paginaVehiculos = new Pagina<>(vehiculos, page, size, total);
                 } else {
                     System.out.println("Admin obteniendo todos paginado");
-                    paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
+                    List<Vehiculo> vehiculos = vehiculoService.obtenerTodos(page, size);
+                    long total = vehiculoService.contarTotal();
+                    paginaVehiculos = new Pagina<>(vehiculos, page, size, total);
                 }
             } else {
                 System.out.println("Procesando como GUARDIA - Página: " + page + ", Tamaño: " + size);
                 if (buscar != null && !buscar.trim().isEmpty()) {
                     System.out.println("Guardia buscando paginado: " + buscar);
-                    paginaVehiculos = vehiculoService.buscarPorPatenteYGuardiaPaginado(buscar.trim(), usuarioId,
-                            pageable);
+                    List<Vehiculo> vehiculos = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId, page, size);
+                    long total = vehiculoService.contarPorPatenteYGuardia(buscar.trim(), usuarioId);
+                    paginaVehiculos = new Pagina<>(vehiculos, page, size, total);
                 } else {
                     System.out.println("Guardia obteniendo todos paginado");
-                    paginaVehiculos = vehiculoService.obtenerTodosPorGuardiaPaginado(usuarioId, pageable);
+                    List<Vehiculo> vehiculos = vehiculoService.obtenerPorGuardia(usuarioId, page, size);
+                    long total = vehiculoService.contarPorGuardia(usuarioId);
+                    paginaVehiculos = new Pagina<>(vehiculos, page, size, total);
                 }
 
-                for (Vehiculo vehiculo : paginaVehiculos.getContent()) {
+                for (Vehiculo vehiculo : paginaVehiculos.getContenido()) {
                     try {
                         String estacionamientoOrigen = vehiculoService.obtenerEstacionamientoOrigenVehiculo(
                                 vehiculo.getPatente(), usuarioId);
@@ -158,17 +164,17 @@ public class PrincipalController {
         } catch (Exception e) {
             System.err.println("Error al obtener vehículos paginados: " + e.getMessage());
             e.printStackTrace();
-            paginaVehiculos = Page.empty(pageable);
+            paginaVehiculos = new Pagina<>(new ArrayList<>(), page, size, 0);
             model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
         }
 
         System.out.println("=== INFORMACIÓN DE PAGINACIÓN ===");
-        System.out.println("Página actual: " + paginaVehiculos.getNumber());
-        System.out.println("Elementos en esta página: " + paginaVehiculos.getNumberOfElements());
-        System.out.println("Total elementos: " + paginaVehiculos.getTotalElements());
-        System.out.println("Total páginas: " + paginaVehiculos.getTotalPages());
-        System.out.println("Es primera página: " + paginaVehiculos.isFirst());
-        System.out.println("Es última página: " + paginaVehiculos.isLast());
+        System.out.println("Página actual: " + paginaVehiculos.getNumeroPagina());
+        System.out.println("Elementos en esta página: " + paginaVehiculos.getNumeroElementos());
+        System.out.println("Total elementos: " + paginaVehiculos.getTotalElementos());
+        System.out.println("Total páginas: " + paginaVehiculos.getTotalPaginas());
+        System.out.println("Es primera página: " + paginaVehiculos.esPrimera());
+        System.out.println("Es última página: " + paginaVehiculos.esUltima());
 
         if (esGuardia) {
             System.out.println("=== INFORMACIÓN DE GUARDIA ===");
@@ -177,7 +183,7 @@ public class PrincipalController {
         }
 
         model.addAttribute("paneles", paneles);
-        model.addAttribute("vehiculos", paginaVehiculos.getContent());
+        model.addAttribute("vehiculos", paginaVehiculos.getContenido());
         model.addAttribute("paginaVehiculos", paginaVehiculos);
         model.addAttribute("buscar", buscar);
         model.addAttribute("rol", rol);

@@ -2,7 +2,12 @@
 
 Short, actionable guidance for an AI coding assistant working on this repository.
 
-- Project type: Spring Boot web app (Java 21) using Thymeleaf templates, Spring Data JPA, Spring Security (minimal config), and ZXing for QR functionality. See `pom.xml` and `src/main/java/com/unsl/sgeu/SgeuApplication.java`.
+- Project type: Spring Boot web app (Java 21) que implementa un sistema de gestión de estacionamientos universitarios usando:
+  - Thymeleaf templates + thymeleaf-layout-dialect
+  - Spring Data JPA para persistencia
+  - Spring Security (configuración mínima sin CSRF)
+  - ZXing para generación/lectura de QR
+  - Ver `pom.xml` y `src/main/java/com/unsl/sgeu/SgeuApplication.java`
 
 - How to run locally (Windows PowerShell): use the included Maven wrapper in repo root
 
@@ -28,9 +33,15 @@ Short, actionable guidance for an AI coding assistant working on this repository
   - `resources/templates/` — Thymeleaf views; `layout.html` + `thymeleaf-layout-dialect` used for layouts
 
 - Important runtime behaviors the agent should respect
-  - Session enforcement is implemented via `SessionInterceptor` (registered in `webconfig`). Many routes are redirected to `/login` if `session.getAttribute("user")` is missing. When adding pages or endpoints, ensure session attributes (`user`, `rol`, `nombreCompleto`, `estacionamiento`) are provided when required.
-  - Security config currently disables CSRF and permits all requests (`SeguridadConfig`). Be careful when modifying auth rules; login is implemented in `LoginController` and stores data in HTTP session.
-  - Application seeds data in `SgeuApplication.seedData` — adding or modifying seed logic affects local test data.
+  - Session enforcement is implemented via `SessionInterceptor` (registered in `webconfig`). Many routes are redirected to `/login` if `session.getAttribute("user")` is missing. When adding pages or endpoints, asegurarse que estos atributos de sesión están presentes cuando se requieren:
+    - `user` - nombre de usuario autenticado
+    - `rol` - rol del usuario (ADMINISTRADOR o GUARDIA)
+    - `nombreCompleto` - nombre completo del usuario
+    - `estacionamiento` - estacionamiento asignado al guardia
+    - `usuarioId` - ID del usuario actual
+  - Security config actualmente deshabilita CSRF y permite todas las requests (`SeguridadConfig`). Tener cuidado al modificar reglas de auth; el login está implementado en `LoginController` y almacena datos en sesión HTTP.
+  - La aplicación inicializa datos semilla en `SgeuApplication.seedData` — modificar la lógica de seed afecta los datos de prueba locales.
+  - Los controladores mantienen logs de depuración usando `System.out.println()` para trackear el flujo de la aplicación (ver `PrincipalController`, `LoginController`, `VehiculoController`)
 
 - Conventions and patterns observed
   - Passwords: seed uses plain text (TODO to encrypt). Production code should use `PasswordEncoder` bean (`BCryptPasswordEncoder`) already declared in `SeguridadConfig`.
@@ -39,9 +50,21 @@ Short, actionable guidance for an AI coding assistant working on this repository
   - QR code logic uses ZXing libs (`com.google.zxing` in `pom.xml`) — see `QRController` and `QRImageController` for examples.
 
 - Typical changes and where to make them
-  - Add REST/Controller endpoints: `controllers/` and corresponding templates in `resources/templates/`.
-  - Add domain fields: `models/` + database mappings + repository updates in `repositories/` and service methods in `servicesimpl/`.
-  - Modify session/authorization behavior: `config/SessionInterceptor.java` and `config/SeguridadConfig.java`.
+  - Add REST/Controller endpoints: 
+    - Controladores en `controllers/` y plantillas correspondientes en `resources/templates/`
+    - Para APIs REST usar `@RestController` + `@RequestMapping("/api/...")` (ver `EstacionamientoController.java`)
+    - Para vistas MVC usar `@Controller` + `@GetMapping` + retornar nombre de plantilla (ver `PrincipalController.java`)
+  - Add domain fields: 
+    - Entidades en `models/` 
+    - Repositorios en `repositories/`
+    - Interfaces de servicio en `services/`
+    - Implementaciones en `servicesimpl/`
+  - Modificar manejo de sesión/autorización:
+    - Interceptor de sesión: `config/SessionInterceptor.java`
+    - Configuración de seguridad: `config/SeguridadConfig.java`
+  - Funcionalidad QR:
+    - Generación: `QRImageController.java`
+    - Lectura: `QRController.java` + `resources/static/js/qr.js`
 
 - Debugging tips specific to this repo
   - Log output: JPA SQL is enabled (`spring.jpa.show-sql: true` in `application.yml`). Use console logs (System.out.println used in several controllers) to trace flow quickly.

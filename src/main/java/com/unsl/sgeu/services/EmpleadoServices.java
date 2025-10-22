@@ -33,11 +33,21 @@ public class EmpleadoServices {
     /* ===================== AUTH ===================== */
 
     public boolean login(String nombreUsuario, String contrasenia) {
-        Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
-        if (opt.isEmpty())
+        try {
+            Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
+            if (opt.isEmpty()) {
+                System.out.println("Login fallido: usuario " + nombreUsuario + " no encontrado");
+                return false;
+            }
+            Empleado empleado = opt.get();
+            boolean matches = passwordEncoder.matches(contrasenia, empleado.getContrasenia());
+            System.out.println("Login de " + nombreUsuario + ": " + (matches ? "exitoso" : "contraseña incorrecta"));
+            return matches;
+        } catch (Exception e) {
+            System.err.println("Error en login: " + e.getMessage());
+            e.printStackTrace();
             return false;
-        Empleado empleado = opt.get();
-        return passwordEncoder.matches(contrasenia, empleado.getContrasenia());
+        }
     }
 
     // Registra con rol explícito (admin/guardia)
@@ -83,9 +93,19 @@ public class EmpleadoServices {
 
     /** Devuelve el rol como String ("admin"/"guardia") */
     public String obtenerRolEmpleado(String nombreUsuario) {
-        return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
-                .map(e -> e.getRol().name())
-                .orElse("Rol no encontrado");
+        try {
+                return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
+                        .map(e -> {
+                            String rol = e.getRol() == Rol.Administrador ? "Administrador" : "Guardia";
+                            System.out.println("Rol obtenido para " + nombreUsuario + ": " + rol);
+                            return rol;
+                        })
+                        .orElse("Guardia"); // Rol por defecto si no se encuentra
+        } catch (Exception e) {
+            System.err.println("Error al obtener rol: " + e.getMessage());
+            e.printStackTrace();
+                return "Guardia";
+        }
     }
 
     public Iterable<Empleado> listarEmpleados() {
@@ -104,8 +124,8 @@ public class EmpleadoServices {
 
     public Long obtenerIdPorUsuario(String nombreUsuario) {
         try {
-            Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
-            return empleado != null ? empleado.getId() : null;
+            Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
+            return opt.map(Empleado::getId).orElse(null);
         } catch (Exception e) {
             System.err.println("Error al obtener ID por usuario: " + e.getMessage());
             return null;

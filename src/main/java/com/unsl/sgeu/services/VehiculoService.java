@@ -3,18 +3,20 @@ package com.unsl.sgeu.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.unsl.sgeu.config.DatabaseConnection;
 import com.unsl.sgeu.dto.VehiculoFormDTO;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.VehiculoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepositoryImpl;
-import com.unsl.sgeu.repositories.VehiculoRepositoryPage;
-import com.unsl.sgeu.servicesimpl.EstacionamientoServiceImpl;
+import com.unsl.sgeu.util.Pagina;
 
-import java.util.UUID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 import org.springframework.data.domain.Page;
@@ -24,24 +26,20 @@ import org.springframework.data.domain.Pageable;
 @Service
 public class VehiculoService {
 
-    @Autowired
-    private VehiculoRepositoryImpl vehiculoRepo;
+    private final VehiculoRepository vehiculoRepo;
+    private final EstacionamientoService estacionamientoService;
+    private final RegistroEstacionamientoService registroEstacionamientoService;
+    private final PersonaService personaService;
 
-    @Autowired
-    private EstacionamientoServiceImpl estacionamientoService;
-
-    @Autowired
-    private RegistroEstacionamientoService registroEstacionamientoService;
-
-    
-    @Autowired
-    private PersonaService personaService;
-    
-
-    private VehiculoRepositoryPage vehiculoRepoPage;
-    @Autowired
-    public VehiculoService(VehiculoRepositoryPage vehiculoRepoPage) {
-        this.vehiculoRepoPage = vehiculoRepoPage;
+    public VehiculoService(
+            VehiculoRepository vehiculoRepo,
+            EstacionamientoService estacionamientoService,
+            RegistroEstacionamientoService registroEstacionamientoService,
+            PersonaService personaService) {
+        this.vehiculoRepo = vehiculoRepo;
+        this.estacionamientoService = estacionamientoService;
+        this.registroEstacionamientoService = registroEstacionamientoService;
+        this.personaService = personaService;
     }
 
     public List<Vehiculo> obtenerTodos() {
@@ -342,37 +340,56 @@ public class VehiculoService {
         return obtenerPorEstacionamientos(idsEstacionamientos).size();
     }
 
-
-
-
-
-
-
-
-
- 
     public List<Vehiculo> obtenerTodos(int page, int size) {
-        int limit = size;
         int offset = page * size;
-        return vehiculoRepoPage.obtenerTodosPaginado(limit, offset);
+        return vehiculoRepo.findAllPaginado(offset, size, "patente");
     }
 
-    public List<Vehiculo> obtenerPorGuardia(Long dniDuenio, int page, int size) {
-        int limit = size;
+    public List<Vehiculo> obtenerPorGuardia(Long guardiaId, int page, int size) {
+        if (guardiaId == null) {
+            System.out.println("obtenerPorGuardia: guardiaId es null, devolviendo lista vacía");
+            return List.of();
+        }
         int offset = page * size;
-        return vehiculoRepoPage.obtenerTodosPorGuardiaPaginado(dniDuenio, limit, offset);
+        return vehiculoRepo.findByGuardiaPaginado(guardiaId, offset, size);
     }
 
     public List<Vehiculo> buscarPorPatente(String patente, int page, int size) {
-        int limit = size;
         int offset = page * size;
-        return vehiculoRepoPage.buscarVehiculosPorPatentePaginado(patente, limit, offset);
+        return vehiculoRepo.findByPatenteContainingPaginado(patente, offset, size);
     }
 
-    public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long dniDuenio, int page, int size) {
-        int limit = size;
+    public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long guardiaId, int page, int size) {
+        if (guardiaId == null) {
+            System.out.println("buscarPorPatenteYGuardia: guardiaId es null, devolviendo lista vacía");
+            return List.of();
+        }
         int offset = page * size;
-        return vehiculoRepoPage.buscarPorPatenteYGuardiaPaginado(patente, dniDuenio, limit, offset);
+        return vehiculoRepo.findByPatenteAndGuardiaPaginado(patente, guardiaId, offset, size);
+    }
+
+    public long contarTotal() {
+        return vehiculoRepo.count();
+    }
+
+    public long contarPorPatente(String patente) {
+        return vehiculoRepo.countByPatenteContaining(patente);
+    }
+
+    public long contarPorGuardia(Long guardiaId) {
+        if (guardiaId == null) {
+            System.out.println("contarPorGuardia: guardiaId es null, devolviendo 0");
+            return 0L;
+        }
+        return vehiculoRepo.countByGuardia(guardiaId);
+    }
+
+    public long contarPorPatenteYGuardia(String patente, Long guardiaId) {
+        if (guardiaId == null) {
+            System.out.println("contarPorPatenteYGuardia: guardiaId es null, devolviendo 0");
+            return 0L;
+        }
+        return vehiculoRepo.countByPatenteAndGuardia(patente, guardiaId);
     }
 
 }

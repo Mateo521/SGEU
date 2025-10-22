@@ -18,6 +18,10 @@ public interface TurnoRepository {
     
     Estacionamiento findEstacionamientoActivoByEmpleadoUsuario(String usuario);
 
+    List<Estacionamiento> findEstacionamientosByEmpleadoId(Long empleadoId);
+
+    List<Long> findEstacionamientoIdsByEmpleadoId(Long empleadoId);
+
     Turno save(Turno turno);
 
     void update(Turno turno);

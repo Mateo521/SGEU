@@ -12,7 +12,7 @@ public class DatabaseConnection {
     // Instancia única del Singleton
     private static DatabaseConnection instance;
 
-    // Objeto Connection
+    // En esta versión no mantenemos una Connection única; pedimos una por llamada
     private Connection connection;
 
     // Datos de conexión (podés ajustarlos según tu config)
@@ -25,11 +25,11 @@ public class DatabaseConnection {
         try {
             // Carga del driver (opcional desde JDBC 4, pero útil para claridad)
             Class.forName("com.mysql.cj.jdbc.Driver");
-            this.connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Conexión establecida con la base de datos.");
-        } catch (SQLException | ClassNotFoundException e) {
+            // No abrimos la conexión aquí de forma persistente. Se abrirá por llamada en getConnection().
+            System.out.println("DatabaseConnection inicializado (las conexiones se abrirán por llamada).");
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error al conectar a la base de datos: " + e.getMessage());
+            throw new RuntimeException("Error al inicializar el driver JDBC: " + e.getMessage());
         }
     }
 
@@ -37,26 +37,17 @@ public class DatabaseConnection {
     public static synchronized DatabaseConnection getInstance() {
         if (instance == null) {
             instance = new DatabaseConnection();
-        } else {
-            try {
-                // Si la conexión está cerrada, la reabre
-                if (instance.getConnection().isClosed()) {
-                    instance = new DatabaseConnection();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                instance = new DatabaseConnection();
-            }
         }
         return instance;
     }
 
-    // Devuelve la conexión
-    public Connection getConnection() {
-        return connection;
+    // Devuelve una conexión nueva. El llamador debe cerrarla cuando termine.
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
     // Cierra la conexión manualmente (si se necesita)
+    // Método existente dejado por compatibilidad; cierra la conexión almacenada si existiera
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {

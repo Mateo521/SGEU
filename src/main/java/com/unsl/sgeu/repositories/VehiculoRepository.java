@@ -17,6 +17,18 @@ public interface VehiculoRepository {
     Vehiculo findByCodigoQr(String codigoQr);
     List<Vehiculo> findByPatenteContainingIgnoreCase(String patente);
 
+    // -------------------- Paginación --------------------
+    List<Vehiculo> findAllPaginado(int offset, int limit, String ordenPor);
+    List<Vehiculo> findByPatenteContainingPaginado(String patente, int offset, int limit);
+    List<Vehiculo> findByGuardiaPaginado(Long idGuardia, int offset, int limit);
+    List<Vehiculo> findByPatenteAndGuardiaPaginado(String patente, Long idGuardia, int offset, int limit);
+    
+    // -------------------- Conteos para paginación --------------------
+    long count();
+    long countByPatenteContaining(String patente);
+    long countByGuardia(Long idGuardia);
+    long countByPatenteAndGuardia(String patente, Long idGuardia);
+
     // -------------------- Consultas con RegistroEstacionamiento --------------------
     List<Vehiculo> findVehiculosByEstacionamiento(Long idEstacionamiento);
     List<Vehiculo> findVehiculosByEstacionamientos(List<Long> idsEstacionamientos);

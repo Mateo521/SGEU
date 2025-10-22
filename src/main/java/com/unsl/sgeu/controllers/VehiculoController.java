@@ -40,8 +40,8 @@ public class VehiculoController {
         }
 
         String rol = (String) session.getAttribute("rol");
-        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+    boolean esAdministrador = "Administrador".equals(rol);
+    boolean esGuardia = "Guardia".equals(rol);
 
         System.out.println("Usuario: " + session.getAttribute("nombreCompleto") + " | Rol: " + rol);
 

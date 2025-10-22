@@ -16,7 +16,11 @@ public interface EstacionamientoRepository {
 
     Optional<Estacionamiento> findById(Long id);
 
-    void save(Estacionamiento estacionamiento);
+    Estacionamiento save(Estacionamiento estacionamiento);
 
     void deleteById(Long id);
+
+    boolean existsById(Long id);
+
+
 }

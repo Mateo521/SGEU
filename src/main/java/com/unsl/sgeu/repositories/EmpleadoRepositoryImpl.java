@@ -244,14 +244,41 @@ public class EmpleadoRepositoryImpl implements EmpleadoRepository {
 
     // Mapeo auxiliar de ResultSet a Empleado
     private Empleado mapEmpleado(ResultSet rs) throws SQLException {
-        Empleado e = new Empleado();
-        e.setId(rs.getLong("id"));
-        e.setNombre(rs.getString("nombre"));
-        e.setApellido(rs.getString("apellido"));
-        e.setCorreo(rs.getString("correo"));
-        e.setNombreUsuario(rs.getString("nombre_usuario"));
-        e.setContrasenia(rs.getString("contrasenia"));
-        e.setRol(Rol.valueOf(rs.getString("rol")));
-        return e;
+        try {
+            Empleado e = new Empleado();
+            e.setId(rs.getLong("id"));
+            e.setNombre(rs.getString("nombre"));
+            e.setApellido(rs.getString("apellido"));
+            e.setCorreo(rs.getString("correo"));
+            e.setNombreUsuario(rs.getString("nombre_usuario"));
+            e.setContrasenia(rs.getString("contrasenia"));
+            
+            String rolStr = rs.getString("rol");
+            if (rolStr != null) {
+                rolStr = rolStr.trim();
+                // Los valores en la BD deben ser exactamente "Administrador" o "Guardia"
+                if ("Administrador".equals(rolStr)) {
+                    e.setRol(Rol.Administrador);
+                } else if ("Guardia".equals(rolStr)) {
+                    e.setRol(Rol.Guardia);
+                } else {
+                    // Fallback: intentar valueOf con el contenido tal cual y, si falla, usar Guardia
+                    try {
+                        e.setRol(Rol.valueOf(rolStr));
+                    } catch (IllegalArgumentException ex) {
+                        System.err.println("Rol inválido en BD: " + rolStr + ". Usando Guardia por defecto");
+                        e.setRol(Rol.Guardia);
+                    }
+                }
+            } else {
+                e.setRol(Rol.Guardia);
+            }
+            
+            return e;
+        } catch (SQLException e) {
+            System.err.println("Error mapeando empleado: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }

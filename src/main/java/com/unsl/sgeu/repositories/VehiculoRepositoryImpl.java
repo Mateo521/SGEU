@@ -7,6 +7,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class VehiculoRepositoryImpl implements VehiculoRepository {
 
     private DatabaseConnection databaseConnection;
@@ -265,6 +268,173 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
         return null;
     }
 
+
+    @Override
+    public List<Vehiculo> findAllPaginado(int offset, int limit, String ordenPor) {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        String sql = "SELECT * FROM vehiculo ORDER BY " + ordenPor + " LIMIT ? OFFSET ?";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    vehiculos.add(mapVehiculo(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al obtener vehículos paginados", e);
+        }
+        return vehiculos;
+    }
+
+    @Override
+    public List<Vehiculo> findByPatenteContainingPaginado(String patente, int offset, int limit) {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        String sql = "SELECT * FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?) ORDER BY patente LIMIT ? OFFSET ?";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, "%" + patente + "%");
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    vehiculos.add(mapVehiculo(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al buscar vehículos por patente paginados", e);
+        }
+        return vehiculos;
+    }
+
+    @Override
+    public List<Vehiculo> findByGuardiaPaginado(Long idGuardia, int offset, int limit) {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        String sql = "SELECT * FROM vehiculo ORDER BY patente LIMIT ? OFFSET ?";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    vehiculos.add(mapVehiculo(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al obtener vehículos por guardia paginados", e);
+        }
+        return vehiculos;
+    }
+
+    @Override
+    public List<Vehiculo> findByPatenteAndGuardiaPaginado(String patente, Long idGuardia, int offset, int limit) {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        String sql = "SELECT * FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?) ORDER BY patente LIMIT ? OFFSET ?";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, "%" + patente + "%");
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    vehiculos.add(mapVehiculo(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al buscar vehículos por patente y guardia paginados", e);
+        }
+        return vehiculos;
+    }
+
+    @Override
+    public long count() {
+        String sql = "SELECT COUNT(*) FROM vehiculo";
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al contar vehículos", e);
+        }
+        return 0;
+    }
+
+    @Override
+    public long countByPatenteContaining(String patente) {
+        String sql = "SELECT COUNT(*) FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?)";
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, "%" + patente + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al contar vehículos por patente", e);
+        }
+        return 0;
+    }
+
+    @Override
+    public long countByGuardia(Long idGuardia) {
+        String sql = "SELECT COUNT(*) FROM vehiculo";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al contar vehículos por guardia", e);
+        }
+        return 0;
+    }
+
+    @Override
+    public long countByPatenteAndGuardia(String patente, Long idGuardia) {
+        String sql = "SELECT COUNT(*) FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?)";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, "%" + patente + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al contar vehículos por patente y guardia", e);
+        }
+        return 0;
+    }
 
     // -------------------- Mapper --------------------
     private Vehiculo mapVehiculo(ResultSet rs) throws SQLException {

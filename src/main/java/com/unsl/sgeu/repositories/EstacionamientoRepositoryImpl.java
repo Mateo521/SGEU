@@ -21,6 +21,25 @@ public class EstacionamientoRepositoryImpl implements EstacionamientoRepository 
     }
 
     @Override
+    public boolean existsById(Long id) {
+        String sql = "SELECT COUNT(*) FROM estacionamiento WHERE id_est = ?";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public List<Estacionamiento> findAll() {
         List<Estacionamiento> lista = new ArrayList<>();
         String sql = "SELECT * FROM estacionamiento";
@@ -112,7 +131,7 @@ public class EstacionamientoRepositoryImpl implements EstacionamientoRepository 
     }
 
     @Override
-    public void save(Estacionamiento estacionamiento) {
+    public Estacionamiento save(Estacionamiento estacionamiento) {
         if (estacionamiento.getIdEst() == null) {
             // INSERT
             String sql = "INSERT INTO estacionamiento(nombre, direccion, capacidad, estado) VALUES (?, ?, ?, ?)";
@@ -136,6 +155,7 @@ public class EstacionamientoRepositoryImpl implements EstacionamientoRepository 
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+            return estacionamiento;
 
         } else {
             // UPDATE
@@ -155,6 +175,7 @@ public class EstacionamientoRepositoryImpl implements EstacionamientoRepository 
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+            return estacionamiento;
         }
     }
 

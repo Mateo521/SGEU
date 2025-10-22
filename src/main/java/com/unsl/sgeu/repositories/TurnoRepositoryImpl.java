@@ -24,6 +24,54 @@ public class TurnoRepositoryImpl implements TurnoRepository {
     public TurnoRepositoryImpl(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
     }
+    public List<Long> findEstacionamientoIdsByEmpleadoId(Long empleadoId) {
+        List<Long> ids = new ArrayList<>();
+        String sql = "SELECT DISTINCT id_est FROM turnos WHERE id_empleado = ? AND fecha_fin IS NULL";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, empleadoId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getLong("id_est"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error al obtener IDs de estacionamientos por empleado: " + e.getMessage());
+        }
+        return ids;
+    }
+
+    @Override
+    public List<Estacionamiento> findEstacionamientosByEmpleadoId(Long empleadoId) {
+        List<Estacionamiento> estacionamientos = new ArrayList<>();
+        String sql = "SELECT DISTINCT e.* FROM estacionamiento e " +
+                    "INNER JOIN turnos t ON e.id_est = t.id_est " +
+                    "WHERE t.id_empleado = ? AND t.fecha_fin IS NULL";
+        
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, empleadoId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Estacionamiento e = new Estacionamiento();
+                    e.setIdEst(rs.getLong("id_est"));
+                    e.setNombre(rs.getString("nombre"));
+                    e.setDireccion(rs.getString("direccion"));
+                    e.setCapacidad(rs.getInt("capacidad"));
+                    e.setEstado(rs.getBoolean("estado"));
+                    estacionamientos.add(e);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error al obtener estacionamientos por empleado: " + e.getMessage());
+        }
+        return estacionamientos;
+    }
 
     @Override
     public Optional<Turno> findById(Long id){
@@ -220,6 +268,60 @@ public class TurnoRepositoryImpl implements TurnoRepository {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public long countTurnos(Long empleadoId, Long estId, LocalDate fecha) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM turnos WHERE 1=1 ");
+
+        if (empleadoId != null) sql.append("AND id_empleado = ? ");
+        if (estId != null) sql.append("AND id_est = ? ");
+        if (fecha != null) sql.append("AND fecha_inicio = ? ");
+
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int idx = 1;
+            if (empleadoId != null) stmt.setLong(idx++, empleadoId);
+            if (estId != null) stmt.setLong(idx++, estId);
+            if (fecha != null) stmt.setDate(idx++, Date.valueOf(fecha));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public long countTurnosRange(Long empleadoId, Long estId, LocalDate desde, LocalDate hasta) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM turnos WHERE 1=1 ");
+
+        if (empleadoId != null) sql.append("AND id_empleado = ? ");
+        if (estId != null) sql.append("AND id_est = ? ");
+        if (desde != null) sql.append("AND fecha_inicio >= ? ");
+        if (hasta != null) sql.append("AND fecha_inicio <= ? ");
+
+        try (Connection conn = databaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int idx = 1;
+            if (empleadoId != null) stmt.setLong(idx++, empleadoId);
+            if (estId != null) stmt.setLong(idx++, estId);
+            if (desde != null) stmt.setDate(idx++, Date.valueOf(desde));
+            if (hasta != null) stmt.setDate(idx++, Date.valueOf(hasta));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     // Mapeo de ResultSet → Turno

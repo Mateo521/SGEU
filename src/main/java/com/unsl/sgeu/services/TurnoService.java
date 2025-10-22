@@ -31,7 +31,7 @@ public class TurnoService {
         }
 
         // ===================== LISTADOS =====================
-         public List<TurnoDTO> list(Long empleadoId, Long estId, String fecha, Integer page, Integer size) {
+        public List<TurnoDTO> list(Long empleadoId, Long estId, String fecha, Integer page, Integer size) {
                 int limit = (size != null ? size : 20);
                 int offset = ((page != null ? page : 0) * limit);
 
@@ -50,6 +50,17 @@ public class TurnoService {
 
                 List<Turno> turnos = turnoRepositoryPage.searchRange(empleadoId, estId, d, h, limit, offset);
                 return turnos.stream().map(TurnoMapper::toDTO).toList();
+        }
+
+        public long count(Long empleadoId, Long estId, String fecha) {
+                LocalDate f = (fecha != null && !fecha.isBlank()) ? LocalDate.parse(fecha) : null;
+                return turnoRepo.countTurnos(empleadoId, estId, f);
+        }
+
+        public long countRange(Long empleadoId, Long estId, String desde, String hasta) {
+                LocalDate d = (desde != null && !desde.isBlank()) ? LocalDate.parse(desde) : null;
+                LocalDate h = (hasta != null && !hasta.isBlank()) ? LocalDate.parse(hasta) : null;
+                return turnoRepo.countTurnosRange(empleadoId, estId, d, h);
         }
 
         // ===================== CREAR =====================

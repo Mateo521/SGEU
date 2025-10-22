@@ -3,15 +3,17 @@ package com.unsl.sgeu.repositories;
 import com.unsl.sgeu.config.DatabaseConnection;
 import com.unsl.sgeu.models.VehiculoTipo;
 import com.unsl.sgeu.repositories.VehiculoTipoRepository;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class VehiculoTipoRepositoryImpl implements VehiculoTipoRepository {
 
-    private DatabaseConnection databaseConnection;
+    private final DatabaseConnection databaseConnection;
 
     public VehiculoTipoRepositoryImpl(DatabaseConnection databaseConnection) {
         this.databaseConnection = databaseConnection;
