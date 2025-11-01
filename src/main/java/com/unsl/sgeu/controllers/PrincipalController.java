@@ -66,9 +66,8 @@ public class PrincipalController {
 
         System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol + " | ID: " + usuarioId);
 
-    // Normalizamos a las cadenas exactas que usamos en BD: "Administrador" y "Guardia"
-    boolean esAdministrador = "Administrador".equals(rol);
-    boolean esGuardia = "Guardia".equals(rol);
+        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
         System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
 

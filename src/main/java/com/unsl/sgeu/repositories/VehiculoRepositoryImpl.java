@@ -319,13 +319,19 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
     @Override
     public List<Vehiculo> findByGuardiaPaginado(Long idGuardia, int offset, int limit) {
         List<Vehiculo> vehiculos = new ArrayList<>();
-        String sql = "SELECT * FROM vehiculo ORDER BY patente LIMIT ? OFFSET ?";
+        String sql = 
+            "SELECT DISTINCT v.* FROM vehiculo v " +
+            "INNER JOIN registro_estacionamiento re ON v.patente = re.patente " +
+            "INNER JOIN turno t ON re.id_estacionamiento = t.id_estacionamiento " +
+            "WHERE t.id_empleado = ? " +
+            "ORDER BY v.patente LIMIT ? OFFSET ?";
         
         try (Connection conn = databaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, limit);
-            stmt.setInt(2, offset);
+            stmt.setLong(1, idGuardia);
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -342,14 +348,20 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
     @Override
     public List<Vehiculo> findByPatenteAndGuardiaPaginado(String patente, Long idGuardia, int offset, int limit) {
         List<Vehiculo> vehiculos = new ArrayList<>();
-        String sql = "SELECT * FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?) ORDER BY patente LIMIT ? OFFSET ?";
+        String sql = 
+            "SELECT DISTINCT v.* FROM vehiculo v " +
+            "INNER JOIN registro_estacionamiento re ON v.patente = re.patente " +
+            "INNER JOIN turno t ON re.id_estacionamiento = t.id_estacionamiento " +
+            "WHERE t.id_empleado = ? AND UPPER(v.patente) LIKE UPPER(?) " +
+            "ORDER BY v.patente LIMIT ? OFFSET ?";
         
         try (Connection conn = databaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, "%" + patente + "%");
-            stmt.setInt(2, limit);
-            stmt.setInt(3, offset);
+            stmt.setLong(1, idGuardia);
+            stmt.setString(2, "%" + patente + "%");
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -401,13 +413,20 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
 
     @Override
     public long countByGuardia(Long idGuardia) {
-        String sql = "SELECT COUNT(*) FROM vehiculo";
+        String sql = 
+            "SELECT COUNT(DISTINCT v.patente) FROM vehiculo v " +
+            "INNER JOIN registro_estacionamiento re ON v.patente = re.patente " +
+            "INNER JOIN turno t ON re.id_estacionamiento = t.id_estacionamiento " +
+            "WHERE t.id_empleado = ?";
         
         try (Connection conn = databaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getLong(1);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, idGuardia);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -418,12 +437,17 @@ public class VehiculoRepositoryImpl implements VehiculoRepository {
 
     @Override
     public long countByPatenteAndGuardia(String patente, Long idGuardia) {
-        String sql = "SELECT COUNT(*) FROM vehiculo WHERE UPPER(patente) LIKE UPPER(?)";
+        String sql = 
+            "SELECT COUNT(DISTINCT v.patente) FROM vehiculo v " +
+            "INNER JOIN registro_estacionamiento re ON v.patente = re.patente " +
+            "INNER JOIN turno t ON re.id_estacionamiento = t.id_estacionamiento " +
+            "WHERE t.id_empleado = ? AND UPPER(v.patente) LIKE UPPER(?)";
         
         try (Connection conn = databaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setString(1, "%" + patente + "%");
+            stmt.setLong(1, idGuardia);
+            stmt.setString(2, "%" + patente + "%");
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getLong(1);

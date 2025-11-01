@@ -346,10 +346,6 @@ public class VehiculoService {
     }
 
     public List<Vehiculo> obtenerPorGuardia(Long guardiaId, int page, int size) {
-        if (guardiaId == null) {
-            System.out.println("obtenerPorGuardia: guardiaId es null, devolviendo lista vacía");
-            return List.of();
-        }
         int offset = page * size;
         return vehiculoRepo.findByGuardiaPaginado(guardiaId, offset, size);
     }
@@ -360,10 +356,6 @@ public class VehiculoService {
     }
 
     public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long guardiaId, int page, int size) {
-        if (guardiaId == null) {
-            System.out.println("buscarPorPatenteYGuardia: guardiaId es null, devolviendo lista vacía");
-            return List.of();
-        }
         int offset = page * size;
         return vehiculoRepo.findByPatenteAndGuardiaPaginado(patente, guardiaId, offset, size);
     }
@@ -377,18 +369,10 @@ public class VehiculoService {
     }
 
     public long contarPorGuardia(Long guardiaId) {
-        if (guardiaId == null) {
-            System.out.println("contarPorGuardia: guardiaId es null, devolviendo 0");
-            return 0L;
-        }
         return vehiculoRepo.countByGuardia(guardiaId);
     }
 
     public long contarPorPatenteYGuardia(String patente, Long guardiaId) {
-        if (guardiaId == null) {
-            System.out.println("contarPorPatenteYGuardia: guardiaId es null, devolviendo 0");
-            return 0L;
-        }
         return vehiculoRepo.countByPatenteAndGuardia(patente, guardiaId);
     }
 

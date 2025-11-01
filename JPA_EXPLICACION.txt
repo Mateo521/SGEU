@@ -1,0 +1,122 @@
+Voy a utilizar como ejemplo a la entidad Empleado.
+Que tiene lo siguiente
+
+@Entity
+@Table(name = "empleado", uniqueConstraints = {
+    @UniqueConstraint(name = "uq_empleado_usuario", columnNames = "nombre_usuario"),
+    @UniqueConstraint(name = "uq_empleado_correo", columnNames = "correo")
+})
+public class Empleado {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false, length = 255)
+  private String nombre;
+
+  @Column(nullable = false, length = 255)
+  private String apellido;
+
+  @Column(length = 255)
+  private String correo;
+
+  @Column(name = "nombre_usuario", nullable = false, length = 255)
+  private String nombreUsuario;
+
+  @Column(nullable = false, length = 255)
+  private String contrasenia;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "rol", nullable = false, length = 20) // valores en enum: Guardia | Administrador
+  private Rol rol = Rol.Guardia;
+
+  // Getters / Setters
+}
+
+Ahora utilizando JPARepository para hacer la parte DAO (conexion a la bd)
+
+// Repository que maneja la entidad Empleado
+@Repository
+public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {  
+    // Al extender JpaRepository, Spring genera automáticamente toda la lógica CRUD
+    // (findAll, findById, save, deleteById, etc.) para la entidad Empleado.
+    // Internamente usa EntityManager de JPA, por lo que no hace falta escribir SQL ni conexión manual.
+
+    // Buscar por nombre de usuario (exacto)
+    Empleado findByNombreUsuario(String nombreUsuario);
+    // Genera automáticamente la consulta:
+    // SELECT * FROM empleado WHERE nombre_usuario = :nombreUsuario
+    // Devuelve directamente el Empleado o null si no existe.
+
+    // Variante segura (case-insensitive) y opcional
+    Optional<Empleado> findByNombreUsuarioIgnoreCase(String nombreUsuario);
+    // Genera la consulta internamente:
+    // SELECT * FROM empleado WHERE LOWER(nombre_usuario) = LOWER(:nombreUsuario)
+    // Devuelve Optional<Empleado> por si no existe registro.
+}
+
+
+Ahora explico como funciona ese "EntityManager" que se nombra mas arriba
+Administra entidades en memoria, ejecuta SQL, maneja transacciones, su vida util termina en cada metodo o peticion.
+
+Al EntityManager lo crea un EntityManagerFactory que este mismo tiene una vida util Singleton en toda la aplicación.
+Spring crea un único EntityManagerFactory cuando arranca la aplicación.
+Lee las anotaciones @Entity
+Inicializa el dialecto SQL (MySQL, PostgreSQL, etc.)
+Configura la conexión al DataSource (pool de conexiones)
+
+Internamente hace algo asi
+
+@Bean
+public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+    HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    vendorAdapter.setGenerateDdl(true);
+
+    LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+    factory.setJpaVendorAdapter(vendorAdapter);
+    factory.setPackagesToScan("com.tu.proyecto.models");
+    factory.setDataSource(dataSource);
+    return factory;
+}
+
+Esto hace lo siguiente
+-Inyecta el DataSource configurado en application.properties
+-Escanea entidades @Entity
+-Crea un EntityManagerFactory con Hibernate como proveedor JPA
+-Este EntityManagerFactory vive en el contexto de Spring como un único bean.
+-Ese reemplaza a tu DatabaseConnection Singleton.
+
+Y el DataSource proviene de 
+spring.datasource.url=jdbc:mysql://localhost:3306/mi_bd
+spring.datasource.username=root
+spring.datasource.password=1234
+spring.datasource.hikari.maximum-pool-size=10
+
+Resultado: rendimiento mucho mejor, no se crean conexiones por consulta, sino que utiliza la misma para todo (singleton). 
+
+Ahora
+Cómo se generan las consultas realmente
+
+tenemos:
+    Empleado findByNombreUsuario(String nombreUsuario);
+
+
+Spring Data analiza el nombre del método:
+    find → operación SELECT
+    ByNombreUsuario → condición WHERE
+    Tipo de retorno Empleado → una fila
+
+    Construye una consultada JPQL:
+        SELECT e FROM Empleado e WHERE e.nombreUsuario = :nombreUsuario
+        Hibernate traduce esa JPQL al SQL específico de tu base:
+            SELECT id, nombre, apellido, correo, nombre_usuario, contrasenia, rol
+            FROM empleado
+            WHERE nombre_usuario = ?
+
+    Hibernate mapea cada columna al atributo de tu entidad usando:
+        nombre de columnas (@Column)
+        conversiones necesarias (@Enumerated)
+        tipos Java
+        
+Todo sin tener que escribir SQL manual.
