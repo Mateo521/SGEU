@@ -1,13 +1,11 @@
-
 class QRVehiculoManager {
     constructor() {
         this.currentData = null;
     }
-//prueba con clases
-    
+
+   
     mostrarQR(button) {
         try {
-        
             this.currentData = {
                 patente: button.dataset.patente,
                 qr: button.dataset.qr,
@@ -19,7 +17,6 @@ class QRVehiculoManager {
 
             console.log('📱 Mostrando QR para:', this.currentData);
 
-            
             const elementos = [
                 'modalPatente', 'modalModelo', 'modalColor', 
                 'modalTipo', 'modalDni', 'modalCodigoQr'
@@ -34,7 +31,6 @@ class QRVehiculoManager {
                 }
             }
 
-         
             document.getElementById('modalPatente').textContent = this.currentData.patente;
             document.getElementById('modalModelo').textContent = this.currentData.modelo;
             document.getElementById('modalColor').textContent = this.currentData.color;
@@ -42,7 +38,6 @@ class QRVehiculoManager {
             document.getElementById('modalDni').textContent = this.currentData.dni;
             document.getElementById('modalCodigoQr').textContent = this.currentData.qr;
 
-     
             const qrImage = document.getElementById('qrImageModal');
             const qrError = document.getElementById('qrError');
             
@@ -52,36 +47,31 @@ class QRVehiculoManager {
                 return;
             }
             
-            // Resetear estado
             qrImage.style.display = 'block';
             qrError.style.display = 'none';
-            
-           
             qrImage.src = `qr-codes/qr_${this.currentData.patente}.png`;
             
-            // Manejar errores de cargaa
             qrImage.onload = function() {
                 console.log(' Imagen QR cargada correctamente');
             };
             
             qrImage.onerror = function() {
-                console.error('Error cargando imagen QR:', `qr-codes/${this.currentData.patente}.png`);
+     
                 qrImage.style.display = 'none';
                 qrError.style.display = 'block';
                 qrError.textContent = 'Error al cargar la imagen QR';
             }.bind(this);
 
-            // Mostrar modal
             const modal = document.getElementById('qrModal');
             if (modal) {
                 modal.classList.remove('hidden');
             } else {
-                console.error(' Modal no encontrado');
+             
                 alert('Error: Modal no encontrado');
             }
 
         } catch (error) {
-            console.error(' Error al mostrar QR:', error);
+       
             alert('Error al mostrar el código QR: ' + error.message);
         }
     }
@@ -89,7 +79,6 @@ class QRVehiculoManager {
   
     imprimirQR(button) {
         try {
-            // Obtener datos del boton
             const data = {
                 patente: button.dataset.patente,
                 qr: button.dataset.qr,
@@ -103,12 +92,72 @@ class QRVehiculoManager {
             this.imprimirConImagenExistente(data);
 
         } catch (error) {
-            console.error(' Error al imprimir QR:', error);
+           
             alert('Error al imprimir el código QR: ' + error.message);
         }
     }
 
+     
+   imprimirQRDesdeImagen() {
+    console.log('🖨️ Imprimiendo QR desde imagen recién generada...');
+    
+ 
+    const imagenQR = document.querySelector('.qr-image');
+    
+    if (!imagenQR) {
    
+        alert('No se encontró la imagen del código QR para imprimir');
+        return;
+    }
+
+ 
+    const patente = imagenQR.dataset.patente || imagenQR.getAttribute('data-patente') || 'Sin patente';
+    const codigoQR = imagenQR.dataset.codigo || imagenQR.getAttribute('data-codigo') || '';
+    const modelo = imagenQR.dataset.modelo || imagenQR.getAttribute('data-modelo') || 'N/A';
+    const color = imagenQR.dataset.color || imagenQR.getAttribute('data-color') || 'N/A';
+    const tipo = imagenQR.dataset.tipo || imagenQR.getAttribute('data-tipo') || 'N/A';
+    const dni = imagenQR.dataset.dni || imagenQR.getAttribute('data-dni') || 'N/A';
+    const nombre = imagenQR.dataset.nombre || imagenQR.getAttribute('data-nombre') || 'N/A';
+    
+ 
+    const rutaImagen = imagenQR.dataset.imagen || imagenQR.getAttribute('data-imagen') || imagenQR.src;
+
+    
+    console.log('📋 Datos obtenidos de la imagen:');
+    console.log('   Patente:', patente);
+    console.log('   Código QR:', codigoQR.substring(0, 30) + '...');
+    console.log('   Modelo:', modelo);
+    console.log('   Color:', color);
+    console.log('   Tipo:', tipo);
+    console.log('   DNI:', dni);
+    console.log('   Nombre:', nombre);
+    console.log('   Ruta imagen:', rutaImagen);
+
+ 
+    if (!patente || patente === 'Sin patente') {
+       
+        alert('Error: No se pudo obtener la patente del vehículo');
+        return;
+    }
+
+    const data = {
+        patente: patente,
+        qr: codigoQR,
+        modelo: modelo,
+        color: color,
+        tipo: tipo,
+        dni: dni,
+        nombre: nombre
+    };
+
+ 
+    
+    
+    this.crearDocumentoImpresion(data, rutaImagen);
+}
+
+
+  
     imprimirQRDesdeModal() {
         if (!this.currentData) {
             alert('No hay datos para imprimir');
@@ -117,9 +166,8 @@ class QRVehiculoManager {
         this.imprimirConImagenExistente(this.currentData);
     }
 
-    
-    imprimirConImagenExistente(data) {
   
+    imprimirConImagenExistente(data) {
         const qrImageSrc = `qr-codes/qr_${data.patente}.png`;
         console.log('🖨️ Usando imagen QR:', qrImageSrc);
         this.crearDocumentoImpresion(data, qrImageSrc);
@@ -127,7 +175,12 @@ class QRVehiculoManager {
 
   
     crearDocumentoImpresion(data, qrImageSrc) {
-        const printWindow = window.open('', '_blank');
+        const printWindow = window.open('', '_blank', 'width=600,height=800');
+        
+        if (!printWindow) {
+            alert('Por favor, permite las ventanas emergentes para imprimir');
+            return;
+        }
         
         const htmlContent = `
         <!DOCTYPE html>
@@ -237,7 +290,7 @@ class QRVehiculoManager {
                 
                 <div class="qr-container">
                     <img src="${qrImageSrc}" alt="Código QR" class="qr-image" 
-                         onerror="this.alt='Error al cargar QR: ${qrImageSrc}'; this.style.border='2px dashed #ccc'; console.error('Error cargando:', '${qrImageSrc}');">
+                         onerror="this.alt='Error al cargar QR'; this.style.border='2px dashed #ccc';">
                     <div class="qr-code-text">${data.qr}</div>
                 </div>
                 
@@ -271,8 +324,11 @@ class QRVehiculoManager {
                     console.log('🖨️ Documento de impresión cargado');
                     setTimeout(function() {
                         window.print();
-                        window.close();
-                    }, 1500); // Más tiempo para cargar la imagen
+                    }, 1000);
+                };
+                
+                window.onafterprint = function() {
+                    window.close();
                 };
             </script>
         </body>
@@ -309,6 +365,11 @@ function imprimirQRDesdeModal() {
     qrManager.imprimirQRDesdeModal();
 }
 
+ 
+function imprimirQRRecienGenerado() {
+    qrManager.imprimirQRDesdeImagen();
+}
+
 function cerrarModal() {
     qrManager.cerrarModal();
 }
@@ -320,7 +381,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
- 
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('qrModal');
     if (modal) {

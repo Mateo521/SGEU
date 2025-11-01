@@ -3,9 +3,11 @@ package com.unsl.sgeu.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 import com.unsl.sgeu.dto.VehiculoFormDTO;
 import com.unsl.sgeu.models.Estacionamiento;
@@ -31,27 +33,30 @@ public class VehiculoController {
     private QRCodeService qrCodeService;
 
     @GetMapping("vehiculos/agregar")
-    public String mostrarFormularioAgregar(Model model, HttpSession session, RedirectAttributes redirectAttributes) {
-        System.out.println(" GET /agregar - Mostrando formulario");
+    public String mostrarFormularioAgregar(Model model, HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        System.out.println("🔍 GET /agregar - Mostrando formulario");
 
+        // Validar autenticación
         if (session.getAttribute("user") == null) {
-            System.out.println("Usuario no autenticado");
+            System.out.println("❌ Usuario no autenticado");
             return "redirect:/login";
         }
 
+        // Validar permisos
         String rol = (String) session.getAttribute("rol");
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
-        System.out.println("Usuario: " + session.getAttribute("nombreCompleto") + " | Rol: " + rol);
+        System.out.println("👤 Usuario: " + session.getAttribute("nombreCompleto") + " | Rol: " + rol);
 
         if (!esAdministrador && !esGuardia) {
-            System.out.println("Usuario sin permisos para agregar vehículos");
+            System.out.println("❌ Usuario sin permisos para agregar vehículos");
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
-            return "redirect:/"; // Redirigir a la pagina principal
+            return "redirect:/";
         }
 
-        System.out.println("Mostrando formulario de agregar vehículo");
+        System.out.println("✅ Mostrando formulario de agregar vehículo");
         model.addAttribute("vehiculoForm", new VehiculoFormDTO());
         model.addAttribute("esEdicion", false);
 
@@ -191,7 +196,8 @@ public class VehiculoController {
         try {
 
             // String rol = (String) session.getAttribute("rol");
-            // boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+            // boolean esAdministrador = "ADMINISTRADOR".equals(rol) ||
+            // "Administrador".equals(rol);
             /*
              * probando control
              * if (!esAdministrador) {
@@ -228,18 +234,46 @@ public class VehiculoController {
     }
 
     @PostMapping("/vehiculos/agregar")
-    public String agregarVehiculo(@ModelAttribute VehiculoFormDTO form,
-            RedirectAttributes redirectAttributes) {
-        try {
-            // Validaciones básicas
-            if (vehiculoService.existePatente(form.getPatente())) {
-                redirectAttributes.addFlashAttribute("error", "Ya existe un vehículo con esa patente");
-                return "redirect:/vehiculos/agregar";
-            }
+    public String agregarVehiculo(
+            @Valid @ModelAttribute("vehiculoForm") VehiculoFormDTO form,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
 
-            if (form.getDni() == null || form.getPatente() == null ||
-                    form.getCategoriaNombre() == null || form.getTipoNombre() == null) {
-                redirectAttributes.addFlashAttribute("error", "Todos los campos son obligatorios");
+        if (session.getAttribute("user") == null) {
+            return "redirect:/login";
+        }
+
+        String rol = (String) session.getAttribute("rol");
+        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
+        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+
+        if (!esAdministrador && !esGuardia) {
+            redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
+            return "redirect:/";
+        }
+
+        if (bindingResult.hasErrors()) {
+
+            StringBuilder erroresMsg = new StringBuilder("Errores de validación:\n");
+            bindingResult.getAllErrors().forEach(error -> {
+                String mensaje = error.getDefaultMessage();
+
+                erroresMsg.append("• ").append(mensaje).append("\n");
+            });
+
+            redirectAttributes.addFlashAttribute("error", erroresMsg.toString());
+            redirectAttributes.addFlashAttribute("vehiculoForm", form);
+            return "redirect:/vehiculos/agregar";
+        }
+
+        try {
+
+            if (vehiculoService.existePatente(form.getPatente())) {
+
+                redirectAttributes.addFlashAttribute("error",
+                        "Ya existe un vehículo con la patente " + form.getPatente());
+                redirectAttributes.addFlashAttribute("vehiculoForm", form);
                 return "redirect:/vehiculos/agregar";
             }
 
@@ -287,11 +321,10 @@ public class VehiculoController {
                         vehiculoGuardado.getPatente());
                 System.out.println("Archivo QR guardado: " + rutaArchivoQR);
             } catch (Exception e) {
-                System.err.println("Error guardando archivo QR: " + e.getMessage());
-
+                System.err.println("Error guardando archivo QR (no crítico): " + e.getMessage());
             }
 
-            String rutaImagenQR = "/qr-image/" + vehiculoGuardado.getCodigoQr();
+            String rutaImagenQR = "/qr-codes/qr_" + vehiculoGuardado.getPatente() + ".png";
 
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
             redirectAttributes.addFlashAttribute("codigoQR", vehiculoGuardado.getCodigoQr());
@@ -299,12 +332,23 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("patente", form.getPatente());
             redirectAttributes.addFlashAttribute("vehiculoInfo", crearInfoVehiculo(form, persona));
 
+            // impresion de QR
+
+           
+            redirectAttributes.addFlashAttribute("modelo", form.getModelo());
+            redirectAttributes.addFlashAttribute("color", form.getColor());
+            redirectAttributes.addFlashAttribute("tipo", form.getTipoNombre());
+            redirectAttributes.addFlashAttribute("dni", form.getDni());
+            redirectAttributes.addFlashAttribute("nombre", form.getNombre());
+
             return "redirect:/vehiculos/agregar";
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Error al agregar el vehículo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "Error al agregar el vehículo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("vehiculoForm", form);
             return "redirect:/vehiculos/agregar";
         }
     }
