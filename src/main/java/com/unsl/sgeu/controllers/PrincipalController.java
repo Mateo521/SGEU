@@ -3,7 +3,6 @@ package com.unsl.sgeu.controllers;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Vehiculo;
-import com.unsl.sgeu.repositories.TurnoRepository;
 import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
@@ -42,8 +41,7 @@ public class PrincipalController {
     @Autowired
     private EstacionamientoService estacionamientoService;
 
-    @Autowired
-    private TurnoRepository turnoRepo;
+
 
     @GetMapping("/")
     public String index(HttpSession session, Model model,

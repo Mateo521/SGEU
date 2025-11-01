@@ -6,11 +6,14 @@ import com.unsl.sgeu.models.Turno;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional; // <--- IMPORT NUEVO
 
+
+@Repository
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
   @Query("""
@@ -61,7 +64,11 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
   @Query("SELECT t FROM Turno t WHERE t.empleado.id = :empleadoId")
   List<Turno> findByEmpleadoId(@Param("empleadoId") Long empleadoId);
 
-  // ====== NUEVO: obtener la asignación abierta (fecha_fin = NULL) del guardia
-  // ======
-  Optional<Turno> findByEmpleadoIdAndFechaFinIsNull(Long empleadoId);
+  // Buscar turno activo de un empleado (sin fecha de fin)
+Optional<Turno> findByEmpleadoIdAndFechaFinIsNull(Long empleadoId);
+    // Spring genera la consulta automáticamente:
+    // SELECT * FROM turno 
+    // WHERE empleado_id = :empleadoId AND fecha_fin IS NULL
+    // Devuelve un Optional<Turno> porque puede que no exista ningún turno activo.
+
 }

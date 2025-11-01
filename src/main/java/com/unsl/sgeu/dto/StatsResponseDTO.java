@@ -21,7 +21,6 @@ public class StatsResponseDTO {
 
     public StatsResponseDTO() {}
 
-    // getters / setters
     public List<CategoriaStatsDTO> getCategorias() { return categorias; }
     public void setCategorias(List<CategoriaStatsDTO> categorias) { this.categorias = categorias; }
     public EstacionamientoStatsDTO getEstacionamientoTop() { return estacionamientoTop; }

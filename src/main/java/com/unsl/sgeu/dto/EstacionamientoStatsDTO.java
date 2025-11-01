@@ -1,6 +1,7 @@
 package com.unsl.sgeu.dto;
 
 public class EstacionamientoStatsDTO {
+    //unifico los datos que necesito para el reporte en un solo DTO
     private Long id;
     private String nombre;
     private Integer capacidad;

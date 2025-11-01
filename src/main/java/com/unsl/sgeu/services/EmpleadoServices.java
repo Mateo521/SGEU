@@ -40,7 +40,7 @@ public class EmpleadoServices {
         return passwordEncoder.matches(contrasenia, empleado.getContrasenia());
     }
 
-    /** Registra con rol explícito (admin/guardia). */
+    // Registra con rol explícito (admin/guardia)
     public boolean register(String nombre,
             String apellido,
             String nombreUsuario,
@@ -48,7 +48,7 @@ public class EmpleadoServices {
             String correo,
             Rol rol) {
         if (empleadoRepository.existsByNombreUsuario(nombreUsuario)) {
-            return false; // usuario ya existe
+            return false; // usuario q ya existe
         }
         Empleado nuevo = new Empleado();
         nuevo.setNombre(nombre);
@@ -62,7 +62,7 @@ public class EmpleadoServices {
         return true;
     }
 
-    /** Overload: por compatibilidad si aún te llega "cargo" como String. */
+    //Aca comparamos que el string del select sea igual a administrador o no
     public boolean register(String nombre,
             String apellido,
             String nombreUsuario,
@@ -126,13 +126,13 @@ public class EmpleadoServices {
         Empleado empleado = empleadoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Empleado no encontrado con ID: " + id));
 
-        // 🧩 Aplicar los cambios desde el DTO usando el mapper
+        // Aplicar los cambios desde el DTO usando el mapper
         EmpleadoMapper.updateEntityFromDTO(empleado, dto);
 
-        // 🗄️ Guardar los cambios en la BD
+        // Guardar los cambios en la BD
         Empleado actualizado = empleadoRepository.save(empleado);
 
-        // 🔁 Retornar el DTO actualizado para respuesta al frontend
+        // Retornar el DTO actualizado para respuesta al frontend
         return EmpleadoMapper.toDTO(actualizado);
     }
 }

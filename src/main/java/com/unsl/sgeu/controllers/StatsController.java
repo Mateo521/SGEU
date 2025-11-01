@@ -1,5 +1,6 @@
 package com.unsl.sgeu.controllers;
 
+import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.StatsService;
 import com.unsl.sgeu.repositories.EstacionamientoRepository;
 import org.springframework.http.MediaType;
@@ -19,10 +20,11 @@ import com.unsl.sgeu.dto.*;
 public class StatsController {
 
     private final StatsService statsService;
-    private final EstacionamientoRepository estacionamientoRepository;
-    public StatsController(StatsService statsService, EstacionamientoRepository estacionamientoRepository){
+    private final EstacionamientoService estacionamientoService;
+
+    public StatsController(StatsService statsService, EstacionamientoService estacionamientoService){
         this.statsService = statsService;
-        this.estacionamientoRepository = estacionamientoRepository;
+        this.estacionamientoService = estacionamientoService;
     }
 
     @GetMapping("/stats")
@@ -58,9 +60,9 @@ public class StatsController {
 
         // lista de estacionamientos para el select
         java.util.List<java.util.Map<String,Object>> ests = new java.util.ArrayList<>();
-        for(var e: estacionamientoRepository.findAll()){
+        for(var e: estacionamientoService.listarTodos()){
             java.util.Map<String,Object> m = new java.util.HashMap<>();
-            m.put("id", e.getIdEst());
+            m.put("id", e.getId());
             m.put("nombre", e.getNombre());
             ests.add(m);
         }
@@ -83,11 +85,9 @@ public class StatsController {
         return ResponseEntity.ok(Map.of("data", dto));
     }
 
-    // Nota: la API de estacionamientos ya está disponible en EstacionamientoController (/api/estacionamientos)
-
     
 
-    // Construye y mapea la respuesta a DTO (evita llamadas duplicadas)
+    // Construye y mapea la respuesta a DTO
     private StatsResponseDTO buildStatsDto(LocalDate desde, LocalDate hasta, Long estId){
         StatsResponseDTO dto = new StatsResponseDTO();
 
@@ -173,7 +173,6 @@ public class StatsController {
         }
         dto.setHorariosPico(horariosList);
 
-    // Promedio de estancia eliminado por solicitud del usuario
 
         // Distribucion por tipo de vehiculo
         var distrib = statsService.distribucionPorTipoVehiculo(desde,hasta,estId);
