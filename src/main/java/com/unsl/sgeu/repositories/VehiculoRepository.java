@@ -32,7 +32,7 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, String> {
     // Genera la consulta:
     // SELECT * FROM vehiculo WHERE LOWER(patente) LIKE LOWER(:patente)
     // Devuelve una página de resultados (Page<Vehiculo>) que contienen la cadena dada,
-    // útil para búsquedas parciales con paginación.
+ 
 
     @Query("""
             SELECT DISTINCT v FROM Vehiculo v
