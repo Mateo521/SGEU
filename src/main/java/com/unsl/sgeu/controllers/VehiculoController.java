@@ -35,28 +35,22 @@ public class VehiculoController {
     @GetMapping("vehiculos/agregar")
     public String mostrarFormularioAgregar(Model model, HttpSession session,
             RedirectAttributes redirectAttributes) {
-        System.out.println("🔍 GET /agregar - Mostrando formulario");
 
-        // Validar autenticación
-        if (session.getAttribute("user") == null) {
-            System.out.println("❌ Usuario no autenticado");
+         if (session.getAttribute("user") == null) {
             return "redirect:/login";
         }
 
-        // Validar permisos
-        String rol = (String) session.getAttribute("rol");
+         String rol = (String) session.getAttribute("rol");
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
-        System.out.println("👤 Usuario: " + session.getAttribute("nombreCompleto") + " | Rol: " + rol);
+      
 
         if (!esAdministrador && !esGuardia) {
-            System.out.println("❌ Usuario sin permisos para agregar vehículos");
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
             return "redirect:/";
         }
 
-        System.out.println("✅ Mostrando formulario de agregar vehículo");
         model.addAttribute("vehiculoForm", new VehiculoFormDTO());
         model.addAttribute("esEdicion", false);
 

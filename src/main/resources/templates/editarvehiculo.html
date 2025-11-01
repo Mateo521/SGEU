@@ -81,7 +81,7 @@
 
             <div class="container mx-auto">
 
-                <!-- Header -->
+                
                 <div class="mb-8 fade-in">
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div>
@@ -110,7 +110,7 @@
                     </div>
                 </div>
 
-                <!-- Mensaje de éxito -->
+              
                 <div th:if="${success}" class="bg-green-50 border-l-4 border-green-500 rounded-lg p-6 mb-8 fade-in">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -123,7 +123,7 @@
                     </div>
                 </div>
 
-                <!-- Mensaje de error -->
+              
                 <div th:if="${error}" class="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-8 fade-in">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
@@ -136,13 +136,13 @@
                     </div>
                 </div>
 
-                <!-- Formulario -->
+               
                 <div class="bg-white rounded-xl shadow-lg p-8 fade-in">
                     <form
                         th:action="${esEdicion} ? @{/vehiculos/editar/{patente}(patente=${patenteOriginal})} : @{/vehiculos/agregar}"
                         method="post" th:object="${vehiculoForm}" class="space-y-8">
 
-                        <!-- Datos del Propietario -->
+                        
                         <div>
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-slate-200">
                                 <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -249,7 +249,7 @@
                             </div>
                         </div>
 
-                        <!-- Datos del Vehículo -->
+                       
                         <div>
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b-2 border-slate-200">
                                 <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
@@ -341,7 +341,7 @@
                             </div>
                         </div>
 
-                        <!-- Botón -->
+                        
                         <button type="submit"
                             class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200 hover:scale-[1.02] shadow-lg flex items-center justify-center gap-3 text-lg">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

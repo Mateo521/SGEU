@@ -85,7 +85,7 @@ public class VehiculoFormDTO {
         this.vehiculoTipoId = mapearTipoAId(tipoNombre);
     }
     
-    // ===== MÉTODOS DE MAPEO =====
+ 
     
     private Short mapearCategoriaAId(String categoria) {
         if (categoria == null) return null;
@@ -107,7 +107,7 @@ public class VehiculoFormDTO {
         }
     }
     
-    // ===== GETTERS Y SETTERS =====
+ 
     
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { 
