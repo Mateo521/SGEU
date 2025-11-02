@@ -345,12 +345,6 @@ public Page<Vehiculo> obtenerTodosPaginado(Pageable pageable) {
     return vehiculoRepo.findAll(pageable);
 }
 
-public Page<Vehiculo> obtenerTodosPorGuardiaPaginado(Long guardiaId, Pageable pageable) {
-    System.out.println("Guardia " + guardiaId + " - Página: " + pageable.getPageNumber());
-    
-    return vehiculoRepo.findAll(pageable);
-}
-
 public Page<Vehiculo> buscarVehiculosPorPatentePaginado(String patente, Pageable pageable) {
     System.out.println("Buscando '" + patente + "' - Página: " + pageable.getPageNumber());
     return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);

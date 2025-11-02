@@ -139,7 +139,7 @@ public class PrincipalController {
                             pageable);
                 } else {
                     System.out.println("Guardia obteniendo todos paginado");
-                    paginaVehiculos = vehiculoService.obtenerTodosPorGuardiaPaginado(usuarioId, pageable);
+                    paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
                 }
 
                 for (Vehiculo vehiculo : paginaVehiculos.getContent()) {
