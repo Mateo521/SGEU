@@ -3,6 +3,7 @@ package com.unsl.sgeu.services;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import com.unsl.sgeu.dto.StatsResponseDTO;
 
 public interface StatsService {
     List<Map<String, Object>> diaSemanaMasIngresos(LocalDate desde, LocalDate hasta, Long estacionamientoId);
@@ -14,4 +15,7 @@ public interface StatsService {
     List<Map<String, Object>> evolucionIngresosDiarios(LocalDate desde, LocalDate hasta, Long estId);
     List<Map<String,Object>> conteoManualVsQr(LocalDate desde, LocalDate hasta, Long estId);
     List<Map<String, Object>> distribucionPorTipoVehiculo(LocalDate desde, LocalDate hasta, Long estId);
+
+    // Construye un StatsResponseDTO con todas las métricas solicitadas
+    StatsResponseDTO buildStatsDto(LocalDate desde, LocalDate hasta, Long estId);
 }

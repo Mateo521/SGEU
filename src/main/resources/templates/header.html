@@ -87,7 +87,7 @@
             </a>
           </li>
 
-          <li>
+          <li th:if="${session.rol == 'Guardia'}">
             <a th:href="@{/ieManual}"
               class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"
@@ -99,7 +99,7 @@
             </a>
           </li>
 
-          <li>
+          <li th:if="${session.rol == 'Guardia'}">
             <a th:href="@{/leerqr}"
               class="nav-link flex items-center gap-3 p-3 text-slate-700 rounded-xl font-medium group">
               <svg class="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" fill="none"

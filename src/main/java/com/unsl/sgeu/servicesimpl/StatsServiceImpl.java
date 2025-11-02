@@ -1,5 +1,6 @@
 package com.unsl.sgeu.servicesimpl;
 
+import com.unsl.sgeu.dto.*;
 import com.unsl.sgeu.repositories.StatsRepository;
 import com.unsl.sgeu.services.StatsService;
 import org.springframework.stereotype.Service;
@@ -150,7 +151,7 @@ public class StatsServiceImpl implements StatsService {
         List<Object[]> rows = statsRepository.getDistribucionPorTipoVehiculo(desde, hasta, estId);
         long total = 0;
         for(Object[] r : rows) total += ((Number) r[1]).longValue();
-
+        
         List<Map<String,Object>> res = new ArrayList<>();
         for(Object[] r : rows){
             Map<String,Object> m = new HashMap<>();
@@ -163,6 +164,107 @@ public class StatsServiceImpl implements StatsService {
             res.add(m);
         }
         return res;
+    }
+
+    @Override
+    public StatsResponseDTO buildStatsDto(LocalDate desde, LocalDate hasta, Long estId) {
+        StatsResponseDTO dto = new StatsResponseDTO();
+
+        var pctCats = this.porcentajeCategorias(desde,hasta,estId);
+        var lstCats = new java.util.ArrayList<CategoriaStatsDTO>();
+        var categoriasLabels = new java.util.ArrayList<String>();
+        var categoriasData = new java.util.ArrayList<Number>();
+        for(var m : pctCats){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String cat = map.getOrDefault("categoria","Sin categoria").toString();
+            long cantidad = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            double pct = ((Number)map.getOrDefault("porcentaje",0)).doubleValue();
+            lstCats.add(new CategoriaStatsDTO(cat,cantidad,pct));
+            categoriasLabels.add(cat);
+            categoriasData.add(cantidad);
+        }
+        dto.setCategorias(lstCats);
+        dto.setCategoriasLabels(categoriasLabels);
+        dto.setCategoriasData(categoriasData);
+
+        var estTopMap = this.estacionamientoConMasIngresos(desde,hasta,estId);
+        if(estTopMap != null && !estTopMap.isEmpty()){
+            java.util.Map<String,Object> top = (java.util.Map<String,Object>) estTopMap;
+            EstacionamientoStatsDTO est = new EstacionamientoStatsDTO(
+                ((Number)top.getOrDefault("id",0)).longValue(),
+                top.getOrDefault("nombre","\"").toString(),
+                ((Number)top.getOrDefault("capacidad",0)).intValue(),
+                ((Number)top.getOrDefault("ingresos",0)).longValue(),
+                ((Number)top.getOrDefault("porcentaje_capacidad",0)).doubleValue()
+            );
+            dto.setEstacionamientoTop(est);
+        }
+
+        var ocup = this.porcentajeOcupacionPorEstacionamiento(desde,hasta,estId);
+        var ocupLabels = new java.util.ArrayList<String>();
+        var ocupData = new java.util.ArrayList<Number>();
+        var estList = new java.util.ArrayList<EstacionamientoStatsDTO>();
+        for(var m : ocup){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String nombre = map.getOrDefault("nombre","-").toString();
+            Integer cap = ((Number)map.getOrDefault("capacidad",0)).intValue();
+            Long ingresos = ((Number)map.getOrDefault("ingresos",0)).longValue();
+            Double pct = ((Number)map.getOrDefault("porcentaje",0)).doubleValue();
+            ocupLabels.add(nombre); ocupData.add(pct);
+            estList.add(new EstacionamientoStatsDTO(((Number)map.getOrDefault("id",0)).longValue(), nombre, cap, ingresos, pct));
+        }
+        dto.setOcupacionLabels(ocupLabels);
+        dto.setOcupacionData(ocupData);
+        dto.setPorcentajeOcupacion(estList);
+
+        var evo = this.evolucionIngresosDiarios(desde,hasta,estId);
+        var evoList = new java.util.ArrayList<EvolucionDTO>();
+        var evoLabels = new java.util.ArrayList<String>();
+        var evoData = new java.util.ArrayList<Number>();
+        for(var m: evo){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String dia = map.getOrDefault("dia","-").toString();
+            Long cnt = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            evoList.add(new EvolucionDTO(dia, cnt));
+            evoLabels.add(dia); evoData.add(cnt);
+        }
+        dto.setEvolucion(evoList);
+        dto.setEvolucionLabels(evoLabels);
+        dto.setEvolucionData(evoData);
+
+        var modos = this.conteoManualVsQr(desde,hasta,estId);
+        var modoList = new java.util.ArrayList<ModoConteoDTO>();
+        for(var m: modos){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String modo = map.getOrDefault("modo","MANUAL").toString();
+            Long cnt = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            Double pct = ((Number)map.getOrDefault("porcentaje",0)).doubleValue();
+            modoList.add(new ModoConteoDTO(modo, cnt, pct));
+        }
+        dto.setModoConteo(modoList);
+
+        var horarios = this.horariosPicoIngresos(desde,hasta,5,estId);
+        var horariosList = new java.util.ArrayList<HorarioDTO>();
+        for(var m: horarios){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            Integer hora = ((Number)map.getOrDefault("hora",0)).intValue();
+            Long cnt = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            horariosList.add(new HorarioDTO(hora, cnt));
+        }
+        dto.setHorariosPico(horariosList);
+
+        var distrib = this.distribucionPorTipoVehiculo(desde,hasta,estId);
+        var tipoList = new java.util.ArrayList<TipoVehiculoDTO>();
+        for(var m: distrib){
+            java.util.Map<String,Object> map = (java.util.Map<String,Object>) m;
+            String tipo = map.getOrDefault("tipo","Desconocido").toString();
+            Long cnt = ((Number)map.getOrDefault("cantidad",0)).longValue();
+            Double pct = ((Number)map.getOrDefault("porcentaje",0)).doubleValue();
+            tipoList.add(new TipoVehiculoDTO(tipo, cnt, pct));
+        }
+        dto.setDistribucionTipoVehiculo(tipoList);
+
+        return dto;
     }
 
 }
