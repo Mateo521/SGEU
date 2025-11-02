@@ -1,6 +1,6 @@
 package com.unsl.sgeu.controllers;
 
-import com.unsl.sgeu.models.Estacionamiento;
+import com.unsl.sgeu.dto.SessionDTO;
 import com.unsl.sgeu.services.EmpleadoServices;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -22,29 +22,21 @@ public class LoginController {
             @RequestParam String contrasenia,
             HttpSession session) {
 
-        boolean ok = empleadoServices.login(nombreUsuario, contrasenia);
-        if (!ok) {
+        SessionDTO sesion = empleadoServices.autenticarYObtenerDatosSesion(nombreUsuario, contrasenia);
+        if (!sesion.getLoginExitoso()) {
             return "redirect:/login?error=true";
         }
 
-        // capturamos datos del empleado para pasarlos al session
-        String rol = empleadoServices.obtenerRolEmpleado(nombreUsuario);
-        String nombreCompleto = empleadoServices.obtenerNombrePorUsuario(nombreUsuario);
-        Long usuarioId = empleadoServices.obtenerIdPorUsuario(nombreUsuario);
-        Estacionamiento estacionamiento = empleadoServices.obtenerEstacionamientoActivo(nombreUsuario);
-
-        session.setAttribute("usuarioId", usuarioId);
-        session.setAttribute("user", nombreUsuario);
-        session.setAttribute("rol", rol);
-        session.setAttribute("nombreCompleto", nombreCompleto);
-        session.setAttribute("estacionamiento", estacionamiento);
+        // Almacenamos los datos del DTO en la sesión
+        session.setAttribute("usuarioId", sesion.getUsuarioId());
+        session.setAttribute("user", sesion.getNombreUsuario());
+        session.setAttribute("rol", sesion.getRol());
+        session.setAttribute("nombreCompleto", sesion.getNombreCompleto());
+        session.setAttribute("estacionamientoId", sesion.getEstacionamientoId());
+        session.setAttribute("estacionamientoNombre", sesion.getEstacionamientoNombre());
 
         System.out.println("=== VERIFICACIÓN SESIÓN ===");
-        System.out.println("Usuario: " + session.getAttribute("user"));
-        System.out.println("ID: " + session.getAttribute("usuarioId"));
-        System.out.println("Rol: " + session.getAttribute("rol"));
-        System.out.println("Nombre: " + session.getAttribute("nombreCompleto"));
-        System.out.println("Estacionamiento activo: " + session.getAttribute("estacionamiento"));
+        System.out.println(sesion);
         System.out.println("========================");
 
         return "redirect:/?success=true";

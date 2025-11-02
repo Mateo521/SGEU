@@ -1,6 +1,7 @@
 package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.dto.EmpleadoDTO;
+import com.unsl.sgeu.dto.SessionDTO;
 import com.unsl.sgeu.mappers.EmpleadoMapper;
 import com.unsl.sgeu.models.Empleado;
 import com.unsl.sgeu.models.Estacionamiento;
@@ -32,12 +33,28 @@ public class EmpleadoServices {
 
     /* ===================== AUTH ===================== */
 
-    public boolean login(String nombreUsuario, String contrasenia) {
+    public SessionDTO autenticarYObtenerDatosSesion(String nombreUsuario, String contrasenia) {
+        // 1. Verificar credenciales
         Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
-        if (opt.isEmpty())
-            return false;
+        if (opt.isEmpty() || !passwordEncoder.matches(contrasenia, opt.get().getContrasenia())) {
+            return SessionDTO.loginFallido();
+        }
+
+        // 2. Obtener datos del empleado
         Empleado empleado = opt.get();
-        return passwordEncoder.matches(contrasenia, empleado.getContrasenia());
+        
+        // 3. Obtener estacionamiento activo
+        Estacionamiento estacionamiento = turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(nombreUsuario);
+
+        // 4. Construir DTO de sesión
+        return SessionDTO.loginExitoso(
+            empleado.getId(),
+            empleado.getNombreUsuario(),
+            empleado.getRol().name(),
+            empleado.getNombre() + " " + empleado.getApellido(),
+            estacionamiento != null ? estacionamiento.getIdEst() : null,
+            estacionamiento != null ? estacionamiento.getNombre() : null
+        );
     }
 
     // Registra con rol explícito (admin/guardia)
@@ -81,35 +98,8 @@ public class EmpleadoServices {
                 .orElse("Nombre no encontrado");
     }
 
-    /** Devuelve el rol como String ("admin"/"guardia") */
-    public String obtenerRolEmpleado(String nombreUsuario) {
-        return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
-                .map(e -> e.getRol().name())
-                .orElse("Rol no encontrado");
-    }
-
     public Iterable<Empleado> listarEmpleados() {
         return empleadoRepository.findAll();
-    }
-
-    public String obtenerNombrePorUsuario(String nombreUsuario) {
-        return empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario)
-                .map(e -> e.getNombre() + " " + e.getApellido())
-                .orElse("Nombre no encontrado");
-    }
-
-    public Estacionamiento obtenerEstacionamientoActivo(String usuario) {
-        return turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(usuario);
-    }
-
-    public Long obtenerIdPorUsuario(String nombreUsuario) {
-        try {
-            Empleado empleado = empleadoRepository.findByNombreUsuario(nombreUsuario);
-            return empleado != null ? empleado.getId() : null;
-        } catch (Exception e) {
-            System.err.println("Error al obtener ID por usuario: " + e.getMessage());
-            return null;
-        }
     }
 
     /** Devuelve solo guardias en formato DTO */
