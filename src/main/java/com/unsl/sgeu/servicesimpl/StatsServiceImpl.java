@@ -91,24 +91,59 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<Map<String, Object>> porcentajeOcupacionPorEstacionamiento(LocalDate desde, LocalDate hasta, Long estId) {
-        List<Object[]> rows = statsRepository.getIngresosPorEstacionamiento(desde, hasta, estId);
-        List<Map<String,Object>> res = new ArrayList<>();
+        // 1. Obtener todos los estacionamientos activos
+        List<Object[]> estacionamientos = statsRepository.getIngresosPorEstacionamiento(desde, hasta, estId);
+        // 2. Obtener ingresos diarios por estacionamiento
+        List<Object[]> ingresosPorDia = statsRepository.getIngresosPorDia(desde, hasta, estId);
 
-        for(Object[] r: rows){
-            long ingresos = ((Number)r[3]).longValue();
-            int capacidad = r[2]==null ? 0 : ((Number)r[2]).intValue();
-            double pct = capacidad == 0 ? 0.0 : Math.min(ingresos*100.0/capacidad, 100.0);
-
-            Map<String,Object> m = new HashMap<>();
-            m.put("id", ((Number)r[0]).longValue());
-            m.put("nombre", r[1]);
-            m.put("capacidad", capacidad);
-            m.put("ingresos", ingresos);
-            m.put("porcentaje", Math.round(pct*100.0)/100.0);
-
-            res.add(m);
+        // Map<idEst, [nombre, capacidad]>
+        Map<Long, Object[]> infoEst = new HashMap<>();
+        for (Object[] r : estacionamientos) {
+            Long id = ((Number) r[0]).longValue();
+            infoEst.put(id, r);
         }
 
+        // Map<idEst, Map<fecha, ingresos>>
+        Map<Long, Map<String, Long>> ingresosDiariosPorEst = new HashMap<>();
+        for (Object[] r : ingresosPorDia) {
+            // Si la query de getIngresosPorDia no trae id_est, hay que ajustarla para que lo haga
+            // Suponemos: [fecha, cantidad, id_est]
+            String fecha = r[0].toString();
+            Long cantidad = ((Number) r[1]).longValue();
+            Long idEst = r.length > 2 ? ((Number) r[2]).longValue() : null;
+            if (idEst == null) continue;
+            ingresosDiariosPorEst.putIfAbsent(idEst, new HashMap<>());
+            ingresosDiariosPorEst.get(idEst).put(fecha, cantidad);
+        }
+
+        List<Map<String, Object>> res = new ArrayList<>();
+        for (Map.Entry<Long, Object[]> entry : infoEst.entrySet()) {
+            Long id = entry.getKey();
+            Object[] datos = entry.getValue();
+            String nombre = datos[1].toString();
+            int capacidad = datos[2] == null ? 0 : ((Number) datos[2]).intValue();
+            long ingresosTotales = ((Number) datos[3]).longValue();
+
+            Map<String, Long> ingresosPorFecha = ingresosDiariosPorEst.getOrDefault(id, new HashMap<>());
+            double sumaPct = 0.0;
+            int dias = 0;
+            for (Long ingresosDia : ingresosPorFecha.values()) {
+                if (capacidad > 0) {
+                    double pctDia = Math.min(ingresosDia * 100.0 / capacidad, 100.0);
+                    sumaPct += pctDia;
+                    dias++;
+                }
+            }
+            double promedioPct = (dias > 0) ? (sumaPct / dias) : 0.0;
+
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", id);
+            m.put("nombre", nombre);
+            m.put("capacidad", capacidad);
+            m.put("ingresos", ingresosTotales);
+            m.put("porcentaje", Math.round(promedioPct * 100.0) / 100.0);
+            res.add(m);
+        }
         return res;
     }
 
