@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
+import com.unsl.sgeu.dto.VehiculoRegistroResultadoDTO;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.VehiculoRepository;
@@ -11,7 +12,7 @@ import java.util.UUID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,179 @@ public class VehiculoService {
 
     @Autowired
     private PersonaService personaService;
+
+    @Autowired
+    private QRCodeService qrCodeService;
+
+@Transactional
+     public VehiculoRegistroResultadoDTO registrarNuevoVehiculo(RegistroVehiculoFormDTO form) {
+        try {
+            var personaForm = form.getPersona();
+            var vehiculoForm = form.getVehiculo();
+
+            String patente = vehiculoForm.getPatente();
+            if (existePatente(patente)) {
+                throw new VehiculoOperacionException(
+                    "Ya existe un vehículo con la patente " + patente
+                );
+            }
+
+            Integer categoriaId = mapearCategoriaAId(personaForm.getCategoriaNombre());
+            if (categoriaId == null) {
+                throw new VehiculoOperacionException("Categoría inválida");
+            }
+
+            Integer tipoId = mapearTipoAId(vehiculoForm.getTipoNombre());
+            if (tipoId == null) {
+                throw new VehiculoOperacionException("Tipo de vehículo inválido");
+            }
+
+            Long dni = personaForm.getDni();
+            Persona persona = personaService.existePersona(dni)
+                    ? personaService.buscarPorDni(dni)
+                    : new Persona();
+
+            persona.setDni(dni);
+            persona.setNombre(personaForm.getNombre());
+            persona.setTelefono(personaForm.getTelefono());
+            persona.setEmail(personaForm.getEmail());
+            persona.setIdCategoria(categoriaId);
+            persona.setCategoria(personaForm.getCategoriaNombre());
+            personaService.guardarPersona(persona);
+
+            String codigoQr = generarCodigoQR(patente);
+
+            Vehiculo vehiculo = new Vehiculo();
+            vehiculo.setPatente(patente);
+            vehiculo.setCodigoQr(codigoQr);
+            vehiculo.setModelo(vehiculoForm.getModelo());
+            vehiculo.setColor(vehiculoForm.getColor());
+            vehiculo.setIdVehiculoTipo(tipoId);
+            vehiculo.setDniDuenio(dni);
+            vehiculo.setTipo(vehiculoForm.getTipoNombre());
+
+            Vehiculo vehiculoGuardado = guardarVehiculo(vehiculo);
+
+            String rutaArchivoQR = null;
+            try {
+                rutaArchivoQR = qrCodeService.generarImagenQR(
+                        vehiculoGuardado.getCodigoQr(),
+                        vehiculoGuardado.getPatente());
+            } catch (Exception e) {
+                System.err.println("Error guardando archivo QR (no crítico): " + e.getMessage());
+            }
+
+           
+            String rutaImagenQR = (rutaArchivoQR != null)
+                    ? rutaArchivoQR
+                    : "/sgeu/qr-codes/qr_" + vehiculoGuardado.getPatente() + ".png";
+
+            String vehiculoInfo = crearInfoVehiculo(form, persona);
+
+            return new VehiculoRegistroResultadoDTO(
+                    vehiculoGuardado.getPatente(),
+                    vehiculoGuardado.getCodigoQr(),
+                    rutaImagenQR,
+                    vehiculoInfo
+            );
+
+        } catch (VehiculoOperacionException ex) {
+            throw ex;  
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new VehiculoOperacionException("Error al registrar el vehículo: " + e.getMessage(), e);
+        }
+    }
+
+@Transactional
+     public boolean actualizarVehiculo(String patenteOriginal, RegistroVehiculoFormDTO form) {
+        var personaForm = form.getPersona();
+        var vehiculoForm = form.getVehiculo();
+
+        Integer categoriaId = mapearCategoriaAId(personaForm.getCategoriaNombre());
+        if (categoriaId == null) {
+            throw new VehiculoOperacionException(
+                "Categoría inválida: " + personaForm.getCategoriaNombre()
+            );
+        }
+
+        Integer tipoId = mapearTipoAId(vehiculoForm.getTipoNombre());
+        if (tipoId == null) {
+            throw new VehiculoOperacionException(
+                "Tipo de vehículo inválido: " + vehiculoForm.getTipoNombre()
+            );
+        }
+
+         if (!patenteOriginal.equalsIgnoreCase(vehiculoForm.getPatente())) {
+            if (existePatente(vehiculoForm.getPatente())) {
+                throw new VehiculoOperacionException(
+                    "Ya existe un vehículo con la patente " + vehiculoForm.getPatente()
+                );
+            }
+         }
+
+         boolean ok = actualizarVehiculo(patenteOriginal, form, categoriaId, tipoId);
+        if (!ok) {
+            throw new VehiculoOperacionException("Error al actualizar el vehículo en la base de datos");
+        }
+        return true;
+    }
+
+ 
+    private Integer mapearCategoriaAId(String categoria) {
+        if (categoria == null) return null;
+        switch (categoria.toLowerCase()) {
+            case "docente":     return 1;
+            case "no_docente":  return 2;
+            case "estudiante":  return 3;
+            case "visitante":   return 4;
+            default:            return null;
+        }
+    }
+
+    private Integer mapearTipoAId(String tipo) {
+        if (tipo == null) return null;
+        switch (tipo.toLowerCase()) {
+            case "auto": return 1;
+            case "moto": return 2;
+            default:     return null;
+        }
+    }
+
+    private String mapearCategoriaNombreATexto(String categoria) {
+        if (categoria == null) return "Sin categoría";
+        switch (categoria.toLowerCase()) {
+            case "docente":     return "Docente";
+            case "no_docente":  return "No Docente";
+            case "estudiante":  return "Estudiante";
+            case "visitante":   return "Visitante";
+            default:            return categoria;
+        }
+    }
+
+    private String nullToDash(String s) {
+        return (s == null || s.isBlank()) ? "—" : s;
+    }
+
+    private String crearInfoVehiculo(RegistroVehiculoFormDTO form, Persona persona) {
+        var personaForm = form.getPersona();
+        var vehiculoForm = form.getVehiculo();
+
+        String nombrePropietario = personaForm.getNombre() != null ? personaForm.getNombre() : "Sin nombre";
+        String categoriaNombre = personaForm.getCategoriaNombre() != null
+                ? mapearCategoriaNombreATexto(personaForm.getCategoriaNombre())
+                : "Sin categoría";
+
+        return String.format(
+                "Propietario: %s (DNI: %s) | Patente: %s | Modelo: %s %s | Categoría: %s",
+                nombrePropietario,
+                personaForm.getDni(),
+                vehiculoForm.getPatente(),
+                nullToDash(vehiculoForm.getModelo()),
+                nullToDash(vehiculoForm.getColor()),
+                categoriaNombre);
+    }
+
 
     public List<Vehiculo> obtenerTodos() {
         return vehiculoRepo.findAll();
@@ -165,7 +339,7 @@ public class VehiculoService {
              return buscarVehiculosPorPatente(patente);
         }
     }
-
+@Transactional
       public ResultadoEliminacion eliminarVehiculo(String patente) {
      
     try {
@@ -227,7 +401,7 @@ public class VehiculoService {
     }
 }
 
-
+@Transactional
     public ResultadoEliminacion eliminarVehiculoConHistorial(String patente) {
         try {
             Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);

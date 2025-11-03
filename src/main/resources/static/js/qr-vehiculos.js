@@ -15,7 +15,7 @@ class QRVehiculoManager {
                 dni: button.dataset.dni
             };
 
-            console.log('📱 Mostrando QR para:', this.currentData);
+            console.log(' Mostrando QR para:', this.currentData);
 
             const elementos = [
                 'modalPatente', 'modalModelo', 'modalColor', 
@@ -49,7 +49,7 @@ class QRVehiculoManager {
             
             qrImage.style.display = 'block';
             qrError.style.display = 'none';
-            qrImage.src = `qr-codes/qr_${this.currentData.patente}.png`;
+            qrImage.src = `/sgeu/qr-codes/qr_${this.currentData.patente}.png`;
             
             qrImage.onload = function() {
                 console.log(' Imagen QR cargada correctamente');
@@ -88,7 +88,7 @@ class QRVehiculoManager {
                 dni: button.dataset.dni
             };
 
-            console.log('🖨️ Imprimiendo QR para:', data);
+            console.log(' Imprimiendo QR para:', data);
             this.imprimirConImagenExistente(data);
 
         } catch (error) {
@@ -99,7 +99,7 @@ class QRVehiculoManager {
 
      
    imprimirQRDesdeImagen() {
-    console.log('🖨️ Imprimiendo QR desde imagen recién generada...');
+    console.log('Imprimiendo QR desde imagen recién generada...');
     
  
     const imagenQR = document.querySelector('.qr-image');
@@ -120,10 +120,31 @@ class QRVehiculoManager {
     const nombre = imagenQR.dataset.nombre || imagenQR.getAttribute('data-nombre') || 'N/A';
     
  
-    const rutaImagen = imagenQR.dataset.imagen || imagenQR.getAttribute('data-imagen') || imagenQR.src;
+    let rutaImagen = imagenQR.dataset.imagen || imagenQR.getAttribute('data-imagen') || imagenQR.src;
 
-    
-    console.log('📋 Datos obtenidos de la imagen:');
+    if (rutaImagen && !rutaImagen.startsWith('/sgeu/qr-codes/')) {
+       
+        
+        if (rutaImagen.startsWith('/qr-codes/')) {
+            rutaImagen = '/sgeu' + rutaImagen;
+        }
+   
+        
+        else if (rutaImagen.includes('qr_')) {
+            const nombreArchivo = rutaImagen.split('/').pop();
+            rutaImagen = `/sgeu/qr-codes/${nombreArchivo}`;
+        }
+       
+        
+        else if (rutaImagen.includes('qr-codes/')) {
+            const match = rutaImagen.match(/\/qr-codes\/(qr_.*\.png)/);
+            if (match) {
+                rutaImagen = `/sgeu/qr-codes/${match[1]}`;
+            }
+        }
+    }
+
+    console.log(' Datos obtenidos de la imagen:');
     console.log('   Patente:', patente);
     console.log('   Código QR:', codigoQR.substring(0, 30) + '...');
     console.log('   Modelo:', modelo);
@@ -168,8 +189,8 @@ class QRVehiculoManager {
 
   
     imprimirConImagenExistente(data) {
-        const qrImageSrc = `qr-codes/qr_${data.patente}.png`;
-        console.log('🖨️ Usando imagen QR:', qrImageSrc);
+        const qrImageSrc = `/sgeu/qr-codes/qr_${data.patente}.png`;
+        console.log(' Usando imagen QR:', qrImageSrc);
         this.crearDocumentoImpresion(data, qrImageSrc);
     }
 
@@ -321,7 +342,7 @@ class QRVehiculoManager {
             
             <script>
                 window.onload = function() {
-                    console.log('🖨️ Documento de impresión cargado');
+                    console.log('Documento de impresión cargado');
                     setTimeout(function() {
                         window.print();
                     }, 1000);
