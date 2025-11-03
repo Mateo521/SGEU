@@ -15,7 +15,7 @@ import com.unsl.sgeu.dto.VehiculoDTO;
 import com.unsl.sgeu.dto.PersonaDTO;
 import com.unsl.sgeu.mappers.PersonaMapper;
 import com.unsl.sgeu.mappers.VehiculoMapper;
- 
+
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
@@ -36,8 +36,6 @@ public class VehiculoController {
 
     @Autowired
     private PersonaService personaService;
-
- 
 
     @GetMapping("vehiculos/agregar")
     public String mostrarFormularioAgregar(Model model, HttpSession session,
@@ -173,7 +171,7 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("patente", resultado.getPatente());
             redirectAttributes.addFlashAttribute("vehiculoInfo", resultado.getVehiculoInfo());
 
-             redirectAttributes.addFlashAttribute("modelo", form.getVehiculo().getModelo());
+            redirectAttributes.addFlashAttribute("modelo", form.getVehiculo().getModelo());
             redirectAttributes.addFlashAttribute("color", form.getVehiculo().getColor());
             redirectAttributes.addFlashAttribute("tipo", form.getVehiculo().getTipoNombre());
             redirectAttributes.addFlashAttribute("dni", form.getPersona().getDni());
@@ -240,7 +238,7 @@ public class VehiculoController {
             personaDTO.setEmail(persona.getEmail());
             personaDTO.setCategoriaNombre(persona.getCategoria());
 
-             RegistroVehiculoFormDTO form = new RegistroVehiculoFormDTO();
+            RegistroVehiculoFormDTO form = new RegistroVehiculoFormDTO();
             form.setVehiculo(vehiculoDTO);
             form.setPersona(personaDTO);
 
@@ -285,6 +283,15 @@ public class VehiculoController {
                 return "redirect:/";
             }
 
+            if (!patenteOriginal.equalsIgnoreCase(form.getVehiculo().getPatente())) {
+                model.addAttribute("error", "No se puede modificar la patente del vehículo");
+                model.addAttribute("vehiculoForm", form);
+                model.addAttribute("esEdicion", true);
+                model.addAttribute("patenteOriginal", patenteOriginal);
+                model.addAttribute("esAdministrador", esAdministrador);
+                return "editarvehiculo";
+            }
+
             if (bindingResult.hasErrors()) {
                 bindingResult.getAllErrors().forEach(error -> System.out.println(" - " + error.getDefaultMessage()));
                 model.addAttribute("vehiculoForm", form);
@@ -319,8 +326,6 @@ public class VehiculoController {
             return "editarvehiculo";
         }
     }
-
-
 
     @PostMapping("/registrar-movimiento")
     public String registrarMovimiento(@RequestParam String patente1,
