@@ -94,15 +94,12 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
     @Transactional(readOnly = true)
     public List<Long> obtenerIdsPorEmpleado(Long empleadoId) {
         try {
-            System.out.println("🔍 Buscando estacionamientos para empleado ID: " + empleadoId);
             
             List<Long> ids = turnoRepository.findEstacionamientoIdsByEmpleadoId(empleadoId);
             
-            System.out.println("✅ Estacionamientos encontrados: " + ids);
             return ids;
             
         } catch (Exception e) {
-            System.err.println("❌ Error al obtener estacionamientos por empleado: " + e.getMessage());
             e.printStackTrace();
             return List.of(); // Lista vacía en caso de error
         }
@@ -112,7 +109,6 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
     @Transactional(readOnly = true)
     public List<EstacionamientoDTO> obtenerPorEmpleado(Long empleadoId) {
         try {
-            System.out.println("🔍 Obteniendo estacionamientos completos para empleado ID: " + empleadoId);
             
             List<Estacionamiento> estacionamientos = turnoRepository.findEstacionamientosByEmpleadoId(empleadoId);
             
@@ -120,11 +116,9 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
                     .map(EstacionamientoMapper::toDTO)
                     .toList();
                     
-            System.out.println("✅ DTOs creados: " + dtos.size());
             return dtos;
                     
         } catch (Exception e) {
-            System.err.println("❌ Error al obtener estacionamientos: " + e.getMessage());
             e.printStackTrace();
             return List.of();
         }
@@ -135,10 +129,9 @@ public class EstacionamientoServiceImpl implements EstacionamientoService {
     public boolean empleadoTieneAcceso(Long empleadoId, Long estacionamientoId) {
         try {
             boolean tieneAcceso = turnoRepository.existsByEmpleadoAndEstacionamiento(empleadoId, estacionamientoId);
-            System.out.println("🔐 Empleado " + empleadoId + " tiene acceso a estacionamiento " + estacionamientoId + ": " + tieneAcceso);
             return tieneAcceso;
         } catch (Exception e) {
-            System.err.println("❌ Error verificando acceso: " + e.getMessage());
+            System.err.println("Error verificando acceso: " + e.getMessage());
             return false;
         }
     }

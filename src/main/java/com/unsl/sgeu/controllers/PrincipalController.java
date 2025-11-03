@@ -51,30 +51,22 @@ public class PrincipalController {
             HttpServletRequest request) {
 
         if (session.getAttribute("user") == null) {
-            System.out.println("Acceso no autorizado. Redirigiendo a login.");
-            return "redirect:/login";
+             return "redirect:/login";
         }
 
-        System.out.println("URL completa: " + request.getRequestURL());
-        System.out.println("URI: " + request.getRequestURI());
-        System.out.println("Método HTTP: " + request.getMethod());
-        System.out.println("Query String: " + request.getQueryString());
-        System.out.println("Context Path: " + request.getContextPath());
+         
 
         String rol = (String) session.getAttribute("rol");
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         String nombreCompleto = (String) session.getAttribute("nombreCompleto");
 
-        System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol + " | ID: " + usuarioId);
-
+ 
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
-        System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: " + esGuardia);
-
+ 
         if (!esAdministrador && !esGuardia) {
-            System.out.println("Usuario sin permisos");
-            model.addAttribute("error", "No tiene permisos para acceder a esta sección");
+             model.addAttribute("error", "No tiene permisos para acceder a esta sección");
             return "error";
         }
 
@@ -87,8 +79,8 @@ public class PrincipalController {
                 List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
 
                 if (estacionamientosGuardia.isEmpty()) {
-                    System.out.println("No se encontraron turnos para el empleado: " + usuarioId);
 
+                    
                 } else {
 
                     for (EstacionamientoDTO est : estacionamientosGuardia) {
@@ -104,10 +96,7 @@ public class PrincipalController {
 
                         paneles.add(panel);
 
-                        System.out.println("Panel creado - Estacionamiento: " + est.getNombre() +
-                                " | Vehículos adentro: " + panel.getTotalVehiculosAdentro() +
-                                ", Ingresos: " + panel.getTotalIngresosHoy() +
-                                ", Egresos: " + panel.getTotalEgresosHoy());
+                   
                     }
                 }
 
@@ -123,23 +112,17 @@ public class PrincipalController {
 
         try {
             if (esAdministrador) {
-                System.out.println("Procesando como ADMINISTRADOR - Página: " + page + ", Tamaño: " + size);
-                if (buscar != null && !buscar.trim().isEmpty()) {
-                    System.out.println("Admin buscando paginado: " + buscar);
-                    paginaVehiculos = vehiculoService.buscarVehiculosPorPatentePaginado(buscar.trim(), pageable);
+                 if (buscar != null && !buscar.trim().isEmpty()) {
+                     paginaVehiculos = vehiculoService.buscarVehiculosPorPatentePaginado(buscar.trim(), pageable);
                 } else {
-                    System.out.println("Admin obteniendo todos paginado");
-                    paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
+                     paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
                 }
             } else {
-                System.out.println("Procesando como GUARDIA - Página: " + page + ", Tamaño: " + size);
-                if (buscar != null && !buscar.trim().isEmpty()) {
-                    System.out.println("Guardia buscando paginado: " + buscar);
-                    paginaVehiculos = vehiculoService.buscarPorPatenteYGuardiaPaginado(buscar.trim(), usuarioId,
+                 if (buscar != null && !buscar.trim().isEmpty()) {
+                     paginaVehiculos = vehiculoService.buscarPorPatenteYGuardiaPaginado(buscar.trim(), usuarioId,
                             pageable);
                 } else {
-                    System.out.println("Guardia obteniendo todos paginado");
-                    paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
+                     paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
                 }
 
                 for (Vehiculo vehiculo : paginaVehiculos.getContent()) {
@@ -162,19 +145,9 @@ public class PrincipalController {
             model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
         }
 
-        System.out.println("=== INFORMACIÓN DE PAGINACIÓN ===");
-        System.out.println("Página actual: " + paginaVehiculos.getNumber());
-        System.out.println("Elementos en esta página: " + paginaVehiculos.getNumberOfElements());
-        System.out.println("Total elementos: " + paginaVehiculos.getTotalElements());
-        System.out.println("Total páginas: " + paginaVehiculos.getTotalPages());
-        System.out.println("Es primera página: " + paginaVehiculos.isFirst());
-        System.out.println("Es última página: " + paginaVehiculos.isLast());
+        
 
-        if (esGuardia) {
-            System.out.println("=== INFORMACIÓN DE GUARDIA ===");
-            System.out.println("Estacionamientos origen mapeados: " + estacionamientosOrigen.size());
-            System.out.println("Paneles creados: " + paneles.size());
-        }
+         
 
         model.addAttribute("paneles", paneles);
         model.addAttribute("vehiculos", paginaVehiculos.getContent());
@@ -219,32 +192,14 @@ public class PrincipalController {
         return "registrarvehiculo";
     }
 
-    /*
-     * @PostMapping("/leerqr")
-     * public ResponseEntity<String> recibirQR(@RequestBody LeerQR qr) {
-     * System.out.println("Código leído: " + qr.getCodigo());
-     * return ResponseEntity.ok("QR recibido correctamente: " + qr.getCodigo());
-     * }
-     */
+   
+    
 
     @GetMapping("/ieManual")
     public String showManual() {
         return "ieManual";
     }
 
-    /*
-     * @ModelAttribute("patentesVencidas")
-     * public List<String> cargarPatentesVencidas(HttpSession session) {
-     * Estacionamiento est = (Estacionamiento)
-     * session.getAttribute("estacionamiento");
-     * if (est == null) {
-     * // No hay sesión activa o no hay estacionamiento seleccionado
-     * System.out.println("ESTACIONAMIENTO NULL");
-     * return Collections.emptyList(); // Devuelve lista vacía en ese caso
-     * }
-     * System.out.println("ESTACIONAMIENOT: " + est.getIdEst());
-     * return
-     * registroEstacionamientoService.obtenerPatentesAdentroMasDeCuatroHoras(est);
-     * }
-     */
+    
+    
 }

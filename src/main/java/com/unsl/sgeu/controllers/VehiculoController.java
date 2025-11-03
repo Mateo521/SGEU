@@ -10,7 +10,11 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import com.unsl.sgeu.dto.EstacionamientoDTO;
-import com.unsl.sgeu.dto.VehiculoFormDTO;
+import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
+import com.unsl.sgeu.dto.VehiculoDTO;
+import com.unsl.sgeu.dto.PersonaDTO;
+import com.unsl.sgeu.mappers.PersonaMapper;
+import com.unsl.sgeu.mappers.VehiculoMapper;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
@@ -24,7 +28,7 @@ public class VehiculoController {
     @Autowired
     private RegistroEstacionamientoService registroestacionamientoService;
 
-@Autowired
+    @Autowired
     private EstacionamientoService estacionamientoService;
 
     @Autowired
@@ -36,117 +40,38 @@ public class VehiculoController {
     @Autowired
     private QRCodeService qrCodeService;
 
+    @Autowired
+    private PersonaMapper personaMapper;
+    @Autowired
+    private VehiculoMapper vehiculoMapper;
+
     @GetMapping("vehiculos/agregar")
     public String mostrarFormularioAgregar(Model model, HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-         if (session.getAttribute("user") == null) {
+        if (session.getAttribute("user") == null) {
             return "redirect:/login";
         }
 
-         String rol = (String) session.getAttribute("rol");
+        String rol = (String) session.getAttribute("rol");
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
-
-      
 
         if (!esAdministrador && !esGuardia) {
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
             return "redirect:/";
         }
 
-        model.addAttribute("vehiculoForm", new VehiculoFormDTO());
+        model.addAttribute("vehiculoForm", new RegistroVehiculoFormDTO());
         model.addAttribute("esEdicion", false);
 
         return "registrarvehiculo";
     }
 
-    /*
-     * @GetMapping
-     * public String listarVehiculos(
-     * 
-     * @RequestParam(value = "buscar", required = false) String buscar,
-     * 
-     * @RequestParam(value = "estacionamientoFiltro", required = false) Long
-     * estacionamientoFiltro,
-     * Model model,
-     * HttpSession session,
-     * HttpServletRequest request) {
-     * 
-     * System.out.println(" DEBUG COMPLETO");
-     * System.out.println("URL completa: " + request.getRequestURL());
-     * System.out.println("URI: " + request.getRequestURI());
-     * System.out.println("Método HTTP: " + request.getMethod());
-     * System.out.println("Query String: " + request.getQueryString());
-     * System.out.println("Context Path: " + request.getContextPath());
-     * 
-     * String rol = (String) session.getAttribute("rol");
-     * Long usuarioId = (Long) session.getAttribute("usuarioId");
-     * String nombreCompleto = (String) session.getAttribute("nombreCompleto");
-     * 
-     * System.out.println("Usuario: " + nombreCompleto + " | Rol: " + rol +
-     * " | ID: " + usuarioId);
-     * 
-     * boolean esAdministrador = "ADMINISTRADOR".equals(rol) ||
-     * "Administrador".equals(rol);
-     * boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
-     * 
-     * System.out.println("Es Administrador: " + esAdministrador + " | Es Guardia: "
-     * + esGuardia);
-     * 
-     * if (!esAdministrador && !esGuardia) {
-     * System.out.println(" Usuario sin permisos");
-     * model.addAttribute("error", "No tiene permisos para acceder a esta sección");
-     * return "error";
-     * }
-     * 
-     * List<Vehiculo> lista;
-     * 
-     * try {
-     * if (esAdministrador) {
-     * System.out.println(" Procesando como admin");
-     * if (buscar != null && !buscar.trim().isEmpty()) {
-     * System.out.println("Admin buscando: " + buscar);
-     * lista = vehiculoService.buscarVehiculosPorPatente(buscar.trim());
-     * } else {
-     * System.out.println("Admin obteniendo todos los vehics.");
-     * lista = vehiculoService.obtenerTodos();
-     * }
-     * } else {
-     * System.out.println(" Procesando como GUARDIA");
-     * if (buscar != null && !buscar.trim().isEmpty()) {
-     * System.out.println("Guardia buscando: " + buscar);
-     * lista = vehiculoService.buscarPorPatenteYGuardia(buscar.trim(), usuarioId);
-     * } else {
-     * System.out.println("Guardia obteniendo vehículos asignados");
-     * lista = vehiculoService.obtenerPorGuardia(usuarioId);
-     * }
-     * }
-     * } catch (Exception e) {
-     * System.err.println(" Error al obtener vehículos: " + e.getMessage());
-     * e.printStackTrace();
-     * lista = List.of();
-     * model.addAttribute("error", " Error al cargar vehículos: " + e.getMessage());
-     * }
-     * 
-     * System.out.println(" Total vehiculos encontrados: " + lista.size());
-     * 
-     * model.addAttribute("vehiculos", lista);
-     * model.addAttribute("buscar", buscar);
-     * model.addAttribute("rol", rol);
-     * model.addAttribute("esAdministrador", esAdministrador);
-     * model.addAttribute("esGuardia", esGuardia);
-     * model.addAttribute("nombreCompleto", nombreCompleto);
-     * 
-     * System.out.println(" Retornando vista 'vehiculos'");
-     * return "vehiculos";
-     * }
-     */
-
+    
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String testMethod(Model model) {
-        System.out.println(" METODO TEST FUNCIONANDO");
-        model.addAttribute("vehiculos", List.of());
+         model.addAttribute("vehiculos", List.of());
         model.addAttribute("mensaje", "Método de prueba funcionando correctamente");
         return "vehiculos";
     }
@@ -166,8 +91,7 @@ public class VehiculoController {
                 return "redirect:/";
             }
 
-            System.out.println("NLIMINANDO VEHÍCULO (NORMAL)");
-            System.out.println("Patente: " + patente + " | Usuario: " + rol);
+  
 
             ResultadoEliminacion resultado = vehiculoService.eliminarVehiculo(patente);
 
@@ -204,8 +128,7 @@ public class VehiculoController {
              * return "redirect:/";
              * }
              */
-            System.out.println("ELIMINANDO VEHICULO CON HISTORIAL");
-            System.out.println("Patente: " + patente + " | Admin: " + session.getAttribute("nombreCompleto"));
+         
 
             ResultadoEliminacion resultado = vehiculoService.eliminarVehiculoConHistorial(patente);
 
@@ -227,13 +150,13 @@ public class VehiculoController {
 
     @GetMapping("/agregar")
     public String mostrarFormulario(Model model) {
-        model.addAttribute("vehiculoForm", new VehiculoFormDTO());
+        model.addAttribute("vehiculoForm", new RegistroVehiculoFormDTO());
         return "registrarvehiculo";
     }
 
     @PostMapping("/vehiculos/agregar")
     public String agregarVehiculo(
-            @Valid @ModelAttribute("vehiculoForm") VehiculoFormDTO form,
+            @Valid @ModelAttribute("vehiculoForm") RegistroVehiculoFormDTO form,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
@@ -243,8 +166,8 @@ public class VehiculoController {
         }
 
         String rol = (String) session.getAttribute("rol");
-        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
+        boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
+        boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
 
         if (!esAdministrador && !esGuardia) {
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
@@ -252,11 +175,9 @@ public class VehiculoController {
         }
 
         if (bindingResult.hasErrors()) {
-
             StringBuilder erroresMsg = new StringBuilder("Errores de validación:\n");
             bindingResult.getAllErrors().forEach(error -> {
                 String mensaje = error.getDefaultMessage();
-
                 erroresMsg.append("• ").append(mensaje).append("\n");
             });
 
@@ -266,50 +187,52 @@ public class VehiculoController {
         }
 
         try {
-
-            if (vehiculoService.existePatente(form.getPatente())) {
-
+            // Accesos ahora via form.getVehiculo() y form.getPersona()
+            String patente = form.getVehiculo().getPatente();
+            if (vehiculoService.existePatente(patente)) {
                 redirectAttributes.addFlashAttribute("error",
-                        "Ya existe un vehículo con la patente " + form.getPatente());
+                        "Ya existe un vehículo con la patente " + patente);
                 redirectAttributes.addFlashAttribute("vehiculoForm", form);
                 return "redirect:/vehiculos/agregar";
             }
 
-            Integer categoriaId = mapearCategoriaAId(form.getCategoriaNombre());
+            Integer categoriaId = mapearCategoriaAId(form.getPersona().getCategoriaNombre());
             if (categoriaId == null) {
                 redirectAttributes.addFlashAttribute("error", "Categoría inválida");
                 return "redirect:/vehiculos/agregar";
             }
 
-            Integer vehiculoTipoId = mapearTipoAId(form.getTipoNombre());
+            Integer vehiculoTipoId = mapearTipoAId(form.getVehiculo().getTipoNombre());
             if (vehiculoTipoId == null) {
                 redirectAttributes.addFlashAttribute("error", "Tipo de vehículo inválido");
                 return "redirect:/vehiculos/agregar";
             }
 
-            Persona persona = personaService.existePersona(form.getDni())
-                    ? personaService.buscarPorDni(form.getDni())
+            Long dni = form.getPersona().getDni();
+            Persona persona = personaService.existePersona(dni)
+                    ? personaService.buscarPorDni(dni)
                     : new Persona();
 
-            persona.setDni(form.getDni());
-            persona.setNombre(form.getNombre());
-            persona.setTelefono(form.getTelefono());
-            persona.setEmail(form.getEmail());
+            persona.setDni(dni);
+            persona.setNombre(form.getPersona().getNombre());
+            persona.setTelefono(form.getPersona().getTelefono());
+            persona.setEmail(form.getPersona().getEmail());
             persona.setIdCategoria(categoriaId);
-            persona.setCategoria(form.getCategoriaNombre());
+            persona.setCategoria(form.getPersona().getCategoriaNombre());
 
             personaService.guardarPersona(persona);
 
-            String codigoQr = vehiculoService.generarCodigoQR(form.getPatente());
+            // Vehiculo
+            String codigoQr = vehiculoService.generarCodigoQR(patente);
 
             Vehiculo vehiculo = new Vehiculo();
-            vehiculo.setPatente(form.getPatente());
+            vehiculo.setPatente(patente);
             vehiculo.setCodigoQr(codigoQr);
-            vehiculo.setModelo(form.getModelo());
-            vehiculo.setColor(form.getColor());
+            vehiculo.setModelo(form.getVehiculo().getModelo());
+            vehiculo.setColor(form.getVehiculo().getColor());
             vehiculo.setIdVehiculoTipo(vehiculoTipoId);
-            vehiculo.setDniDuenio(form.getDni());
-            vehiculo.setTipo(form.getTipoNombre());
+            vehiculo.setDniDuenio(dni);
+            vehiculo.setTipo(form.getVehiculo().getTipoNombre());
 
             Vehiculo vehiculoGuardado = vehiculoService.guardarVehiculo(vehiculo);
 
@@ -317,8 +240,8 @@ public class VehiculoController {
                 String rutaArchivoQR = qrCodeService.generarImagenQR(
                         vehiculoGuardado.getCodigoQr(),
                         vehiculoGuardado.getPatente());
-                System.out.println("Archivo QR guardado: " + rutaArchivoQR);
-            } catch (Exception e) {
+
+                    } catch (Exception e) {
                 System.err.println("Error guardando archivo QR (no crítico): " + e.getMessage());
             }
 
@@ -327,21 +250,19 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
             redirectAttributes.addFlashAttribute("codigoQR", vehiculoGuardado.getCodigoQr());
             redirectAttributes.addFlashAttribute("imagenQR", rutaImagenQR);
-            redirectAttributes.addFlashAttribute("patente", form.getPatente());
+            redirectAttributes.addFlashAttribute("patente", patente);
             redirectAttributes.addFlashAttribute("vehiculoInfo", crearInfoVehiculo(form, persona));
 
-            // impresion de QR
-
-            redirectAttributes.addFlashAttribute("modelo", form.getModelo());
-            redirectAttributes.addFlashAttribute("color", form.getColor());
-            redirectAttributes.addFlashAttribute("tipo", form.getTipoNombre());
-            redirectAttributes.addFlashAttribute("dni", form.getDni());
-            redirectAttributes.addFlashAttribute("nombre", form.getNombre());
+            // impresión de QR (atributos para la vista)
+            redirectAttributes.addFlashAttribute("modelo", form.getVehiculo().getModelo());
+            redirectAttributes.addFlashAttribute("color", form.getVehiculo().getColor());
+            redirectAttributes.addFlashAttribute("tipo", form.getVehiculo().getTipoNombre());
+            redirectAttributes.addFlashAttribute("dni", dni);
+            redirectAttributes.addFlashAttribute("nombre", form.getPersona().getNombre());
 
             return "redirect:/vehiculos/agregar";
 
         } catch (Exception e) {
-
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
                     "Error al agregar el vehículo: " + e.getMessage());
@@ -397,20 +318,23 @@ public class VehiculoController {
         }
     }
 
-    private String crearInfoVehiculo(VehiculoFormDTO form, Persona persona) {
-        // Usar los datos del formulario directamente para evitar problemas
-        String nombrePropietario = form.getNombre() != null ? form.getNombre() : "Sin nombre";
-        String categoriaNombre = form.getCategoriaNombre() != null
-                ? mapearCategoriaNombreATexto(form.getCategoriaNombre())
+    private String crearInfoVehiculo(RegistroVehiculoFormDTO form, Persona persona) {
+        // Extraer sub-objetos
+        var personaForm = form.getPersona();
+        var vehiculoForm = form.getVehiculo();
+
+        String nombrePropietario = personaForm.getNombre() != null ? personaForm.getNombre() : "Sin nombre";
+        String categoriaNombre = personaForm.getCategoriaNombre() != null
+                ? mapearCategoriaNombreATexto(personaForm.getCategoriaNombre())
                 : "Sin categoría";
 
         return String.format(
                 "Propietario: %s (DNI: %s) | Patente: %s | Modelo: %s %s | Categoría: %s",
                 nombrePropietario,
-                form.getDni(),
-                form.getPatente(),
-                nullToDash(form.getModelo()),
-                nullToDash(form.getColor()),
+                personaForm.getDni(),
+                vehiculoForm.getPatente(),
+                nullToDash(vehiculoForm.getModelo()),
+                nullToDash(vehiculoForm.getColor()),
                 categoriaNombre);
     }
 
@@ -443,13 +367,11 @@ public class VehiculoController {
             RedirectAttributes redirectAttributes) {
 
         try {
-
             if (session.getAttribute("user") == null) {
                 return "redirect:/login";
             }
 
             String rol = (String) session.getAttribute("rol");
-
             boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
             boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
 
@@ -470,16 +392,23 @@ public class VehiculoController {
                 return "redirect:/";
             }
 
-            VehiculoFormDTO form = new VehiculoFormDTO();
-            form.setPatente(vehiculo.getPatente());
-            form.setModelo(vehiculo.getModelo());
-            form.setColor(vehiculo.getColor());
-            form.setTipoNombre(vehiculo.getTipo());
-            form.setDni(persona.getDni());
-            form.setNombre(persona.getNombre());
-            form.setTelefono(persona.getTelefono());
-            form.setEmail(persona.getEmail());
-            form.setCategoriaNombre(persona.getCategoria());
+            VehiculoDTO vehiculoDTO = new VehiculoDTO();
+            vehiculoDTO.setPatente(vehiculo.getPatente());
+            vehiculoDTO.setModelo(vehiculo.getModelo());
+            vehiculoDTO.setColor(vehiculo.getColor());
+            vehiculoDTO.setTipoNombre(vehiculo.getTipo());
+
+            PersonaDTO personaDTO = new PersonaDTO();
+            personaDTO.setDni(persona.getDni());
+            personaDTO.setNombre(persona.getNombre());
+            personaDTO.setTelefono(persona.getTelefono());
+            personaDTO.setEmail(persona.getEmail());
+            personaDTO.setCategoriaNombre(persona.getCategoria());
+
+            // Componer el DTO principal
+            RegistroVehiculoFormDTO form = new RegistroVehiculoFormDTO();
+            form.setVehiculo(vehiculoDTO);
+            form.setPersona(personaDTO);
 
             if (!model.containsAttribute("vehiculoForm")) {
                 model.addAttribute("vehiculoForm", form);
@@ -492,30 +421,28 @@ public class VehiculoController {
             return "editarvehiculo";
 
         } catch (Exception e) {
-            System.err.println(" Error al cargar formulario de edición: " + e.getMessage());
+            System.err.println("Error al cargar formulario de edición: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Error al cargar el vehículo");
             return "redirect:/";
         }
     }
 
-    // ========== POST: Procesar edición con validaciones ==========
     @PostMapping("/vehiculos/editar/{patenteOriginal}")
     public String editarVehiculo(
             @PathVariable String patenteOriginal,
-            @Valid @ModelAttribute("vehiculoForm") VehiculoFormDTO form,
+            @Valid @ModelAttribute("vehiculoForm") RegistroVehiculoFormDTO form,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             Model model,
             HttpSession session) {
 
         try {
-
             if (session.getAttribute("user") == null) {
                 return "redirect:/login";
             }
-            String rol = (String) session.getAttribute("rol");
 
+            String rol = (String) session.getAttribute("rol");
             boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
             boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
 
@@ -525,16 +452,17 @@ public class VehiculoController {
             }
 
             if (bindingResult.hasErrors()) {
-
-                bindingResult.getAllErrors().forEach(error -> System.out.println("   - " + error.getDefaultMessage()));
+                bindingResult.getAllErrors().forEach(error -> System.out.println(" - " + error.getDefaultMessage()));
 
                 model.addAttribute("vehiculoForm", form);
                 model.addAttribute("esEdicion", true);
                 model.addAttribute("patenteOriginal", patenteOriginal);
                 model.addAttribute("esAdministrador", esAdministrador);
-
                 return "editarvehiculo";
             }
+
+            var personaForm = form.getPersona();
+            var vehiculoForm = form.getVehiculo();
 
             Vehiculo vehiculoExistente = vehiculoService.buscarPorPatente(patenteOriginal);
             if (vehiculoExistente == null) {
@@ -542,9 +470,10 @@ public class VehiculoController {
                 return "redirect:/";
             }
 
-            if (!patenteOriginal.equalsIgnoreCase(form.getPatente())) {
-                if (vehiculoService.existePatente(form.getPatente())) {
-                    model.addAttribute("error", "Ya existe un vehículo con la patente " + form.getPatente());
+            // Si se intenta cambiar la patente, validar duplicado
+            if (!patenteOriginal.equalsIgnoreCase(vehiculoForm.getPatente())) {
+                if (vehiculoService.existePatente(vehiculoForm.getPatente())) {
+                    model.addAttribute("error", "Ya existe un vehículo con la patente " + vehiculoForm.getPatente());
                     model.addAttribute("vehiculoForm", form);
                     model.addAttribute("esEdicion", true);
                     model.addAttribute("patenteOriginal", patenteOriginal);
@@ -553,9 +482,9 @@ public class VehiculoController {
                 }
             }
 
-            Persona personaExistente = personaService.buscarPorDni(form.getDni());
+            Persona personaExistente = personaService.buscarPorDni(personaForm.getDni());
             if (personaExistente == null) {
-                model.addAttribute("error", "No existe una persona con el DNI " + form.getDni());
+                model.addAttribute("error", "No existe una persona con el DNI " + personaForm.getDni());
                 model.addAttribute("vehiculoForm", form);
                 model.addAttribute("esEdicion", true);
                 model.addAttribute("patenteOriginal", patenteOriginal);
@@ -563,11 +492,11 @@ public class VehiculoController {
                 return "editarvehiculo";
             }
 
-            Integer categoriaId = mapearCategoriaAId(form.getCategoriaNombre());
-            Integer tipoId = mapearTipoAId(form.getTipoNombre());
+            Integer categoriaId = mapearCategoriaAId(personaForm.getCategoriaNombre());
+            Integer tipoId = mapearTipoAId(vehiculoForm.getTipoNombre());
 
             if (categoriaId == null) {
-                model.addAttribute("error", "Categoría inválida: " + form.getCategoriaNombre());
+                model.addAttribute("error", "Categoría inválida: " + personaForm.getCategoriaNombre());
                 model.addAttribute("vehiculoForm", form);
                 model.addAttribute("esEdicion", true);
                 model.addAttribute("patenteOriginal", patenteOriginal);
@@ -576,7 +505,7 @@ public class VehiculoController {
             }
 
             if (tipoId == null) {
-                model.addAttribute("error", "Tipo de vehículo inválido: " + form.getTipoNombre());
+                model.addAttribute("error", "Tipo de vehículo inválido: " + vehiculoForm.getTipoNombre());
                 model.addAttribute("vehiculoForm", form);
                 model.addAttribute("esEdicion", true);
                 model.addAttribute("patenteOriginal", patenteOriginal);
@@ -592,7 +521,7 @@ public class VehiculoController {
 
             if (actualizado) {
                 redirectAttributes.addFlashAttribute("success",
-                        "Vehículo " + form.getPatente() + " actualizado exitosamente");
+                        "Vehículo " + vehiculoForm.getPatente() + " actualizado exitosamente");
                 return "redirect:/";
             } else {
                 model.addAttribute("error", "Error al actualizar el vehículo en la base de datos");
@@ -604,7 +533,7 @@ public class VehiculoController {
             }
 
         } catch (Exception e) {
-            System.err.println("  Error al editar vehículo: " + e.getMessage());
+            System.err.println("Error al editar vehículo: " + e.getMessage());
             e.printStackTrace();
 
             model.addAttribute("error", "Error inesperado al actualizar: " + e.getMessage());
@@ -616,35 +545,24 @@ public class VehiculoController {
         }
     }
 
-    private Object validarSesion(HttpSession session) {
-        Object usuario = session.getAttribute("usuario");
-        if (usuario == null) {
-            System.err.println("  Sesión inválida o expirada");
-            return null;
-        }
-        return usuario;
-    }
-
     @PostMapping("/registrar-movimiento")
     public String registrarMovimiento(@RequestParam String patente1,
             @RequestParam String accion,
             RedirectAttributes redirectAttributes,
-            HttpSession session) {      
+            HttpSession session) {
         String mensaje = "";
         boolean exito = false;
 
         if (session.getAttribute("estacionamientoId") == null) {
-                mensaje = "Guardia sin estacionamiento asignado";
-                redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
-                redirectAttributes.addFlashAttribute("mensaje", mensaje);
-                return "redirect:/ieManual";    
+            mensaje = "Guardia sin estacionamiento asignado";
+            redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
+            redirectAttributes.addFlashAttribute("mensaje", mensaje);
+            return "redirect:/ieManual";
         }
         String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
-        patente = patente.toUpperCase();  
+        patente = patente.toUpperCase();
         EstacionamientoDTO est1 = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId"));
 
-
-        
         if ("ingreso".equalsIgnoreCase(accion)) {
             if (registroestacionamientoService.estacionamientoIsFull(est1)) {
                 mensaje = "Estacionamiento lleno";
@@ -652,23 +570,23 @@ public class VehiculoController {
                 redirectAttributes.addFlashAttribute("mensaje", mensaje);
                 return "redirect:/ieManual";
             }
-            // Verificamos todas las condiciones para una entrada válida
+
             else if (!vehiculoService.existePatente(patente)) {
                 mensaje = "La patente '" + patente + "' no está registrada en el sistema.";
             } else if (!registroestacionamientoService.esPar(patente, est1)) {
                 mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
             } else {
-            
+
                 registroestacionamientoService.registrarEntrada(patente, est1, 0);
                 mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
                 exito = true;
             }
         } else if ("egreso".equalsIgnoreCase(accion)) {
-          
+
             if (registroestacionamientoService.esPar(patente, est1)) {
                 mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
             } else {
-            
+
                 registroestacionamientoService.registrarSalida(patente, est1, 0);
                 mensaje = "Salida de '" + patente + "' registrada con éxito.";
                 exito = true;
@@ -677,11 +595,9 @@ public class VehiculoController {
             mensaje = "Acción no válida.";
         }
 
-       
         redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
         redirectAttributes.addFlashAttribute("mensaje", mensaje);
 
-      
         return "redirect:/ieManual";
     }
 

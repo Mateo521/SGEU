@@ -36,7 +36,6 @@ public class QRCodeService {
         Path rutaArchivo = Paths.get(QR_CODE_IMAGE_PATH + nombreCompleto);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", rutaArchivo);
 
-        System.out.println(" QR guardado en: " + rutaArchivo.toAbsolutePath());
 
         
         return "/qr-codes/" + nombreCompleto;

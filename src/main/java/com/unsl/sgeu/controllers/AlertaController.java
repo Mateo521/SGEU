@@ -30,7 +30,7 @@ public class AlertaController {
 
         // Si no hay estacionamiento en la sesión, devolvemos una lista vacía.
         if (est == null) {
-            System.out.println("Estacionamiento NULL");
+
             return ResponseEntity.ok(Collections.emptyList());
         }
 
@@ -39,7 +39,7 @@ public class AlertaController {
 
         // Devolvemos la lista. Spring la convertirá en un arreglo JSON.
         // Si la lista está vacía, se enviará un arreglo vacío: []
-        System.out.println("Hay estacionamiento, devuelve la lista de tamaño"+ patentesVencidas.size());
+
         return ResponseEntity.ok(patentesVencidas);
     }
 }

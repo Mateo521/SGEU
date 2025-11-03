@@ -38,16 +38,15 @@ public class LoginController {
         session.setAttribute("estacionamientoId", sesion.getEstacionamientoId());
         session.setAttribute("estacionamientoNombre", sesion.getEstacionamientoNombre());
 
-        System.out.println("=== VERIFICACIÓN SESIÓN ===");
-        System.out.println(sesion);
-        System.out.println("========================");
+      
+        
 
         return "redirect:/?success=true";
     }
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        System.out.println("Usuario " + session.getAttribute("user") + " cerró sesión.");
+
         session.invalidate();
         return "redirect:/login";
     }

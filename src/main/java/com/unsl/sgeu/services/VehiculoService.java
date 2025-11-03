@@ -3,7 +3,7 @@ package com.unsl.sgeu.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.unsl.sgeu.dto.VehiculoFormDTO;
+import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.repositories.VehiculoRepository;
@@ -48,56 +48,49 @@ public class VehiculoService {
         return vehiculoRepo.findByPatente(patente);
     }
 
-    public boolean actualizarVehiculo(String patenteOriginal, VehiculoFormDTO form,
-            Integer categoriaId, Integer tipoId) {
-        try {
-            // Buscar vehículo actual
-            Vehiculo vehiculo = vehiculoRepo.findByPatente(patenteOriginal);
-            if (vehiculo == null)
-                return false;
-
-            // Actualizar persona
-            Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
-            if (persona != null) {
-                persona.setNombre(form.getNombre());
-                persona.setTelefono(form.getTelefono());
-                persona.setEmail(form.getEmail());
-                persona.setIdCategoria(categoriaId);
-                persona.setCategoria(form.getCategoriaNombre());
-                personaService.guardarPersona(persona);
-            }
-
-            // Actualizar vehículo
-            vehiculo.setPatente(form.getPatente());
-            vehiculo.setModelo(form.getModelo());
-            vehiculo.setColor(form.getColor());
-            vehiculo.setIdVehiculoTipo(tipoId);
-            vehiculo.setTipo(form.getTipoNombre());
-
-            vehiculoRepo.save(vehiculo);
-            return true;
-
-        } catch (Exception e) {
-            System.err.println("Error en actualizarVehiculo: " + e.getMessage());
+    public boolean actualizarVehiculo(String patenteOriginal, RegistroVehiculoFormDTO form,
+        Integer categoriaId, Integer tipoId) {
+    try {
+        Vehiculo vehiculo = vehiculoRepo.findByPatente(patenteOriginal);
+        if (vehiculo == null) {
+        
             return false;
         }
+
+   
+        Persona persona = personaService.buscarPorDni(vehiculo.getDniDuenio());
+        if (persona != null) {
+            persona.setNombre(form.getPersona().getNombre());
+            persona.setTelefono(form.getPersona().getTelefono());
+            persona.setEmail(form.getPersona().getEmail());
+            persona.setIdCategoria(categoriaId);
+            persona.setCategoria(form.getPersona().getCategoriaNombre());
+            personaService.guardarPersona(persona);
+        }
+
+     
+        vehiculo.setModelo(form.getVehiculo().getModelo());
+        vehiculo.setColor(form.getVehiculo().getColor());
+        vehiculo.setIdVehiculoTipo(tipoId);
+        vehiculo.setTipo(form.getVehiculo().getTipoNombre());
+
+        vehiculoRepo.save(vehiculo);
+        return true;
+
+    } catch (Exception e) {
+        System.err.println("Error en actualizarVehiculo: " + e.getMessage());
+        e.printStackTrace();
+        return false;
     }
+}
+
 
     public void probarEstadoVehiculo(String patente) {
         EstadoVehiculo estado = registroEstacionamientoService.obtenerEstadoActualVehiculo(patente);
 
-     
-        System.out.println("   - Patente: " + estado.getPatente());
-        System.out.println("   - Tiene registros: " + estado.isTieneRegistros());
-        System.out.println("   - Está estacionado: " + estado.isEstaEstacionado());
-        System.out.println("   - ID Estacionamiento: " + estado.getIdEstacionamiento());
-        System.out.println("   - Nombre estacionamiento: " + estado.getNombreEstacionamiento());
-        System.out.println("   - Cantidad registros: " + estado.getCantidadRegistros());
+    
 
-        if (estado.getUltimoRegistro() != null) {
-            System.out.println("   - Último tipo: " + estado.getUltimoRegistro().getTipo());
-            System.out.println("   - Última fecha: " + estado.getUltimoRegistro().getFechaHora());
-        }
+        
     }
 
     public List<Vehiculo> buscarVehiculosPorPatente(String patente) {
@@ -131,65 +124,50 @@ public class VehiculoService {
 
     public List<Vehiculo> obtenerPorGuardia(Long guardiaId) {
         try {
-            System.out.println(" Obteniendo vehículos para guardia ID: " + guardiaId);
-            System.out.println(
-                    " Tipo de guardiaId: " + (guardiaId != null ? guardiaId.getClass().getSimpleName() : "null"));
-            System.out.println(" Valor de guardiaId: " + guardiaId);
-            System.out.println(" Llamando a estacionamientoService.obtenerIdsPorEmpleado(" + guardiaId + ")");
+           
 
             List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
 
-            System.out.println(" IDs devueltos por EstacionamientoService: " + idsEstacionamientos);
-
+ 
             if (idsEstacionamientos.isEmpty()) {
-                System.out.println(" Guardia sin estacionamientos asignados - mostrando lista vacía");
-                return List.of();
+                 return List.of();
             }
 
-            System.out.println(" Estacionamientos del guardia: " + idsEstacionamientos);
-
+ 
             List<Vehiculo> vehiculos = obtenerPorEstacionamientos(idsEstacionamientos);
 
-            System.out.println(" Vehículos encontrados: " + vehiculos.size());
-            return vehiculos;
+             return vehiculos;
 
         } catch (Exception e) {
             System.err.println(" Error al obtener vehículos por guardia: " + e.getMessage());
             e.printStackTrace();
-            System.out.println(" FALLBACK: Mostrando todos los vehículos por error");
-            return obtenerTodos();
+             return obtenerTodos();
         }
     }
 
     public List<Vehiculo> buscarPorPatenteYGuardia(String patente, Long guardiaId) {
         try {
-            System.out.println(" Buscando patente '" + patente + "' para guardia ID: " + guardiaId);
-
+ 
             List<Long> idsEstacionamientos = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
 
             if (idsEstacionamientos.isEmpty()) {
-                System.out.println(" Guardia sin estacionamientos asignados - búsqueda vacía");
-                return List.of();
+                 return List.of();
             }
 
-            System.out.println(" Buscando en estacionamientos: " + idsEstacionamientos);
-
+ 
             List<Vehiculo> vehiculos = buscarEnEstacionamientos(idsEstacionamientos, patente);
 
-            System.out.println(" Vehículos encontrados: " + vehiculos.size());
-            return vehiculos;
+             return vehiculos;
 
         } catch (Exception e) {
             System.err.println(" Error al buscar por patente y guardia: " + e.getMessage());
             e.printStackTrace();
-            System.out.println(" FALLBACK: Búsqueda sin filtro por error");
-            return buscarVehiculosPorPatente(patente);
+             return buscarVehiculosPorPatente(patente);
         }
     }
 
       public ResultadoEliminacion eliminarVehiculo(String patente) {
-    System.out.println(" Iniciando eliminación del vehículo: " + patente);
-    
+     
     try {
         
         probarEstadoVehiculo(patente);
@@ -198,16 +176,12 @@ public class VehiculoService {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         if (vehiculo == null) {
             String mensaje = " El vehículo con patente " + patente + " no existe";
-            System.out.println(mensaje);
-            return new ResultadoEliminacion(false, mensaje);
+             return new ResultadoEliminacion(false, mensaje);
         }
 
         EstadoVehiculo estado = registroEstacionamientoService.obtenerEstadoActualVehiculo(patente);
         
-        System.out.println(" Estado obtenido para eliminación:");
-        System.out.println("   - Tiene registros: " + estado.isTieneRegistros());
-        System.out.println("   - Está estacionado: " + estado.isEstaEstacionado());
-        System.out.println("   - Nombre estacionamiento: " + estado.getNombreEstacionamiento());
+     
         
      
         if (estado.isEstaEstacionado()) {
@@ -220,15 +194,13 @@ public class VehiculoService {
             return new ResultadoEliminacion(false, mensaje);
         }
 
-    
-        System.out.println(" Vehículo " + patente + " no está en ningún estacionamiento.");
-        System.out.println("Procediendo a eliminar...");
+     
         
       
         vehiculoRepo.deleteById(patente);
         
         String mensajeExito = "Vehículo " + patente + " eliminado exitosamente";
-        System.out.println(mensajeExito);
+      
         return new ResultadoEliminacion(true, mensajeExito);
 
     } catch (org.springframework.dao.DataIntegrityViolationException e) {
@@ -263,7 +235,6 @@ public class VehiculoService {
                 return new ResultadoEliminacion(false, "El vehículo con patente " + patente + " no existe");
             }
 
-            System.out.println(" Eliminando registros de estacionamiento para patente: " + patente);
 
             registroEstacionamientoService.eliminarRegistrosPorPatente(patente);
             vehiculoRepo.deleteById(patente);
@@ -340,18 +311,15 @@ public class VehiculoService {
 
  
 public Page<Vehiculo> obtenerTodosPaginado(Pageable pageable) {
-    System.out.println("Obteniendo página: " + pageable.getPageNumber() + 
-                      ", tamaño: " + pageable.getPageSize());
+
     return vehiculoRepo.findAll(pageable);
 }
 
 public Page<Vehiculo> buscarVehiculosPorPatentePaginado(String patente, Pageable pageable) {
-    System.out.println("Buscando '" + patente + "' - Página: " + pageable.getPageNumber());
     return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
 }
 
 public Page<Vehiculo> buscarPorPatenteYGuardiaPaginado(String patente, Long guardiaId, Pageable pageable) {
-    System.out.println("Guardia " + guardiaId + " buscando '" + patente + "' - Página: " + pageable.getPageNumber());
    
     return vehiculoRepo.findByPatenteContainingIgnoreCase(patente, pageable);
 }

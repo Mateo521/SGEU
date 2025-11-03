@@ -36,10 +36,8 @@ public class RegistroEstacionamientoService {
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
-        System.out.println(""+registro.getFechaHora().toString());
-        registro.setTipo("ENTRADA");
-        System.out.println(est.getId());
-        registro.setIdEstacionamiento(est.getId());
+         registro.setTipo("ENTRADA");
+         registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
         } else {
@@ -53,8 +51,7 @@ public class RegistroEstacionamientoService {
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
-        System.out.println(""+registro.getFechaHora().toString());
-        registro.setTipo("SALIDA");
+         registro.setTipo("SALIDA");
         registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
@@ -74,35 +71,29 @@ public class RegistroEstacionamientoService {
     }
 
     public List<String> obtenerPatentesAdentroMasDeCuatroHoras(EstacionamientoDTO est) {
-        System.out.println("PASO EL ESTACIONAMIENTO NUMERO " + est.getId());
-        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getId());
+         return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void eliminarRegistrosPorPatente(String patente) {
         try {
-            System.out.println("=== ELIMINANDO REGISTROSS");
-            System.out.println("Patente: " + patente);
+     
 
             long cantidadAntes = registroRepo.countByPatente(patente);
-            System.out.println("Registros encontrados: " + cantidadAntes);
-
+ 
             if (cantidadAntes > 0) {
                 int eliminados = registroRepo.deleteByPatente(patente);
-                System.out.println("Registros eliminados: " + eliminados);
-
+ 
                 // Verificar que se eliminaronn
                 long cantidadDespues = registroRepo.countByPatente(patente);
-                System.out.println("Registros restantes: " + cantidadDespues);
-
+ 
                 if (cantidadDespues > 0) {
                     throw new RuntimeException(
                             "No se pudieron eliminar todos los registros. Restantes: " + cantidadDespues);
                 }
             }
 
-            System.out.println("Eliminación de registros completada exitosamente");
-
+ 
         } catch (Exception e) {
             System.err.println("Error al eliminar registros: " + e.getMessage());
             e.printStackTrace();
@@ -148,15 +139,13 @@ public class RegistroEstacionamientoService {
 
     public EstadoVehiculo obtenerEstadoActualVehiculo(String patente) {
         try {
-            System.out.println("Verificando estado actual del vehículo: " + patente);
-
+ 
             EstadoVehiculo estado = new EstadoVehiculo(patente);
 
             List<RegistroEstacionamiento> registros = registroRepo.findByPatenteOrderByFechaHoraDesc(patente);
 
             if (registros.isEmpty()) {
-                System.out.println("No hay registros para la patente: " + patente);
-                estado.setTieneRegistros(false);
+                 estado.setTieneRegistros(false);
                 estado.setEstaEstacionado(false);
                 estado.setNombreEstacionamiento("Sin registros");
                 return estado;
@@ -188,11 +177,7 @@ public class RegistroEstacionamientoService {
             long cantidadLong = registroRepo.countByPatente(patente);
             estado.setCantidadRegistros((int) cantidadLong);
 
-            System.out.println("Estado del vehículo " + patente + ":");
-            System.out.println("   - Último movimiento: " + ultimoRegistro.getTipo());
-            System.out.println("   - Está adentro: " + estaAdentro);
-            System.out.println("   - Estacionamiento: " + nombreEstacionamiento);
-            System.out.println("   - Total registros: " + estado.getCantidadRegistros());
+       
 
             return estado;
 
@@ -210,8 +195,7 @@ public class RegistroEstacionamientoService {
 
     public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento) {
         try {
-            System.out.println("Obteniendo vehículos actualmente en estacionamiento ID: " + idEstacionamiento);
-
+ 
             List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
 
   
@@ -236,8 +220,7 @@ public class RegistroEstacionamientoService {
 
             vehiculosAdentro.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
 
-            System.out.println(
-                    " Encontrados " + vehiculosAdentro.size() + " vehículos actualmente en el estacionamiento");
+ 
             return vehiculosAdentro;
 
         } catch (Exception e) {
@@ -247,17 +230,14 @@ public class RegistroEstacionamientoService {
         }
     }
 
-    // Obtener egresos del día actual
-    public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
+     public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
         try {
-            System.out.println(" Obteniendo egresos del día para estacionamiento ID: " + idEstacionamiento);
 
            
             List<RegistroEstacionamiento> egresos = registroRepo
                     .findRegistrosDePatentePares(
                             idEstacionamiento);
 
-            System.out.println(" Encontrados " + egresos.size() + " egresos del día");
             return egresos;
 
         } catch (Exception e) {
@@ -269,8 +249,7 @@ public class RegistroEstacionamientoService {
 
     public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento) {
         try {
-            System.out.println(" Obteniendo ingresos del día para estacionamiento ID: " + idEstacionamiento);
-
+ 
             LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
             LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
 
@@ -278,8 +257,7 @@ public class RegistroEstacionamientoService {
                     .findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
                             idEstacionamiento, "ENTRADA", inicioDelDia, finDelDia);
 
-            System.out.println(" Encontrados " + ingresos.size() + " ingresos del día");
-            return ingresos;
+             return ingresos;
 
         } catch (Exception e) {
             System.err.println(" Error obteniendo ingresos del día: " + e.getMessage());
@@ -290,8 +268,7 @@ public class RegistroEstacionamientoService {
 
     public EstadoVehiculo obtenerEstadoDetallado(String patente) {
         try {
-            System.out.println("Obteniendo estado detallado para: " + patente);
-
+ 
             List<RegistroEstacionamiento> registros = registroRepo.findByPatenteOrderByFechaHoraDesc(patente);
 
             EstadoVehiculo estado = new EstadoVehiculo();
@@ -356,9 +333,7 @@ public class RegistroEstacionamientoService {
    public boolean estacionamientoIsFull (EstacionamientoDTO est){
 
         List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getId());
-        System.out.println(est.getId());
-        System.out.println("Patentes adentro"+Re.size()+"Capacidad del estacionamiento "+ est.getCapacidad());
-        return Re.size() == est.getCapacidad();
+         return Re.size() == est.getCapacidad();
 
     }
 

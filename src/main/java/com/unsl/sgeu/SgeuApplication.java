@@ -34,8 +34,8 @@ public class SgeuApplication {
             VehiculoService vehiculoService
     ) {
         return args -> {
-            System.out.println("⏳ Iniciando seed: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin...");
-            System.out.println("✅ Seed listo: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin.");
+            System.out.println("Iniciando seed: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin...");
+            System.out.println("Seed listo: Categoría, Tipo, Persona, Vehículo, vínculo y Empleado admin.");
         };
     }
 }

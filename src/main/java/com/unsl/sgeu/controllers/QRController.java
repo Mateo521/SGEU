@@ -48,8 +48,7 @@ public class QRController {
     public ResponseEntity<?> leerCodigoQR(@RequestBody Map<String, String> request, HttpSession session) {
         try {
             String codigoQR = request.get("codigo");
-            System.out.println("Código QR recibido: " + codigoQR);
-            EstacionamientoDTO estacionamiento = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId")); 
+             EstacionamientoDTO estacionamiento = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId")); 
             
             if (codigoQR == null || codigoQR.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -107,7 +106,7 @@ public class QRController {
                 }
             }
 
-            System.out.println("Respuesta enviada: " + response);
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

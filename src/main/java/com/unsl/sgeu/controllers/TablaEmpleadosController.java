@@ -17,10 +17,9 @@ public class TablaEmpleadosController {
     @GetMapping("/table_user")
     public String tableUser(Model model) {
         model.addAttribute("empleados", empleadoServices.listarEmpleados());
-        System.out.println("Accediendo a la tabla de empleados");
-        for (var emp : empleadoServices.listarEmpleados()) {
-            System.out.println(emp);
-        }
+
+        
+        
         return "table_user";
     } 
     
