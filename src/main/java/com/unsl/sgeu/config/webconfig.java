@@ -30,14 +30,7 @@ public class webconfig implements WebMvcConfigurer {
         
         if (!qrStoragePath.endsWith("/")) {
             qrStoragePath = qrStoragePath + "/";
-        }
-        
-        System.out.println("==============================================");
-        System.out.println("Configurando QR Codes Resource Handler:");
-        System.out.println("  Path Pattern: /qr-codes/**");
-        System.out.println("  File Location: file:" + qrStoragePath);
-        System.out.println("==============================================");
-        
+        } 
         registry.addResourceHandler("/qr-codes/**")
                 .addResourceLocations("file:" + qrStoragePath);
     }
