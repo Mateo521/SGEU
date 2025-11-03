@@ -42,11 +42,27 @@ public class EmpleadoServices {
 
         // 2. Obtener datos del empleado
         Empleado empleado = opt.get();
-        
-        // 3. Obtener estacionamiento activo
+
+        // 3. Si es guardia, validar turno activo y horario
+        if (empleado.getRol() == Rol.Guardia) {
+            // Buscar turno activo (sin fecha de fin)
+            var turnoOpt = turnoRepository.findByEmpleadoIdAndFechaFinIsNull(empleado.getId());
+            if (turnoOpt.isEmpty()) {
+                // No tiene turno activo
+                return SessionDTO.loginFallido("fuera_turno");
+            }
+            var turno = turnoOpt.get();
+            java.time.LocalTime ahora = java.time.LocalTime.now();
+            if (ahora.isBefore(turno.getHoraIngreso()) || ahora.isAfter(turno.getHoraSalida())) {
+                // No está en horario de turno
+                return SessionDTO.loginFallido("fuera_turno");
+            }
+        }
+
+        // 4. Obtener estacionamiento activo
         Estacionamiento estacionamiento = turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(nombreUsuario);
 
-        // 4. Construir DTO de sesión
+        // 5. Construir DTO de sesión
         return SessionDTO.loginExitoso(
             empleado.getId(),
             empleado.getNombreUsuario(),
