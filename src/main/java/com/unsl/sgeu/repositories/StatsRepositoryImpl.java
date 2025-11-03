@@ -167,13 +167,13 @@ public class StatsRepositoryImpl implements StatsRepository {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object[]> getIngresosPorDia(LocalDate desde, LocalDate hasta, Long estId) {
-        String base = "SELECT DATE(r.fecha_hora) AS dia, COUNT(*) AS cnt FROM registro_estacionamiento r";
+        String base = "SELECT DATE(r.fecha_hora) AS dia, COUNT(*) AS cnt, r.id_est FROM registro_estacionamiento r";
         List<String> conds = new ArrayList<>();
         if(desde != null) conds.add("r.fecha_hora >= :desde");
         if(hasta != null) conds.add("r.fecha_hora <= :hasta");
         conds.add("(:estId IS NULL OR r.id_est = :estId)");
         String sql = base + " WHERE " + String.join(" AND ", conds) + 
-                    " GROUP BY dia ORDER BY dia ASC";
+                    " GROUP BY dia, r.id_est ORDER BY dia ASC";
 
         Query q = em.createNativeQuery(sql);
         if(desde != null) q.setParameter("desde", toStart(desde));

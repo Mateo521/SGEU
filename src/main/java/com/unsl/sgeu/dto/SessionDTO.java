@@ -11,15 +11,24 @@ public class SessionDTO {
     private Long estacionamientoId;
     private String estacionamientoNombre;
     private Boolean loginExitoso;
+    private String motivoFallo;
     
     public SessionDTO() {
         this.loginExitoso = false;
+        this.motivoFallo = null;
     }
     
     // Constructor para login fallido
     public static SessionDTO loginFallido() {
         return new SessionDTO();
     }
+    public static SessionDTO loginFallido(String motivo) {
+        SessionDTO dto = new SessionDTO();
+        dto.motivoFallo = motivo;
+        return dto;
+    }
+    public String getMotivoFallo() { return motivoFallo; }
+    public void setMotivoFallo(String motivoFallo) { this.motivoFallo = motivoFallo; }
     
     // Constructor para login exitoso
     public static SessionDTO loginExitoso(Long usuarioId, String nombreUsuario, String rol, 
@@ -47,7 +56,7 @@ public class SessionDTO {
     
     @Override
     public String toString() {
-        if (!loginExitoso) return "Login fallido";
+        if (!loginExitoso) return "Login fallido" + (motivoFallo != null ? ": " + motivoFallo : "");
         return String.format("SessionDTO[usuarioId=%d, nombreUsuario='%s', rol='%s', " +
                            "nombreCompleto='%s', estacionamientoId=%d, estacionamientoNombre='%s']",
                            usuarioId, nombreUsuario, rol, nombreCompleto, 
