@@ -15,7 +15,7 @@ import com.unsl.sgeu.dto.VehiculoDTO;
 import com.unsl.sgeu.dto.PersonaDTO;
 import com.unsl.sgeu.mappers.PersonaMapper;
 import com.unsl.sgeu.mappers.VehiculoMapper;
-import com.unsl.sgeu.models.Estacionamiento;
+ 
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
@@ -37,13 +37,7 @@ public class VehiculoController {
     @Autowired
     private PersonaService personaService;
 
-    @Autowired
-    private QRCodeService qrCodeService;
-
-    @Autowired
-    private PersonaMapper personaMapper;
-    @Autowired
-    private VehiculoMapper vehiculoMapper;
+ 
 
     @GetMapping("vehiculos/agregar")
     public String mostrarFormularioAgregar(Model model, HttpSession session,
@@ -179,8 +173,7 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("patente", resultado.getPatente());
             redirectAttributes.addFlashAttribute("vehiculoInfo", resultado.getVehiculoInfo());
 
-            // Atributos para impresión (opcionales, si tu vista los necesita)
-            redirectAttributes.addFlashAttribute("modelo", form.getVehiculo().getModelo());
+             redirectAttributes.addFlashAttribute("modelo", form.getVehiculo().getModelo());
             redirectAttributes.addFlashAttribute("color", form.getVehiculo().getColor());
             redirectAttributes.addFlashAttribute("tipo", form.getVehiculo().getTipoNombre());
             redirectAttributes.addFlashAttribute("dni", form.getPersona().getDni());
@@ -247,8 +240,7 @@ public class VehiculoController {
             personaDTO.setEmail(persona.getEmail());
             personaDTO.setCategoriaNombre(persona.getCategoria());
 
-            // Componer el DTO principal
-            RegistroVehiculoFormDTO form = new RegistroVehiculoFormDTO();
+             RegistroVehiculoFormDTO form = new RegistroVehiculoFormDTO();
             form.setVehiculo(vehiculoDTO);
             form.setPersona(personaDTO);
 
@@ -329,7 +321,7 @@ public class VehiculoController {
     }
 
 
-    
+
     @PostMapping("/registrar-movimiento")
     public String registrarMovimiento(@RequestParam String patente1,
             @RequestParam String accion,
