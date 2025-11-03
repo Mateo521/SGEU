@@ -30,7 +30,7 @@ public class RegistroEstacionamientoService {
     @Autowired
     private EstacionamientoService estacionamientoService;
 
-    public RegistroEstacionamiento registrarEntrada(String patente, Estacionamiento est, int modo) {
+    public RegistroEstacionamiento registrarEntrada(String patente, EstacionamientoDTO est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
@@ -38,8 +38,8 @@ public class RegistroEstacionamientoService {
         registro.setFechaHora(LocalDateTime.now());
         System.out.println(""+registro.getFechaHora().toString());
         registro.setTipo("ENTRADA");
-        System.out.println(est.getIdEst());
-        registro.setIdEstacionamiento(est.getIdEst());
+        System.out.println(est.getId());
+        registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
         } else {
@@ -48,14 +48,14 @@ public class RegistroEstacionamientoService {
         return registroRepo.save(registro);
     }
 
-    public RegistroEstacionamiento registrarSalida(String patente, Estacionamiento est, int modo) {
+    public RegistroEstacionamiento registrarSalida(String patente, EstacionamientoDTO est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
         System.out.println(""+registro.getFechaHora().toString());
         registro.setTipo("SALIDA");
-        registro.setIdEstacionamiento(est.getIdEst());
+        registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
         } else {
@@ -66,16 +66,16 @@ public class RegistroEstacionamientoService {
     }
 
 
-    public boolean esPar(String patente, Estacionamiento est) {
+    public boolean esPar(String patente, EstacionamientoDTO est) {
         
-        long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getIdEst());
+        long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getId());
 
         return cantidad % 2 == 0;
     }
 
-    public List<String> obtenerPatentesAdentroMasDeCuatroHoras(Estacionamiento est) {
-        System.out.println("PASO EL ESTACIONAMIENTO NUMERO " + est.getIdEst());
-        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getIdEst());
+    public List<String> obtenerPatentesAdentroMasDeCuatroHoras(EstacionamientoDTO est) {
+        System.out.println("PASO EL ESTACIONAMIENTO NUMERO " + est.getId());
+        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
@@ -353,10 +353,10 @@ public class RegistroEstacionamientoService {
         }
     }
 
-   public boolean estacionamientoIsFull (Estacionamiento est){
+   public boolean estacionamientoIsFull (EstacionamientoDTO est){
 
-        List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getIdEst());
-        System.out.println(est.getIdEst());
+        List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getId());
+        System.out.println(est.getId());
         System.out.println("Patentes adentro"+Re.size()+"Capacidad del estacionamiento "+ est.getCapacidad());
         return Re.size() == est.getCapacidad();
 

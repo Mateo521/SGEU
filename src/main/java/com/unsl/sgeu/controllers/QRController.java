@@ -10,9 +10,11 @@ import com.unsl.sgeu.services.VehiculoService;
 
 import jakarta.servlet.http.HttpSession;
 
+import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.PersonaService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.models.Vehiculo;
+import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
 
@@ -23,6 +25,9 @@ import java.util.Map;
 @Controller
 @RequestMapping("/qr")
 public class QRController {
+
+    @Autowired
+    private EstacionamientoService estacionamientoService;
 
     @Autowired
     private VehiculoService vehiculoService;
@@ -44,7 +49,7 @@ public class QRController {
         try {
             String codigoQR = request.get("codigo");
             System.out.println("Código QR recibido: " + codigoQR);
-            Estacionamiento estacionamiento = (Estacionamiento) session.getAttribute("estacionamiento"); 
+            EstacionamientoDTO estacionamiento = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId")); 
             
             if (codigoQR == null || codigoQR.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -126,7 +131,7 @@ public class QRController {
                         .body(Map.of("mensaje", "Datos incompletos"));
             }
 
-            Estacionamiento estacionamiento = (Estacionamiento) session.getAttribute("estacionamiento");
+            EstacionamientoDTO estacionamiento = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId"));
             if (estacionamiento == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("mensaje", "No hay estacionamiento seleccionado"));

@@ -9,6 +9,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.dto.VehiculoFormDTO;
 import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
@@ -22,6 +23,9 @@ import java.util.List;
 public class VehiculoController {
     @Autowired
     private RegistroEstacionamientoService registroestacionamientoService;
+
+@Autowired
+    private EstacionamientoService estacionamientoService;
 
     @Autowired
     private VehiculoService vehiculoService;
@@ -625,16 +629,22 @@ public class VehiculoController {
     public String registrarMovimiento(@RequestParam String patente1,
             @RequestParam String accion,
             RedirectAttributes redirectAttributes,
-            HttpSession session) {
-        String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
-        patente = patente.toUpperCase();
-        Estacionamiento est1 = (Estacionamiento) session.getAttribute("estacionamiento");
-
-        System.out.println("estacionamiento despues::" + est1);
-
+            HttpSession session) {      
         String mensaje = "";
         boolean exito = false;
 
+        if (session.getAttribute("estacionamientoId") == null) {
+                mensaje = "Guardia sin estacionamiento asignado";
+                redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
+                redirectAttributes.addFlashAttribute("mensaje", mensaje);
+                return "redirect:/ieManual";    
+        }
+        String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
+        patente = patente.toUpperCase();  
+        EstacionamientoDTO est1 = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId"));
+
+
+        
         if ("ingreso".equalsIgnoreCase(accion)) {
             if (registroestacionamientoService.estacionamientoIsFull(est1)) {
                 mensaje = "Estacionamiento lleno";
