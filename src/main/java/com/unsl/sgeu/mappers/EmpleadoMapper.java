@@ -3,8 +3,13 @@ package com.unsl.sgeu.mappers;
 import com.unsl.sgeu.dto.EmpleadoDTO;
 import com.unsl.sgeu.models.Empleado;
 
-public class EmpleadoMapper {
+public final class EmpleadoMapper { // <-- Clase final para ser solo de utilidad
 
+    // Constructor privado para evitar instanciación
+    private EmpleadoMapper() {
+        throw new UnsupportedOperationException("Esta es una clase de utilidad y no debe ser instanciada.");
+    }
+    
     private static String nombreCompleto(Empleado e) {
         String nombre = (e.getNombre() != null) ? e.getNombre().trim() : "";
         String apellido = (e.getApellido() != null) ? e.getApellido().trim() : "";
@@ -13,7 +18,7 @@ public class EmpleadoMapper {
         return nombre + " " + apellido;
     }
 
-    /** Entidad → DTO */
+    /** Entidad → DTO (Static Factory Method) */
     public static EmpleadoDTO toDTO(Empleado e) {
         if (e == null) return null;
         return new EmpleadoDTO(

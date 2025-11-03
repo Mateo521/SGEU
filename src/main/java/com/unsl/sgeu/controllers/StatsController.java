@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
- 
+import java.util.stream.Collectors; // Necesario para Collectors.toList()
+
 import com.unsl.sgeu.dto.*;
 
 @Controller
@@ -37,9 +39,12 @@ public class StatsController {
                                    @RequestParam(value = "desde", required = false) String desdeStr,
                                    @RequestParam(value = "hasta", required = false) String hastaStr,
                                    @RequestParam(value = "estId", required = false) Long estId){
+        
+        // Manejo de parámetros de la request
         LocalDate desde = (desdeStr==null||desdeStr.isBlank())?null:LocalDate.parse(desdeStr);
         LocalDate hasta = (hastaStr==null||hastaStr.isBlank())?null:LocalDate.parse(hastaStr);
 
+        // Delegación de la lógica de negocio al Service
         StatsResponseDTO dto = statsService.buildStatsDto(desde, hasta, estId);
 
         // llenar modelo desde DTO para la vista
@@ -47,7 +52,7 @@ public class StatsController {
         model.addAttribute("estacionamientoTop", dto.getEstacionamientoTop());
         model.addAttribute("diaSemanaTop", dto.getHorariosPico()); // nota: reuso para mostrar
         model.addAttribute("horariosPico", dto.getHorariosPico());
-        model.addAttribute("ocupacionPorEst", dto.getEstacionamientoTop()!=null?java.util.List.of(dto.getEstacionamientoTop()):java.util.List.of());
+        model.addAttribute("ocupacionPorEst", dto.getEstacionamientoTop()!=null?List.of(dto.getEstacionamientoTop()):List.of());
         model.addAttribute("evolucion", dto.getEvolucion());
         model.addAttribute("modoConteo", dto.getModoConteo());
         model.addAttribute("categoriasLabels", dto.getCategoriasLabels());
@@ -57,14 +62,12 @@ public class StatsController {
         model.addAttribute("evolucionLabels", dto.getEvolucionLabels());
         model.addAttribute("evolucionData", dto.getEvolucionData());
 
-        // lista de estacionamientos para el select
-        java.util.List<java.util.Map<String,Object>> ests = new java.util.ArrayList<>();
-        for(var e: estacionamientoService.listarTodos()){
-            java.util.Map<String,Object> m = new java.util.HashMap<>();
-            m.put("id", e.getId());
-            m.put("nombre", e.getNombre());
-            ests.add(m);
-        }
+        // lista de estacionamientos para el select (Refactorizado con Java Streams)
+        // Se transforma EstacionamientoDTO a Map<String, Object> para el modelo de la vista.
+        List<Map<String,Object>> ests = estacionamientoService.listarTodos().stream()
+                .map(e -> Map.of("id", (Object)e.getId(), "nombre", (Object)e.getNombre()))
+                .collect(Collectors.toList());
+        
         model.addAttribute("estacionamientos", ests);
         model.addAttribute("selectedEstId", estId);
 
@@ -80,7 +83,7 @@ public class StatsController {
         LocalDate desde = (desdeStr==null||desdeStr.isBlank())?null:LocalDate.parse(desdeStr);
         LocalDate hasta = (hastaStr==null||hastaStr.isBlank())?null:LocalDate.parse(hastaStr);
 
-    StatsResponseDTO dto = statsService.buildStatsDto(desde, hasta, estId);
+        StatsResponseDTO dto = statsService.buildStatsDto(desde, hasta, estId);
         return ResponseEntity.ok(Map.of("data", dto));
     }
 }
