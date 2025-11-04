@@ -6,6 +6,7 @@ import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,9 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import com.unsl.sgeu.dto.PanelDTO;
+import com.unsl.sgeu.dto.VehiculoListadoDTO;
+import com.unsl.sgeu.dto.PaginaDTO;
+
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.data.domain.Sort;
 
 @Controller
@@ -41,8 +44,6 @@ public class PrincipalController {
     @Autowired
     private EstacionamientoService estacionamientoService;
 
-
-
     @GetMapping("/")
     public String index(HttpSession session, Model model,
             @RequestParam(value = "buscar", required = false) String buscar,
@@ -51,53 +52,40 @@ public class PrincipalController {
             HttpServletRequest request) {
 
         if (session.getAttribute("user") == null) {
-             return "redirect:/login";
+            return "redirect:/login";
         }
-
-         
 
         String rol = (String) session.getAttribute("rol");
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         String nombreCompleto = (String) session.getAttribute("nombreCompleto");
 
- 
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
 
- 
         if (!esAdministrador && !esGuardia) {
-             model.addAttribute("error", "No tiene permisos para acceder a esta sección");
+            model.addAttribute("error", "No tiene permisos para acceder a esta sección");
             return "error";
         }
 
+         
         List<PanelDTO> paneles = new ArrayList<>();
 
         if (esGuardia) {
             try {
-              
-
                 List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
 
-                if (estacionamientosGuardia.isEmpty()) {
+                for (EstacionamientoDTO est : estacionamientosGuardia) {
+                    PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
 
-                    
-                } else {
+                    panel.setVehiculosActualmente(
+                            registroEstacionamientoService
+                                    .obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
+                    panel.setIngresosDelDia(
+                            registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
+                    panel.setEgresosDelDia(
+                            registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
 
-                    for (EstacionamientoDTO est : estacionamientosGuardia) {
-                        PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
-
-                        panel.setVehiculosActualmente(
-                                registroEstacionamientoService
-                                        .obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
-                        panel.setIngresosDelDia(
-                                registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
-                        panel.setEgresosDelDia(
-                                registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
-
-                        paneles.add(panel);
-
-                   
-                    }
+                    paneles.add(panel);
                 }
 
             } catch (Exception e) {
@@ -106,26 +94,39 @@ public class PrincipalController {
             }
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("patente").ascending());
-        Page<Vehiculo> paginaVehiculos;
-        Map<String, String> estacionamientosOrigen = new HashMap<>();
 
         try {
-            if (esAdministrador) {
-                 if (buscar != null && !buscar.trim().isEmpty()) {
-                     paginaVehiculos = vehiculoService.buscarVehiculosPorPatentePaginado(buscar.trim(), pageable);
-                } else {
-                     paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
-                }
-            } else {
-                 if (buscar != null && !buscar.trim().isEmpty()) {
-                     paginaVehiculos = vehiculoService.buscarPorPatenteYGuardiaPaginado(buscar.trim(), usuarioId,
-                            pageable);
-                } else {
-                     paginaVehiculos = vehiculoService.obtenerTodosPaginado(pageable);
-                }
+         
+            List<VehiculoListadoDTO> todosLosVehiculos;
 
-                for (Vehiculo vehiculo : paginaVehiculos.getContent()) {
+            if (buscar != null && !buscar.trim().isEmpty()) {
+                todosLosVehiculos = vehiculoService.buscarVehiculosConDuenio(buscar.trim());
+            } else {
+                todosLosVehiculos = vehiculoService.obtenerTodosConDuenio();
+            }
+
+            if (esGuardia) {
+                
+            }
+
+           
+            int totalVehiculos = todosLosVehiculos.size();
+            int start = page * size;
+            int end = Math.min(start + size, totalVehiculos);
+
+            List<VehiculoListadoDTO> vehiculosPaginados = (start < totalVehiculos)
+                    ? todosLosVehiculos.subList(start, end)
+                    : new ArrayList<>();
+
+            PaginaDTO<VehiculoListadoDTO> paginaVehiculos = new PaginaDTO<>(
+                    vehiculosPaginados,
+                    page,
+                    size,
+                    totalVehiculos);
+
+            Map<String, String> estacionamientosOrigen = new HashMap<>();
+            if (esGuardia) {
+                for (VehiculoListadoDTO vehiculo : vehiculosPaginados) {
                     try {
                         String estacionamientoOrigen = vehiculoService.obtenerEstacionamientoOrigenVehiculo(
                                 vehiculo.getPatente(), usuarioId);
@@ -138,26 +139,29 @@ public class PrincipalController {
                 }
             }
 
+            model.addAttribute("vehiculos", vehiculosPaginados);
+            model.addAttribute("paginaVehiculos", paginaVehiculos);
+            model.addAttribute("estacionamientosOrigen", estacionamientosOrigen);
+
         } catch (Exception e) {
-            System.err.println("Error al obtener vehículos paginados: " + e.getMessage());
+            System.err.println("Error al obtener vehículos: " + e.getMessage());
             e.printStackTrace();
-            paginaVehiculos = Page.empty(pageable);
+
+             PaginaDTO<VehiculoListadoDTO> paginaVacia = new PaginaDTO<>(
+                    new ArrayList<>(), page, size, 0);
+
+            model.addAttribute("vehiculos", new ArrayList<>());
+            model.addAttribute("paginaVehiculos", paginaVacia);
             model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
         }
 
-        
-
-         
-
+      
         model.addAttribute("paneles", paneles);
-        model.addAttribute("vehiculos", paginaVehiculos.getContent());
-        model.addAttribute("paginaVehiculos", paginaVehiculos);
         model.addAttribute("buscar", buscar);
         model.addAttribute("rol", rol);
         model.addAttribute("esAdministrador", esAdministrador);
         model.addAttribute("esGuardia", esGuardia);
         model.addAttribute("nombreCompleto", nombreCompleto);
-        model.addAttribute("estacionamientosOrigen", estacionamientosOrigen);
 
         return "vehiculos";
     }
@@ -192,14 +196,9 @@ public class PrincipalController {
         return "registrarvehiculo";
     }
 
-   
-    
-
     @GetMapping("/ieManual")
     public String showManual() {
         return "ieManual";
     }
 
-    
-    
 }

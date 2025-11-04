@@ -194,7 +194,7 @@
 
         <!-- Toasts -->
         <div class="fixed top-8 right-8 z-50 flex flex-col gap-4">
-            <div th:if="${resultado == 'exito'}" id="toast-success"
+            <div th:if="${resultado == true}" id="toast-success"
                 class="toast-animate flex items-center w-full max-w-sm p-5 text-slate-700 bg-white rounded-xl shadow-2xl border-l-4 border-green-500"
                 role="alert">
                 <div
@@ -215,7 +215,7 @@
                 </button>
             </div>
 
-            <div th:if="${resultado == 'error'}" id="toast-danger"
+            <div th:if="${resultado == false}" id="toast-danger"
                 class="toast-animate flex items-center w-full max-w-sm p-5 text-slate-700 bg-white rounded-xl shadow-2xl border-l-4 border-red-500"
                 role="alert">
                 <div

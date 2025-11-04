@@ -25,9 +25,9 @@ public class LoginController {
         SessionDTO sesion = empleadoServices.autenticarYObtenerDatosSesion(nombreUsuario, contrasenia);
         if (!sesion.getLoginExitoso()) {
             if (sesion instanceof com.unsl.sgeu.dto.SessionDTO && sesion.getMotivoFallo() != null && sesion.getMotivoFallo().equals("fuera_turno")) {
-                return "redirect:/login?fuera_turno=true";
+                return "redirect:/sgeu/login?fuera_turno=true";
             }
-            return "redirect:/login?error=true";
+            return "redirect:/sgeu/login?error=true";
         }
 
         // Almacenamos los datos del DTO en la sesión
@@ -48,6 +48,6 @@ public class LoginController {
     public String logout(HttpSession session) {
 
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:/sgeu/login";
     }
 }

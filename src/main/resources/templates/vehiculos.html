@@ -105,18 +105,6 @@
                         </a>
                     </form>
                 </div>
-
-
-                <!--div th:if="${esAdministrador}">
-                    <a href="/vehiculos/agregar"
-                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Agregar Vehículo
-                    </a>
-                </div-->
                 <a href="/vehiculos/agregar"
                     class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,11 +145,16 @@
                                     Tipo</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Propietario</th>
-                                <!--th th:if="${esGuardia}"
+                                    Nombre</th>
+                                <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Registrado en</th-->
-
+                                    DNI</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Teléfono</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Email</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     QR</th>
@@ -170,33 +163,59 @@
                                     Acciones</th>
                             </tr>
                         </thead>
+
+
+
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr th:each="vehiculo : ${vehiculos}" class="hover:bg-gray-50">
+                                <!-- Patente -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900" th:text="${vehiculo.patente}">ABC123
                                     </div>
                                 </td>
+
+                                <!-- Modelo -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.modelo ?: '—'}">Modelo</div>
                                 </td>
+
+                                <!-- Color -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.color ?: '—'}">Color</div>
                                 </td>
+
+                                <!-- Tipo -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
                                         class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
                                         th:text="${vehiculo.tipo ?: 'Sin tipo'}">Tipo</span>
                                 </td>
+
+                                <!-- ✅ NUEVO: Nombre del Dueño -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"
+                                        th:text="${vehiculo.nombreDuenio ?: '—'}">—</div>
+                                </td>
+
+                                <!-- DNI del Dueño -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.dniDuenio ?: '—'}">DNI</div>
                                 </td>
 
-                                <!--td th:if="${esGuardia}" th:text="${estacionamientosOrigen[vehiculo.patente]}"></td-->
-                                <!--td th:text="${estacionamientosOrigen[vehiculo.patente]}"></td-->
+                                <!-- ✅ NUEVO: Teléfono del Dueño -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900" th:text="${vehiculo.telefonoDuenio ?: '—'}">—
+                                    </div>
+                                </td>
 
+                                <!-- ✅ NUEVO: Email del Dueño -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-500" th:text="${vehiculo.emailDuenio ?: '—'}">—</div>
+                                </td>
+
+                                <!-- QR (sin cambios) -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
-
                                         <div th:if="${vehiculo.codigoQr}" class="qr-mini">
                                             <img th:src="@{'/qr-codes/qr_' + ${vehiculo.patente} + '.png'}"
                                                 th:alt="'QR de ' + ${vehiculo.patente}" class="qr-mini-img"
@@ -208,15 +227,16 @@
                                         <span th:unless="${vehiculo.codigoQr}" class="text-gray-400 text-xs">Sin
                                             QR</span>
 
-
                                         <div class="flex space-x-1" th:if="${vehiculo.codigoQr}">
-
                                             <button onclick="mostrarQR(this)" th:data-patente="${vehiculo.patente}"
                                                 th:data-qr="${vehiculo.codigoQr}"
                                                 th:data-modelo="${vehiculo.modelo ?: 'Sin modelo'}"
                                                 th:data-color="${vehiculo.color ?: 'Sin color'}"
                                                 th:data-tipo="${vehiculo.tipo ?: 'Sin tipo'}"
                                                 th:data-dni="${vehiculo.dniDuenio ?: 'Sin DNI'}"
+                                                th:data-nombre="${vehiculo.nombreDuenio ?: 'Sin nombre'}"
+                                                th:data-telefono="${vehiculo.telefonoDuenio ?: 'Sin teléfono'}"
+                                                th:data-email="${vehiculo.emailDuenio ?: 'Sin email'}"
                                                 class="text-blue-600 cursor-pointer hover:text-blue-800 p-1 rounded transition-colors"
                                                 title="Ver código QR">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -229,13 +249,13 @@
                                                 </svg>
                                             </button>
 
-
                                             <button onclick="imprimirQR(this)" th:data-patente="${vehiculo.patente}"
                                                 th:data-qr="${vehiculo.codigoQr}"
                                                 th:data-modelo="${vehiculo.modelo ?: 'Sin modelo'}"
                                                 th:data-color="${vehiculo.color ?: 'Sin color'}"
                                                 th:data-tipo="${vehiculo.tipo ?: 'Sin tipo'}"
                                                 th:data-dni="${vehiculo.dniDuenio ?: 'Sin DNI'}"
+                                                th:data-nombre="${vehiculo.nombreDuenio ?: 'Sin nombre'}"
                                                 class="text-green-600 cursor-pointer hover:text-green-800 p-1 rounded transition-colors"
                                                 title="Imprimir código QR">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -249,23 +269,16 @@
                                     </div>
                                 </td>
 
-
-
+                                <!-- Acciones (sin cambios) -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
-
-
-
-
-                                        <!-- th:if="${esAdministrador}" --> <a
-                                            th:href="@{/vehiculos/editar/{patente}(patente=${vehiculo.patente})}"
+                                        <a th:href="@{/vehiculos/editar/{patente}(patente=${vehiculo.patente})}"
                                             class="text-yellow-600 hover:text-yellow-900 p-1 rounded" title="Editar">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </a>
-
 
                                         <a th:href="@{/vehiculos/eliminar/{patente}(patente=${vehiculo.patente})}"
                                             class="text-red-600 hover:text-red-900 p-1 rounded"
@@ -277,14 +290,12 @@
                                             </svg>
                                         </a>
 
-
-                                        <!-- th:if="${esAdministrador}" -->
                                         <form
                                             th:action="@{/vehiculos/eliminar-con-historial/{patente}(patente=${vehiculo.patente})}"
                                             method="post" class="inline">
                                             <button type="submit"
                                                 class="text-red-800 cursor-pointer hover:text-red-900 p-1 rounded"
-                                                onclick="return confirm('PELIGRO: Esto va a eliminar el vehículo y todo su historial. ¿desea continuar?')"
+                                                onclick="return confirm('PELIGRO: Esto eliminará el vehículo y todo su historial. ¿Continuar?')"
                                                 title="Eliminar con historial">
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd"
@@ -294,14 +305,15 @@
                                         </form>
                                     </div>
                                 </td>
-
                             </tr>
                         </tbody>
+
+
                     </table>
-               
+
                     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
                         <div class="flex flex-1 justify-between sm:hidden">
-                           
+
                             <a th:if="${paginaVehiculos.hasPrevious()}"
                                 th:href="@{/(page=${paginaVehiculos.number - 1}, size=${paginaVehiculos.size}, buscar=${buscar})}"
                                 class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -332,7 +344,7 @@
                             <div>
                                 <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm"
                                     aria-label="Pagination">
-                                   
+
                                     <a th:if="${paginaVehiculos.hasPrevious()}"
                                         th:href="@{/(page=${paginaVehiculos.number - 1}, size=${paginaVehiculos.size}, buscar=${buscar})}"
                                         class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
@@ -344,7 +356,7 @@
                                         </svg>
                                     </a>
 
-                                    
+
                                     <span th:each="i : ${#numbers.sequence(0, paginaVehiculos.totalPages - 1)}"
                                         th:if="${i >= paginaVehiculos.number - 2 && i <= paginaVehiculos.number + 2}">
                                         <a th:if="${i != paginaVehiculos.number}"
@@ -357,7 +369,7 @@
                                         </span>
                                     </span>
 
-                                    
+
                                     <a th:if="${paginaVehiculos.hasNext()}"
                                         th:href="@{/(page=${paginaVehiculos.number + 1}, size=${paginaVehiculos.size}, buscar=${buscar})}"
                                         class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
