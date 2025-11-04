@@ -42,13 +42,25 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
     @Query("DELETE FROM RegistroEstacionamiento r WHERE r.patente = :patente")
     int deleteByPatente(@Param("patente") String patente);
 
-    @Query(value = "SELECT r.patente " +
-            "FROM registro_estacionamiento r " +
-            "WHERE r.id_est = :idEst " +
-            "GROUP BY r.patente " +
-            "HAVING COUNT(*) % 2 = 1 " +
-            "AND TIMESTAMPDIFF(HOUR, MAX(r.fecha_hora), NOW()) >= 1", nativeQuery = true)
-    List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
+    @Query(value = """
+  SELECT last.patente
+  FROM (
+    -- obtener el id del último registro por patente para el estacionamiento
+    SELECT r.patente, MAX(r.id_registro) AS last_id
+    FROM registro_estacionamiento r
+    WHERE r.id_est = :idEst
+    GROUP BY r.patente
+  ) grouped
+  JOIN registro_estacionamiento last
+    ON last.patente = grouped.patente
+   AND last.id_registro = grouped.last_id
+  WHERE last.id_est = :idEst
+    AND last.tipo_movimiento = 'ENTRADA'
+    AND TIMESTAMPDIFF(HOUR, last.fecha_hora, NOW()) >= 4
+""", nativeQuery = true)
+List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
+
+
 
     List<RegistroEstacionamiento> findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
             Long idEstacionamiento, String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin);
@@ -62,14 +74,14 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
             @Query(value = """
   SELECT re.*
   FROM registro_estacionamiento re
+  JOIN (
+    SELECT patente, MAX(id_registro) AS last_id
+    FROM registro_estacionamiento
+    WHERE id_est = :idEst
+    GROUP BY patente
+    HAVING COUNT(*) % 2 = 1
+  ) last ON re.patente = last.patente AND re.id_registro = last.last_id
   WHERE re.id_est = :idEst
-    AND re.patente IN (
-      SELECT re2.patente
-      FROM registro_estacionamiento re2
-      WHERE re2.id_est = :idEst
-      GROUP BY re2.patente
-      HAVING COUNT(*) % 2 = 1
-    )
   ORDER BY re.patente, re.fecha_hora
 """, nativeQuery = true)
 List<RegistroEstacionamiento> findRegistrosDePatentesImpares(@Param("idEst") Long idEst);
@@ -79,7 +91,7 @@ List<RegistroEstacionamiento> findRegistrosDePatentesImpares(@Param("idEst") Lon
   FROM registro_estacionamiento re
   WHERE re.id_est = :idEst
     AND re.tipo_movimiento = "SALIDA"
-  ORDER BY  re.fecha_hora DESC LIMIT  5 ;
+  ORDER BY  re.fecha_hora DESC;
 """, nativeQuery = true)
 List<RegistroEstacionamiento> findRegistrosDePatentePares(@Param("idEst") Long idEst);
 
