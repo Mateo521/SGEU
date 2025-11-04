@@ -6,6 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import java.util.Collection;
+import java.util.List;
+
 @Repository
 public interface PersonaRepository extends JpaRepository<Persona, Long> {  
     // Al extender JpaRepository, Spring genera automáticamente toda la lógica CRUD
@@ -24,4 +27,7 @@ public interface PersonaRepository extends JpaRepository<Persona, Long> {
     // El prefijo "existsBy" le indica a Spring que debe comprobar la existencia del registro.
     // Internamente ejecuta una consulta tipo:
     // SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM persona p WHERE p.dni = :dni
+
+    List<Persona> findByDniIn(Collection<Long> dnis);
+
 }
