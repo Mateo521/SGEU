@@ -76,6 +76,7 @@ public class QRController {
             String patente = request.get("patente");
             String accion = request.get("accion");
 
+            //datos incompletos
             if (patente == null || accion == null) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("mensaje", "Datos incompletos"));
