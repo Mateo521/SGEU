@@ -62,32 +62,6 @@ public class StatsRepositoryImpl implements StatsRepository {
         return (List<Object[]>) q.getResultList();
     }
 
-    // ----------------------------------------------------------
-
-    // @Override
-    // @SuppressWarnings("unchecked")
-    // public List<Object[]> getIngresosPorEstacionamiento(LocalDate desde, LocalDate hasta, Long estId) {
-    //     // Devuelve los ingresos totales por estacionamiento (raw data), sin calcular porcentajes ni transformar
-    //     String base = "SELECT e.id_est, e.nombre, e.capacidad, COUNT(r.id_registro) AS ingresos FROM estacionamiento e " +
-    //                 "LEFT JOIN registro_estacionamiento r ON r.id_est = e.id_est";
-    //     List<String> conds = new ArrayList<>();
-    //     if(desde != null) conds.add("r.fecha_hora >= :desde");
-    //     if(hasta != null) conds.add("r.fecha_hora <= :hasta");
-    //     conds.add("(:estId IS NULL OR r.id_est = :estId)");
-        
-    //     String sql = base + " WHERE " + String.join(" AND ", conds) + 
-    //                 " GROUP BY e.id_est, e.nombre, e.capacidad ORDER BY ingresos DESC";
-
-    //     Query q = em.createNativeQuery(sql);
-    //     if(desde != null) q.setParameter("desde", toStart(desde));
-    //     if(hasta != null) q.setParameter("hasta", toEnd(hasta));
-    //     q.setParameter("estId", estId);
-
-    //     return (List<Object[]>) q.getResultList();
-    // }
-
-    // // ----------------------------------------------------------
-
     @Override
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> diaSemanaMasIngresos(LocalDate desde, LocalDate hasta, Long estId) {

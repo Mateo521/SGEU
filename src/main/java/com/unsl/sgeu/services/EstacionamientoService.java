@@ -5,10 +5,7 @@ import com.unsl.sgeu.dto.EstacionamientoDTO;
 import java.util.List;
 
 public interface EstacionamientoService {
-
-
     
-
     EstacionamientoDTO crear(EstacionamientoDTO dto);
 
     EstacionamientoDTO editar(Long id, EstacionamientoDTO dto);

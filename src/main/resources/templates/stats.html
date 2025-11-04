@@ -9,12 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -81,253 +75,360 @@
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen p-4 sm:p-6 lg:p-0">
     <main layout:fragment="content" class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div class="container mx-auto px-4 py-8">
-            <div class="mb-8 fade-in">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                        <h1 class="text-4xl font-bold text-slate-800 flex items-center gap-3">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            Panel de Estadísticas
-                        </h1>
-                        <p class="text-slate-500 mt-2">Análisis y métricas del sistema de estacionamiento</p>
-                    </div>
+        <!-- Título y Descripción -->
+        <div class="mb-8 fade-in">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-slate-800 flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        Panel de Estadísticas
+                    </h1>
+                    <p class="text-slate-500 mt-2 text-sm sm:text-base">Análisis y métricas del sistema de
+                        estacionamiento</p>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 fade-in">
-                <form id="filtro" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">
-                            <i class="fas fa-calendar-alt mr-2"></i>Desde
-                        </label>
-                        <input type="date" id="desde" name="desde"
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">
-                            <i class="fas fa-calendar-alt mr-2"></i>Hasta
-                        </label>
-                        <input type="date" id="hasta" name="hasta"
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">
-                            <i class="fas fa-parking mr-2"></i>Estacionamiento
-                        </label>
-                        <select id="estId"
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="">Todos los estacionamientos</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit"
-                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg font-semibold">
-                            <i class="fas fa-search mr-2"></i>Aplicar Filtros
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div id="info" class="text-center text-blue-600 font-medium mb-6 text-lg"></div>
-
-            <div class="grid lg:grid-cols-3 gap-6 mb-6">
-                <div class="glass-card rounded-xl p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
-                            <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Categorías
-                        </h3>
-                        <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
-                            <i class="fas fa-users mr-1"></i><span id="totalCategorias">0</span>
-                        </span>
-                    </div>
-                    <div class="chart-wrapper mb-4">
-                        <canvas id="chartCategorias"></canvas>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" id="tablaCategorias">
-                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th
-                                        class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Categoría</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Cant.</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        %</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100"></tbody>
-                        </table>
-                        <div id="paginationCategorias" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
-                    </div>
+        <!-- Formulario de Filtros Responsive -->
+        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 fade-in">
+            <form id="filtro" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Campo Desde -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Desde
+                    </label>
+                    <input type="date" id="desde" name="desde"
+                        class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
                 </div>
-
-                <div class="glass-card rounded-xl p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
-                            <i class="fas fa-car-side mr-2 text-blue-600"></i>Tipo Vehículo
-                        </h3>
-                        <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
-                            <i class="fas fa-chart-pie mr-1"></i>
-                        </span>
-                    </div>
-                    <div class="chart-wrapper mb-4">
-                        <canvas id="chartVehiculo"></canvas>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" id="tablaVehiculo">
-                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th
-                                        class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Tipo</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Cant.</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        %</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
+                <!-- Campo Hasta -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Hasta
+                    </label>
+                    <input type="date" id="hasta" name="hasta"
+                        class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
                 </div>
-
-                <div class="glass-card rounded-xl p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
-                            <i class="fas fa-qrcode mr-2 text-blue-600"></i>Modo Acceso
-                        </h3>
-                    </div>
-                    <div class="chart-wrapper mb-4">
-                        <canvas id="chartModo"></canvas>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm" id="tablaModo">
-                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th
-                                        class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Modo</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Cant.</th>
-                                    <th
-                                        class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        %</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100"></tbody>
-                        </table>
-                        <div id="paginationModo" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
-                    </div>
+                <!-- Campo Estacionamiento -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        <i class="fas fa-parking mr-2"></i>Estacionamiento
+                    </label>
+                    <select id="estId"
+                        class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">Todos los estacionamientos</option>
+                        <!-- Opciones dinámicas irían aquí -->
+                    </select>
                 </div>
-            </div>
-
-            <div class="grid lg:grid-cols-2 gap-6 mb-6">
-                <div class="glass-card rounded-xl p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-slate-800 flex items-center">
-                            <i class="fas fa-chart-bar mr-2 text-blue-600"></i>Ocupación
-                        </h3>
-                        <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
-                            <i class="fas fa-building mr-1"></i><span id="totalOcupacion">0</span>
-                        </span>
-                    </div>
-                    <div class="chart-wrapper mb-4">
-                        <canvas id="chartOcupacion"></canvas>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full" id="tablaOcupacion">
-                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th
-                                        class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Estacionamiento</th>
-                                    <th
-                                        class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Capacidad</th>
-                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                                        title="Total de ingresos históricos en el rango">Ingresos históricos</th>
-                                    <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                                        title="Promedio diario de ocupación (%) en el rango">Prom. Ocupación diaria (%)
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100"></tbody>
-                        </table>
-                        <div id="paginationOcupacion" class="flex justify-center gap-2 mt-4"></div>
-                    </div>
+                <!-- Botón de Filtros -->
+                <div class="flex items-end">
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg font-semibold">
+                        <i class="fas fa-search mr-2"></i>Aplicar Filtros
+                    </button>
                 </div>
+            </form>
+        </div>
 
-                <div class="glass-card rounded-xl p-6 fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-slate-800 flex items-center">
-                            <i class="fas fa-clock mr-2 text-blue-600"></i>Horarios Pico
-                        </h3>
-                        <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">Top 5</span>
-                    </div>
-                    <div class="chart-wrapper mb-4">
-                        <canvas id="chartHorarios"></canvas>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full" id="tablaHorarios">
-                            <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
-                                <tr>
-                                    <th
-                                        class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Hora</th>
-                                    <th
-                                        class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                        Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100"></tbody>
-                        </table>
-                        <div id="paginationHorarios" class="flex justify-center gap-2 mt-4"></div>
-                    </div>
-                </div>
-            </div>
+        <div id="info" class="text-center text-blue-600 font-medium mb-6 text-lg"></div>
 
-            <div class="glass-card rounded-xl p-6 mb-6 fade-in">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <!-- Card: Categorías -->
+            <div class="glass-card rounded-xl p-6 fade-in">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-slate-800 flex items-center">
-                        <i class="fas fa-chart-line mr-2 text-blue-600"></i>Evolución Diaria
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Categorías
                     </h3>
-                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">
-                        <i class="fas fa-calendar-day mr-1"></i><span id="totalEvolucion">0</span> días
+                    <span class="stat-badge text-white text-xs px-3 py-1 rounded-full flex items-center">
+                        <i class="fas fa-users mr-1"></i><span id="totalCategorias">120</span>
                     </span>
                 </div>
                 <div class="chart-wrapper mb-4">
-                    <canvas id="chartEvolucion"></canvas>
+                    <canvas id="chartCategorias"></canvas>
                 </div>
-                <div class="overflow-hidden">
-                    <table class="w-full" id="tablaEvolucion">
+                <!-- Tabla Categorías (Responsive con overflow) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm min-w-[300px]" id="tablaCategorias">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th
+                                    class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Categoría</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Cant.</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    %</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Filas de ejemplo -->
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Abonados</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">80</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">66.7%</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Visitas</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">40</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">33.3%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="paginationCategorias" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
+                </div>
+            </div>
+
+            <!-- Card: Tipo Vehículo -->
+            <div class="glass-card rounded-xl p-6 fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-car-side mr-2 text-blue-600"></i>Tipo Vehículo
+                    </h3>
+                    <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
+                        <i class="fas fa-chart-pie mr-1"></i>
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-4">
+                    <canvas id="chartVehiculo"></canvas>
+                </div>
+                <!-- Tabla Tipo Vehículo (Responsive con overflow) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm min-w-[300px]" id="tablaVehiculo">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th
+                                    class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Tipo</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Cant.</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    %</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Filas de ejemplo -->
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Automóvil</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">70</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">58.3%</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Moto</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">35</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">29.2%</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Camioneta</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">15</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">12.5%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card: Modo Acceso -->
+            <div class="glass-card rounded-xl p-6 fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-qrcode mr-2 text-blue-600"></i>Modo Acceso
+                    </h3>
+                    <span class="stat-badge text-white text-xs px-3 py-1 rounded-full">
+                        <i class="fas fa-sign-in-alt mr-1"></i>
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-4">
+                    <canvas id="chartModo"></canvas>
+                </div>
+                <!-- Tabla Modo Acceso (Responsive con overflow) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm min-w-[300px]" id="tablaModo">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th
+                                    class="text-left py-3 px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Modo</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Cant.</th>
+                                <th
+                                    class="text-center py-3 px-2 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    %</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Filas de ejemplo -->
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">QR</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">90</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">75%</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="py-2.5 px-3 text-slate-700">Ticket</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">30</td>
+                                <td class="py-2.5 px-2 text-center text-slate-700">25%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="paginationModo" class="flex justify-center gap-1 mt-3 flex-wrap"></div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Card: Ocupación (Se adapta al 100% en móvil) -->
+            <div class="glass-card rounded-xl p-6 fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-chart-bar mr-2 text-blue-600"></i>Ocupación
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full flex items-center">
+                        <i class="fas fa-building mr-1"></i><span id="totalOcupacion">3</span> Estacionamientos
+                    </span>
+                </div>
+                <div class="chart-wrapper mb-4">
+                    <canvas id="chartOcupacion"></canvas>
+                </div>
+                <!-- Tabla Ocupación (Responsive con overflow) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[500px]" id="tablaOcupacion">
                         <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
                             <tr>
                                 <th
                                     class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                    Fecha</th>
+                                    Estacionamiento</th>
+                                <th
+                                    class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Capacidad</th>
+                                <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                                    title="Total de ingresos históricos en el rango">Ingresos históricos</th>
+                                <th class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                                    title="Promedio diario de ocupación (%) en el rango">Prom. Ocupación diaria (%)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Filas de ejemplo -->
+                            <tr class="table-row-hover text-sm">
+                                <td class="py-2.5 px-4 text-slate-700">Central</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">200</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">$1,500.00</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700 text-green-600 font-medium">78%</td>
+                            </tr>
+                            <tr class="table-row-hover text-sm">
+                                <td class="py-2.5 px-4 text-slate-700">Norte</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">150</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">$950.00</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700 text-yellow-600 font-medium">55%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div id="paginationOcupacion" class="flex justify-center gap-2 mt-4"></div>
+                </div>
+            </div>
+
+            <!-- Card: Horarios Pico (Se adapta al 100% en móvil) -->
+            <div class="glass-card rounded-xl p-6 fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-clock mr-2 text-blue-600"></i>Horarios Pico
+                    </h3>
+                    <span class="stat-badge text-white text-sm px-4 py-1 rounded-full">Top 5</span>
+                </div>
+                <div class="chart-wrapper mb-4">
+                    <canvas id="chartHorarios"></canvas>
+                </div>
+                <!-- Tabla Horarios Pico (Responsive con overflow) -->
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[350px]" id="tablaHorarios">
+                        <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th
+                                    class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                    Hora</th>
                                 <th
                                     class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                                     Cantidad</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100"></tbody>
+                        <tbody class="divide-y divide-slate-100">
+                            <!-- Filas de ejemplo -->
+                            <tr class="table-row-hover text-sm">
+                                <td class="py-2.5 px-4 text-slate-700">18:00 - 19:00</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">35</td>
+                            </tr>
+                            <tr class="table-row-hover text-sm">
+                                <td class="py-2.5 px-4 text-slate-700">09:00 - 10:00</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">28</td>
+                            </tr>
+                            <tr class="table-row-hover text-sm">
+                                <td class="py-2.5 px-4 text-slate-700">12:00 - 13:00</td>
+                                <td class="py-2.5 px-4 text-center text-slate-700">25</td>
+                            </tr>
+                        </tbody>
                     </table>
-                    <div id="paginationEvolucion" class="flex justify-center gap-2 mt-4"></div>
+                    <div id="paginationHorarios" class="flex justify-center gap-2 mt-4"></div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Seccion 3: Evolución Diaria (Se adapta al 100% en móvil) -->
+        <div class="glass-card rounded-xl p-6 mb-6 fade-in">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h3 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-blue-600"></i>Evolución Diaria
+                </h3>
+                <span class="stat-badge text-white text-sm px-4 py-1 rounded-full flex items-center">
+                    <i class="fas fa-calendar-day mr-1"></i><span id="totalEvolucion">7</span> días
+                </span>
+            </div>
+            <div class="chart-wrapper mb-4">
+                <canvas id="chartEvolucion"></canvas>
+            </div>
+            <!-- Tabla Evolución Diaria (Responsive con overflow) -->
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[400px]" id="tablaEvolucion">
+                    <thead class="bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-200">
+                        <tr>
+                            <th
+                                class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                Fecha</th>
+                            <th
+                                class="text-center py-3 px-4 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <!-- Filas de ejemplo -->
+                        <tr class="table-row-hover text-sm">
+                            <td class="py-2.5 px-4 text-slate-700">2023-10-01</td>
+                            <td class="py-2.5 px-4 text-center text-slate-700">120</td>
+                        </tr>
+                        <tr class="table-row-hover text-sm">
+                            <td class="py-2.5 px-4 text-slate-700">2023-10-02</td>
+                            <td class="py-2.5 px-4 text-center text-slate-700">150</td>
+                        </tr>
+                        <tr class="table-row-hover text-sm">
+                            <td class="py-2.5 px-4 text-slate-700">2023-10-03</td>
+                            <td class="py-2.5 px-4 text-center text-slate-700">135</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="paginationEvolucion" class="flex justify-center gap-2 mt-4"></div>
             </div>
         </div>
 

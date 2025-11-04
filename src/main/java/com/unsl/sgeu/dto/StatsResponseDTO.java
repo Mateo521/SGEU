@@ -1,5 +1,4 @@
 package com.unsl.sgeu.dto;
-
 import java.util.List;
 
 public class StatsResponseDTO {

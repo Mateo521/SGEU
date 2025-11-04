@@ -15,7 +15,6 @@ import com.unsl.sgeu.services.PersonaService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
-import com.unsl.sgeu.models.Estacionamiento;
 import com.unsl.sgeu.models.Persona;
 
 import java.util.HashMap;
