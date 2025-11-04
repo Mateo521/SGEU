@@ -76,6 +76,7 @@ public class QRController {
             String patente = request.get("patente");
             String accion = request.get("accion");
 
+            System.out.println("Acciooon::::::::s"+accion);
             //datos incompletos
             if (patente == null || accion == null) {
                 return ResponseEntity.badRequest()
@@ -91,7 +92,7 @@ public class QRController {
             }
 
             AccionEstacionamientoResultDTO resultado = 
-                registroEstacionamientoService.procesarAccion(patente, accion, estacionamiento);
+                registroEstacionamientoService.procesarAccion(patente, accion, estacionamiento, 1);
             
             return ResponseEntity.ok(resultado);
 

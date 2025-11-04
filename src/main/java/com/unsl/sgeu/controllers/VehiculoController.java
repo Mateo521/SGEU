@@ -9,6 +9,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import com.unsl.sgeu.dto.AccionEstacionamientoResultDTO;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
 import com.unsl.sgeu.dto.VehiculoDTO;
@@ -344,41 +345,11 @@ public class VehiculoController {
         String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
         patente = patente.toUpperCase();
         EstacionamientoDTO est1 = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId"));
-
-        if ("ingreso".equalsIgnoreCase(accion)) {
-            if (registroestacionamientoService.estacionamientoIsFull(est1)) {
-                mensaje = "Estacionamiento lleno";
-                redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
-                redirectAttributes.addFlashAttribute("mensaje", mensaje);
-                return "redirect:/ieManual";
-            }
-
-            else if (!vehiculoService.existePatente(patente)) {
-                mensaje = "La patente '" + patente + "' no está registrada en el sistema.";
-            } else if (!registroestacionamientoService.esPar(patente, est1)) {
-                mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
-            } else {
-
-                registroestacionamientoService.registrarEntrada(patente, est1, 0);
-                mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
-                exito = true;
-            }
-        } else if ("egreso".equalsIgnoreCase(accion)) {
-
-            if (registroestacionamientoService.esPar(patente, est1)) {
-                mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
-            } else {
-
-                registroestacionamientoService.registrarSalida(patente, est1, 0);
-                mensaje = "Salida de '" + patente + "' registrada con éxito.";
-                exito = true;
-            }
-        } else {
-            mensaje = "Acción no válida.";
-        }
-
-        redirectAttributes.addFlashAttribute("resultado", exito ? "exito" : "error");
-        redirectAttributes.addFlashAttribute("mensaje", mensaje);
+        AccionEstacionamientoResultDTO accionResult = registroestacionamientoService.procesarAccion(patente, accion, est1, 0);
+        System.out.println(""+accionResult.isResultado());
+        redirectAttributes.addFlashAttribute("resultado", accionResult.isResultado());
+        System.out.println(""+accionResult.getMensaje());
+        redirectAttributes.addFlashAttribute("mensaje", accionResult.getMensaje());
 
         return "redirect:/ieManual";
     }

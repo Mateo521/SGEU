@@ -84,7 +84,7 @@
      */
     const verificarVencidos = async () => {
         try {
-            const response = await fetch('/api/alertas/vencidas');
+            const response = await fetch('/sgeu/api/alertas/vencidas');
             if (!response.ok) return;
             const patentes = await response.json();
 
@@ -101,7 +101,7 @@
     // --- TEMPORIZADOR PURO ---
     
     // Define el intervalo de tiempo en milisegundos (30 minutos)
-    const tiempo = 30*6* 10000; 
+    const tiempo = 3* 10000; 
     
     // Establecemos el temporizador. La primera ejecución ocurrirá DESPUÉS de que pase el primer intervalo.
     setInterval(verificarVencidos, tiempo);

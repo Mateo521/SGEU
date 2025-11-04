@@ -38,7 +38,7 @@ public interface RegistroEstacionamientoService {
     
     public void eliminarRegistrosPorPatente(String patente);
 
-      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento) ;
+      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento, int modo) ;
 
 
     public boolean vehiculoTieneRegistros(String patente);

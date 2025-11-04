@@ -47,7 +47,7 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
             "WHERE r.id_est = :idEst " +
             "GROUP BY r.patente " +
             "HAVING COUNT(*) % 2 = 1 " +
-            "AND TIMESTAMPDIFF(HOUR, MAX(r.fecha_hora), NOW()) >= 4", nativeQuery = true)
+            "AND TIMESTAMPDIFF(HOUR, MAX(r.fecha_hora), NOW()) >= 1", nativeQuery = true)
     List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
 
     List<RegistroEstacionamiento> findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(

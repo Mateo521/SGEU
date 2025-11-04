@@ -279,6 +279,7 @@ public class VehiculoServiceImpl implements VehiculoService {
     public Vehiculo guardarVehiculo(Vehiculo vehiculo) {
         return vehiculoRepo.save(vehiculo);
     }
+    
 
     public Vehiculo buscarPorPatente(String patente) {
         return vehiculoRepo.findByPatente(patente);

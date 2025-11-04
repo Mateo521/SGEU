@@ -38,6 +38,7 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
     @Autowired
     private EstacionamientoService estacionamientoService;
 
+
     public RegistroEstacionamiento registrarEntrada(String patente, EstacionamientoDTO est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
@@ -109,31 +110,53 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
         }
     }
 
-      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento) {
+      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento, int modo) {
         
-        boolean resultado = false;
+        boolean exito = false;
         String mensaje = "";
 
-        // si es entrada y existe la patente y es par (existe una salida del vehiculo 0 o 2)
-        if ("Entrada".equals(accion) && vehiculoService.existePatente(patente) && esPar(patente, estacionamiento)) {
-            registrarEntrada(patente, estacionamiento, 1);
-            resultado = true;
-            mensaje = "Entrada registrada correctamente";
-
-        } else if ("Salida".equals(accion) && !esPar(patente, estacionamiento)) {
-            registrarSalida(patente, estacionamiento, 1);
-            resultado = true;
-            mensaje = "Salida registrada correctamente";
-
-        } else {
-            if ("Entrada".equals(accion)) {
-                mensaje = "El vehículo ya está dentro del estacionamiento";
-            } else {
-                mensaje = "El vehículo no está dentro del estacionamiento";
+if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
+            if (estacionamientoIsFull(estacionamiento)) {
+                mensaje = "Estacionamiento lleno";
+                exito = false;
+                
+        return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
             }
-        }
 
-        return new AccionEstacionamientoResultDTO(resultado, mensaje, patente, accion);
+            else if (!vehiculoService.existePatente(patente)) {
+                mensaje = "No existe vehiculo";
+                exito = false;
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+
+            } else if (!esPar(patente, estacionamiento)) {
+                mensaje = "El vehículo con patente '" + patente + "' ya se encuentra dentro del estacionamiento.";
+                exito = false;
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+            } else {
+
+                registrarEntrada(patente, estacionamiento, modo);
+                mensaje = "Ingreso de '" + patente + "' registrado con éxito.";
+                exito = true;
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+            }
+        } else if ("egreso".equalsIgnoreCase(accion) || "Salida".equalsIgnoreCase(accion)) {
+
+            if (esPar(patente, estacionamiento)) {
+                mensaje = "El vehículo con patente '" + patente + "' no registra una entrada previa.";
+                exito = false;
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+            } else {
+
+                registrarSalida(patente, estacionamiento, modo);
+                mensaje = "Salida de '" + patente + "' registrada con éxito.";
+                exito = true;
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+            }
+        } else {
+            exito = false;
+            mensaje = "Acción no válida.";
+            return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+        }
     }
 
 
