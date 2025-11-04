@@ -6,6 +6,7 @@ import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
 import com.unsl.sgeu.services.VehiculoService;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+
+
 
 import java.util.Map;
 import org.springframework.ui.Model;

@@ -5,8 +5,8 @@ import com.unsl.sgeu.repositories.PersonaRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
 import com.unsl.sgeu.services.CategoriaService;
 import com.unsl.sgeu.services.PersonaVehiculoService;
-import com.unsl.sgeu.services.VehiculoService;
 import com.unsl.sgeu.services.VehiculoTipoService;
+import com.unsl.sgeu.services.VehiculoService;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

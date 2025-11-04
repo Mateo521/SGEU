@@ -13,8 +13,9 @@ import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
 import com.unsl.sgeu.dto.VehiculoDTO;
 import com.unsl.sgeu.dto.PersonaDTO;
-import com.unsl.sgeu.mappers.PersonaMapper;
-import com.unsl.sgeu.mappers.VehiculoMapper;
+
+import com.unsl.sgeu.services.ResultadoEliminacion;
+import com.unsl.sgeu.services.VehiculoOperacionException;
 
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
@@ -23,7 +24,6 @@ import java.util.List;
 
 @SessionAttributes
 @Controller
-// @RequestMapping("/vehiculos")
 public class VehiculoController {
     @Autowired
     private RegistroEstacionamientoService registroestacionamientoService;

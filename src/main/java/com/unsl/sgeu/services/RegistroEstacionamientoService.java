@@ -2,6 +2,7 @@ package com.unsl.sgeu.services;
 
 import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
+import com.unsl.sgeu.services.VehiculoService;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.transaction.annotation.Propagation;
-
+import com.unsl.sgeu.dto.AccionEstacionamientoResultDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +27,9 @@ public class RegistroEstacionamientoService {
     private RegistroEstacionamientoRepository registroRepo;
     @Autowired
     private VehiculoRepository vehiculoRepo;
+
+    @Autowired
+    private VehiculoService vehiculoService;
 
     @Autowired
     private EstacionamientoService estacionamientoService;
@@ -100,6 +104,33 @@ public class RegistroEstacionamientoService {
             throw new RuntimeException("Error al eliminar registros de estacionamiento: " + e.getMessage(), e);
         }
     }
+
+      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento) {
+        
+        boolean resultado = false;
+        String mensaje = "";
+
+        if ("Entrada".equals(accion) && vehiculoService.existePatente(patente) && esPar(patente, estacionamiento)) {
+            registrarEntrada(patente, estacionamiento, 1);
+            resultado = true;
+            mensaje = "Entrada registrada correctamente";
+
+        } else if ("Salida".equals(accion) && !esPar(patente, estacionamiento)) {
+            registrarSalida(patente, estacionamiento, 1);
+            resultado = true;
+            mensaje = "Salida registrada correctamente";
+
+        } else {
+            if ("Entrada".equals(accion)) {
+                mensaje = "El vehículo ya está dentro del estacionamiento";
+            } else {
+                mensaje = "El vehículo no está dentro del estacionamiento";
+            }
+        }
+
+        return new AccionEstacionamientoResultDTO(resultado, mensaje, patente, accion);
+    }
+
 
     public boolean vehiculoTieneRegistros(String patente) {
         try {
