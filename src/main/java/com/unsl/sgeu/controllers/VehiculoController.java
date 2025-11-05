@@ -1,6 +1,8 @@
 package com.unsl.sgeu.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,10 +16,6 @@ import com.unsl.sgeu.dto.EstacionamientoDTO;
 import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
 import com.unsl.sgeu.dto.VehiculoDTO;
 import com.unsl.sgeu.dto.PersonaDTO;
-
-import com.unsl.sgeu.services.ResultadoEliminacion;
-import com.unsl.sgeu.services.VehiculoOperacionException;
-
 import com.unsl.sgeu.models.Persona;
 import com.unsl.sgeu.models.Vehiculo;
 import com.unsl.sgeu.services.*;
@@ -193,6 +191,52 @@ public class VehiculoController {
         }
     }
 
+
+@GetMapping("/api/personas/buscar/{dni}")
+@ResponseBody
+public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession session) {
+    System.out.println("eeeentroroiertertieorio");
+    if (session.getAttribute("user") == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    
+    String rol = (String) session.getAttribute("rol");
+    boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
+    boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
+
+    if (!esAdministrador && !esGuardia) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+    
+    try {
+        Persona persona = personaService.buscarPorDni(dni);
+
+
+            System.out.println("=== DEBUG: Persona encontrada: " + (persona != null));
+
+        
+        if (persona != null) {
+            // Convertir Persona a PersonaDTO
+            PersonaDTO personaDTO = new PersonaDTO();
+            personaDTO.setDni(persona.getDni());
+            personaDTO.setNombre(persona.getNombre());
+            personaDTO.setTelefono(persona.getTelefono());
+            personaDTO.setEmail(persona.getEmail());
+            personaDTO.setCategoriaNombre(persona.getCategoria() != null ?   persona.getCategoria() : "");
+            
+            return ResponseEntity.ok(personaDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error al buscar la persona: " + e.getMessage());
+    }
+}
+
+
+
+
     @GetMapping("/vehiculos/editar/{patente}")
     public String mostrarFormularioEdicion(
             @PathVariable String patente,
@@ -260,6 +304,9 @@ public class VehiculoController {
             return "redirect:/";
         }
     }
+
+
+
 
     @PostMapping("/vehiculos/editar/{patenteOriginal}")
     public String editarVehiculo(

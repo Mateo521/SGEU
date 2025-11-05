@@ -1,6 +1,7 @@
 package com.unsl.sgeu.servicesimpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +42,9 @@ public class VehiculoServiceImpl implements VehiculoService {
     private final RegistroEstacionamientoService registroEstacionamientoService;
     private final PersonaService personaService;
     private final QRCodeService qrCodeService;
+
+     @Value("${qr.secret.salt:default-secret-change-me}")
+    private String secretSalt;
 
    
     public VehiculoServiceImpl(
@@ -527,9 +531,16 @@ public class VehiculoServiceImpl implements VehiculoService {
         }
     }
 
-    public String generarCodigoQR(String patente) {
-        return "qr-" + generarCodigoQrUnico(patente);
+      public String generarCodigoQR(String patente) {
+        //obtengo timestamp unico
+        long timestamp = System.currentTimeMillis();
+        //combino patente + timestamp + salt
+        String datos = patente + timestamp + secretSalt;
+        System.out.println(datos);
+        String hash = hashSha256(datos);
+        return "qr-" + hash;
     }
+    
 
     public List<Vehiculo> obtenerTodosVehiculosPorGuardia(Long guardiaId) {
         return obtenerTodos();
@@ -545,18 +556,13 @@ public class VehiculoServiceImpl implements VehiculoService {
         }
     }
 
-    public String generarCodigoQrUnico(String patente) {
-        UUID uuid = UUID.nameUUIDFromBytes(patente.getBytes());
-        String codigoQr = uuid.toString();
-        codigoQr = hashSha256(codigoQr);
-        return codigoQr;
-    }
-
+ 
     private String hashSha256(String input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //obtengo especificamente el sha-256
+            //algoritmo trabaja con bytes
             byte[] hashBytes = digest.digest(input.getBytes());
-            StringBuilder hexString = new StringBuilder();
+            StringBuilder hexString = new StringBuilder(); //convierto a valores imprimibles
             for (byte b : hashBytes) {
                 hexString.append(String.format("%02x", b));
             }

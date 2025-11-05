@@ -227,6 +227,60 @@
                             <h2 class="text-2xl font-bold text-slate-800">Datos del Propietario</h2>
                         </div>
 
+                        <!-- Campo de búsqueda por DNI -->
+                        <div
+                            class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-blue-900 text-lg">¿El propietario ya está registrado?</h3>
+                                    <p class="text-blue-700 text-sm mt-1">Busca por DNI para autocompletar los datos
+                                        automáticamente</p>
+                                </div>
+                            </div>
+
+                            <div class="form-group relative">
+                                <label for="buscarDni"
+                                    class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Buscar por DNI
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="buscarDni" min="1000000" max="99999999"
+                                        class="flex-1 px-4 py-3 bg-white border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                        placeholder="Ej: 12345678" />
+                                    <button type="button" onclick="buscarPersona()"
+                                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center gap-2 font-semibold shadow-md hover:shadow-lg hover:scale-105">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        Buscar
+                                    </button>
+                                    <button type="button" onclick="limpiarFormularioPersona()"
+                                        class="px-6 py-3 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-all duration-200 flex items-center gap-2 font-semibold shadow-md hover:shadow-lg"
+                                        title="Limpiar campos">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p id="busquedaResultado" class="mt-2 text-sm transition-all duration-300"></p>
+                            </div>
+                        </div>
+
                         <div class="space-y-6">
                             <div class="form-group relative">
                                 <label for="nombre"
@@ -275,7 +329,7 @@
                                         </svg>
                                         DNI
                                     </label>
-                                    <input type="number" min="10000000" th:field="*{persona.dni}" id="dni"
+                                    <input type="number" min="1000000" max="99999999" th:field="*{persona.dni}" id="dni"
                                         class="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                                         placeholder="12345678" required />
                                 </div>
@@ -314,6 +368,9 @@
                             </div>
                         </div>
                     </div>
+
+
+
 
                     <!-- Datos del Vehículo -->
                     <div>
@@ -420,8 +477,10 @@
         </div>
 
 
-
+ <script th:src="@{/js/persona.js}"></script>
     </main>
+
+       
 </body>
 
 </html>
