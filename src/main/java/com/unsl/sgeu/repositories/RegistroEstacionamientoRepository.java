@@ -56,7 +56,7 @@ public interface RegistroEstacionamientoRepository extends JpaRepository<Registr
    AND last.id_registro = grouped.last_id
   WHERE last.id_est = :idEst
     AND last.tipo_movimiento = 'ENTRADA'
-    AND TIMESTAMPDIFF(HOUR, last.fecha_hora, NOW()) >= 4
+    AND TIMESTAMPDIFF(HOUR, last.fecha_hora, CONVERT_TZ(NOW(), '+00:00', '-03:00')) >= 4
 """, nativeQuery = true)
 List<String> findPatentesAdentroMasDeCuatroHoras(@Param("idEst") Long idEst);
 
@@ -94,5 +94,17 @@ List<RegistroEstacionamiento> findRegistrosDePatentesImpares(@Param("idEst") Lon
   ORDER BY  re.fecha_hora DESC;
 """, nativeQuery = true)
 List<RegistroEstacionamiento> findRegistrosDePatentePares(@Param("idEst") Long idEst);
+
+
+@Query(value = """
+  SELECT re.*
+  FROM registro_estacionamiento re
+  WHERE re.id_est = :idEst
+    AND re.tipo_movimiento = 'SALIDA'
+    AND re.fecha_hora BETWEEN DATE(CONVERT_TZ(NOW(), '+00:00', '-03:00'))
+                          AND DATE(CONVERT_TZ(NOW(), '+00:00', '-03:00')) + INTERVAL 1 DAY
+  ORDER BY re.fecha_hora DESC
+""", nativeQuery = true)
+List<RegistroEstacionamiento> findRegistrosDeSalidasHoy(@Param("idEst") Long idEst);
 
 }
