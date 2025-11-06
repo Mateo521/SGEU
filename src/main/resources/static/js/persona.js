@@ -29,17 +29,17 @@ function buscarPersona() {
             }
         })
         .then(persona => {
-            // Autocompletar el formulario
+            // autocompletar el formulario
             document.getElementById('nombre').value = persona.nombre || '';
             document.getElementById('dni').value = persona.dni || '';
             document.getElementById('telefono').value = persona.telefono || '';
             document.getElementById('email').value = persona.email || '';
             document.getElementById('categoriaNombre').value = persona.categoriaNombre || '';
 
-            // Marcar como persona cargada
+            // marcar como persona cargada
             personaCargada = true;
 
-            // Deshabilitar campos para evitar edición (excepto email y teléfono por si cambiaron)
+            // deshabilitar campos para evitar edicion (excepto email y telefono por si cambiaron)
             document.getElementById('nombre').readOnly = true;
             document.getElementById('dni').readOnly = true;
             const categoriaElement = document.getElementById('categoriaNombre');
@@ -48,7 +48,7 @@ function buscarPersona() {
             // Y en limpiarFormularioPersona():
             categoriaElement.classList.remove('pointer-events-none', 'opacity-60');
 
-            // Cambiar el color de los campos para indicar que están autocompletados
+            // cambiar el color de los campos para indicar que estan autocompletados
             ['nombre', 'dni', 'telefono', 'email', 'categoriaNombre'].forEach(id => {
                 const element = document.getElementById(id);
                 element.classList.remove('bg-slate-50', 'border-slate-200');
@@ -63,7 +63,7 @@ function buscarPersona() {
                 Persona encontrada: ${persona.nombre}. Datos cargados automáticamente.
             `;
 
-            // Scroll suave hacia el formulario de vehículo
+            // scroll suave hacia el formulario de vehículo
             setTimeout(() => {
                 document.getElementById('patente')?.focus();
             }, 500);
@@ -130,7 +130,7 @@ function limpiarFormularioPersona(limpiarCampos = true) {
     categoriaElement.classList.add('bg-slate-50', 'border-slate-200');
 }
 
-// Permitir búsqueda con Enter en el campo de búsqueda
+// permitir busqueda con Enter en el campo de busqueda
 document.getElementById('buscarDni')?.addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -138,7 +138,7 @@ document.getElementById('buscarDni')?.addEventListener('keypress', function (e) 
     }
 });
 
-// Advertir si intenta cambiar datos de persona cargada
+//advertir si intenta cambiar datos de persona cargada
 ['nombre', 'dni', 'categoriaNombre'].forEach(id => {
     document.getElementById(id)?.addEventListener('focus', function () {
         if (personaCargada && this.readOnly) {

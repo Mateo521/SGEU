@@ -39,6 +39,7 @@ public class QRCodeServiceImpl implements QRCodeService {
             Files.createDirectories(directorio);
 
             try {
+                //controles para crear imagen en servidor (habilitar permisos de directorio y archivo)
                 if (Files.getFileStore(directorio).supportsFileAttributeView("posix")) {
                     var dirPerms = java.nio.file.attribute.PosixFilePermissions.fromString("rwxr-xr-x");
                     Files.setPosixFilePermissions(directorio, dirPerms);
@@ -47,11 +48,12 @@ public class QRCodeServiceImpl implements QRCodeService {
             }
         }
 
-        // Generar el QR
+        // generar el QR
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        //genera imagen (matriz de bits)
         BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT);
 
-        // Guardar a archivo
+        // guardar a archivo
         String nombreCompleto = "qr_" + nombreArchivo + ".png";
         Path rutaArchivo = directorio.resolve(nombreCompleto);
         MatrixToImageWriter.writeToPath(bitMatrix, "PNG", rutaArchivo);

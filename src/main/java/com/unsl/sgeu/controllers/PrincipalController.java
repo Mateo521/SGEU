@@ -61,29 +61,28 @@ public class PrincipalController {
 
         boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
         boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
-
+        // control de acceso
         if (!esAdministrador && !esGuardia) {
             model.addAttribute("error", "No tiene permisos para acceder a esta sección");
             return "error";
         }
 
-         
+        // creo paneles en caso de agregar mas funciones a vista principal
         List<PanelDTO> paneles = new ArrayList<>();
 
+        // solo guardia ve el panel de control de estacionamiento
         if (esGuardia) {
             try {
-                List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
 
+                List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
+                // actualmente es uno solo pero a futuro se puede escalar
                 for (EstacionamientoDTO est : estacionamientosGuardia) {
                     PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
 
                     panel.setVehiculosActualmente(
-                            registroEstacionamientoService
-                                    .obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
-                    panel.setIngresosDelDia(
-                            registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
-                    panel.setEgresosDelDia(
-                            registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
+                            registroEstacionamientoService.obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
+                    panel.setIngresosDelDia(registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
+                    panel.setEgresosDelDia(registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
 
                     paneles.add(panel);
                 }
@@ -94,11 +93,11 @@ public class PrincipalController {
             }
         }
 
-
         try {
-         
+
             List<VehiculoListadoDTO> todosLosVehiculos;
 
+            // en caso de buscar con formulario get
             if (buscar != null && !buscar.trim().isEmpty()) {
                 todosLosVehiculos = vehiculoService.buscarVehiculosConDuenio(buscar.trim());
             } else {
@@ -106,16 +105,16 @@ public class PrincipalController {
             }
 
             if (esGuardia) {
-                
+
             }
 
-           
-            int totalVehiculos = todosLosVehiculos.size();
-            int start = page * size;
-            int end = Math.min(start + size, totalVehiculos);
-
+            // todos los vehiculos
+            int totalVehiculos = todosLosVehiculos.size(); // 25
+            int start = page * size; // page=2, size=10 => start = 20
+            int end = Math.min(start + size, totalVehiculos); //
+            // paginacion manual
             List<VehiculoListadoDTO> vehiculosPaginados = (start < totalVehiculos)
-                    ? todosLosVehiculos.subList(start, end)
+                    ? todosLosVehiculos.subList(start, end) // sublist (20,25)
                     : new ArrayList<>();
 
             PaginaDTO<VehiculoListadoDTO> paginaVehiculos = new PaginaDTO<>(
@@ -123,13 +122,13 @@ public class PrincipalController {
                     page,
                     size,
                     totalVehiculos);
-
+            // deshabilitado actulamente (sin campo de estacionamiento de origen)
             Map<String, String> estacionamientosOrigen = new HashMap<>();
             if (esGuardia) {
                 for (VehiculoListadoDTO vehiculo : vehiculosPaginados) {
                     try {
-                        String estacionamientoOrigen = vehiculoService.obtenerEstacionamientoOrigenVehiculo(
-                                vehiculo.getPatente(), usuarioId);
+                        String estacionamientoOrigen = vehiculoService
+                                .obtenerEstacionamientoOrigenVehiculo(vehiculo.getPatente(), usuarioId);
                         estacionamientosOrigen.put(vehiculo.getPatente(), estacionamientoOrigen);
                     } catch (Exception e) {
                         System.err.println("Error obteniendo estacionamiento origen para " + vehiculo.getPatente()
@@ -146,16 +145,12 @@ public class PrincipalController {
         } catch (Exception e) {
             System.err.println("Error al obtener vehículos: " + e.getMessage());
             e.printStackTrace();
-
-             PaginaDTO<VehiculoListadoDTO> paginaVacia = new PaginaDTO<>(
-                    new ArrayList<>(), page, size, 0);
-
+            PaginaDTO<VehiculoListadoDTO> paginaVacia = new PaginaDTO<>(new ArrayList<>(), page, size, 0);
             model.addAttribute("vehiculos", new ArrayList<>());
             model.addAttribute("paginaVehiculos", paginaVacia);
             model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
         }
 
-      
         model.addAttribute("paneles", paneles);
         model.addAttribute("buscar", buscar);
         model.addAttribute("rol", rol);

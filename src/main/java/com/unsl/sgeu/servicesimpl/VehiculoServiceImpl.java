@@ -36,22 +36,21 @@ import org.springframework.data.domain.Pageable;
 
 @Service
 public class VehiculoServiceImpl implements VehiculoService {
-  
+
     private final VehiculoRepository vehiculoRepo;
     private final EstacionamientoService estacionamientoService;
     private final RegistroEstacionamientoService registroEstacionamientoService;
     private final PersonaService personaService;
     private final QRCodeService qrCodeService;
 
-     @Value("${qr.secret.salt:default-secret-change-me}")
+    @Value("${qr.secret.salt:default-secret-change-me}")
     private String secretSalt;
 
-   
     public VehiculoServiceImpl(
             VehiculoRepository vehiculoRepo,
             EstacionamientoService estacionamientoService,
-            @Lazy RegistroEstacionamientoService registroEstacionamientoService, // @Lazy para romper dependencia
-                                                                                 
+            @Lazy RegistroEstacionamientoService registroEstacionamientoService, // @Lazy para romper dependencia, evita ciclo 
+
             PersonaService personaService,
             QRCodeService qrCodeService) {
         this.vehiculoRepo = vehiculoRepo;
@@ -61,44 +60,50 @@ public class VehiculoServiceImpl implements VehiculoService {
         this.qrCodeService = qrCodeService;
     }
 
-    @Transactional
+    @Transactional // transactional para volver un paso atras en caso de error rollback/ atomicidad
+                   // todo o nada, evita datos inconsistentes
     public VehiculoRegistroResultadoDTO registrarNuevoVehiculo(RegistroVehiculoFormDTO form) {
         try {
+            // sets automaticos desde el front (thymeleaf) por data binding
+
             var personaForm = form.getPersona();
             var vehiculoForm = form.getVehiculo();
 
             String patente = vehiculoForm.getPatente();
+            // controlo patente unica
             if (existePatente(patente)) {
                 throw new VehiculoOperacionException(
                         "Ya existe un vehículo con la patente " + patente);
             }
-
+            // controlo categoria
             Integer categoriaId = mapearCategoriaAId(personaForm.getCategoriaNombre());
             if (categoriaId == null) {
                 throw new VehiculoOperacionException("Categoría inválida");
             }
-
+            // controlo que solo sea auto o moto y no otros
             Integer tipoId = mapearTipoAId(vehiculoForm.getTipoNombre());
             if (tipoId == null) {
                 throw new VehiculoOperacionException("Tipo de vehículo inválido");
             }
-
+// guardo o actualizo persona
             Long dni = personaForm.getDni();
             Persona persona = personaService.existePersona(dni)
                     ? personaService.buscarPorDni(dni)
                     : new Persona();
 
-            persona.setDni(dni);
+            persona.setDni(dni);//tiene que ser el mismo siempre
             persona.setNombre(personaForm.getNombre());
             persona.setTelefono(personaForm.getTelefono());
             persona.setEmail(personaForm.getEmail());
             persona.setIdCategoria(categoriaId);
             persona.setCategoria(personaForm.getCategoriaNombre());
+            //insert o update automatico
             personaService.guardarPersona(persona);
 
             String codigoQr = generarCodigoQR(patente);
 
             Vehiculo vehiculo = new Vehiculo();
+            // seteo los campos del vehiculo
             vehiculo.setPatente(patente);
             vehiculo.setCodigoQr(codigoQr);
             vehiculo.setModelo(vehiculoForm.getModelo());
@@ -111,19 +116,20 @@ public class VehiculoServiceImpl implements VehiculoService {
 
             String rutaArchivoQR = null;
             try {
+                //genero imagen QR hasheada
                 rutaArchivoQR = qrCodeService.generarImagenQR(
                         vehiculoGuardado.getCodigoQr(),
                         vehiculoGuardado.getPatente());
             } catch (Exception e) {
                 System.err.println("Error guardando archivo QR (no crítico): " + e.getMessage());
             }
-
+//obtengo ruta imagen qr o pongo ruta por defecto
             String rutaImagenQR = (rutaArchivoQR != null)
                     ? rutaArchivoQR
                     : "/sgeu/qr-codes/qr_" + vehiculoGuardado.getPatente() + ".png";
 
             String vehiculoInfo = crearInfoVehiculo(form, persona);
-
+//devuelvo el resultado del registro
             return new VehiculoRegistroResultadoDTO(
                     vehiculoGuardado.getPatente(),
                     vehiculoGuardado.getCodigoQr(),
@@ -216,16 +222,18 @@ public class VehiculoServiceImpl implements VehiculoService {
         // return true;
     }
 
-   @Override
+    @Override
     @Transactional(readOnly = true)
     public List<VehiculoListadoDTO> obtenerTodosConDuenio() {
+        // todos los vehiculos de la bd
         List<Vehiculo> vehiculos = vehiculoRepo.findAll();
-
+        // conjunto de dnis unicos
         Set<Long> dnis = vehiculos.stream()
-                .map(Vehiculo::getDniDuenio)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .map(Vehiculo::getDniDuenio)// lo transforma de vehiculo a long (dni)
+                .filter(Objects::nonNull)// descarto nulos
+                .collect(Collectors.toSet()); // elimina duplicados, evita consultas repetidas
 
+        // bsca todas las personas de una sola vez
         Map<Long, Persona> personasPorDni = personaService.buscarPorDnis(dnis).stream()
                 .collect(Collectors.toMap(Persona::getDni, Function.identity()));
 
@@ -234,16 +242,10 @@ public class VehiculoServiceImpl implements VehiculoService {
                 .collect(Collectors.toList());
     }
 
-
-    /**
-     * Búsqueda de vehículos por patente con datos de dueño.
-     * 
-     * @param buscar Texto de búsqueda (patente)
-     * @return Lista de DTOs filtrada
-     */
-       public List<VehiculoListadoDTO> buscarVehiculosConDuenio(String buscar) {
+    // busqueda de vehiculos por patente con datos de dueño
+    public List<VehiculoListadoDTO> buscarVehiculosConDuenio(String buscar) {
         List<Vehiculo> vehiculos;
-        
+
         if (buscar == null || buscar.trim().isEmpty()) {
             vehiculos = vehiculoRepo.findAll();
         } else {
@@ -531,16 +533,15 @@ public class VehiculoServiceImpl implements VehiculoService {
         }
     }
 
-      public String generarCodigoQR(String patente) {
-        //obtengo timestamp unico
+    public String generarCodigoQR(String patente) {
+        // obtengo timestamp unico
         long timestamp = System.currentTimeMillis();
-        //combino patente + timestamp + salt
+        // combino patente + timestamp + salt
         String datos = patente + timestamp + secretSalt;
-        System.out.println(datos);
+     
         String hash = hashSha256(datos);
         return "qr-" + hash;
     }
-    
 
     public List<Vehiculo> obtenerTodosVehiculosPorGuardia(Long guardiaId) {
         return obtenerTodos();
@@ -556,13 +557,12 @@ public class VehiculoServiceImpl implements VehiculoService {
         }
     }
 
- 
     private String hashSha256(String input) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); //obtengo especificamente el sha-256
-            //algoritmo trabaja con bytes
+            MessageDigest digest = MessageDigest.getInstance("SHA-256"); // obtengo especificamente el sha-256
+            // algoritmo trabaja con bytes
             byte[] hashBytes = digest.digest(input.getBytes());
-            StringBuilder hexString = new StringBuilder(); //convierto a valores imprimibles
+            StringBuilder hexString = new StringBuilder(); // convierto a valores imprimibles
             for (byte b : hashBytes) {
                 hexString.append(String.format("%02x", b));
             }

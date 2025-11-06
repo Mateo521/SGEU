@@ -1,6 +1,7 @@
 package com.unsl.sgeu.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -89,6 +90,14 @@ public class VehiculoController {
                 redirectAttributes.addFlashAttribute("error", resultado.getMensaje());
             }
 
+        } catch (DataIntegrityViolationException e) {
+
+            System.err.println("Error de integridad al eliminar vehículo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "No se puede eliminar el vehículo '" + patente.toUpperCase() +
+                            "' porque ya tuvo un ingreso anteriormente. " +
+                            "Debe eliminar con historial.");
+
         } catch (Exception e) {
             System.err.println("Error al eliminar vehículo: " + e.getMessage());
             e.printStackTrace();
@@ -135,7 +144,7 @@ public class VehiculoController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
-
+        // verifica si hay usuario en sesion
         if (session.getAttribute("user") == null) {
             return "redirect:/login";
         }
@@ -143,25 +152,26 @@ public class VehiculoController {
         String rol = (String) session.getAttribute("rol");
         boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
         boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
-
+        // obtengo los roles de guardia o administrador y filtro
         if (!esAdministrador && !esGuardia) {
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
             return "redirect:/";
         }
-
+        // validacion de campos con @valid y BindingResult (acumulativos)
         if (bindingResult.hasErrors()) {
             StringBuilder erroresMsg = new StringBuilder("Errores de validación:\n");
             bindingResult.getAllErrors().forEach(error -> {
                 String mensaje = error.getDefaultMessage();
                 erroresMsg.append("• ").append(mensaje).append("\n");
             });
-
+            // addflash para hacer redirect con errores
             redirectAttributes.addFlashAttribute("error", erroresMsg.toString());
             redirectAttributes.addFlashAttribute("vehiculoForm", form);
             return "redirect:/vehiculos/agregar";
         }
 
         try {
+            // hago el registro del vehiculo
             var resultado = vehiculoService.registrarNuevoVehiculo(form);
 
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
@@ -191,51 +201,45 @@ public class VehiculoController {
         }
     }
 
+    @GetMapping("/api/personas/buscar/{dni}")
+    @ResponseBody
+    public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession session) {
+        System.out.println("eeeentroroiertertieorio");
+        if (session.getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-@GetMapping("/api/personas/buscar/{dni}")
-@ResponseBody
-public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession session) {
-    System.out.println("eeeentroroiertertieorio");
-    if (session.getAttribute("user") == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-    
-    String rol = (String) session.getAttribute("rol");
-    boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
-    boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
+        String rol = (String) session.getAttribute("rol");
+        boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
+        boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
 
-    if (!esAdministrador && !esGuardia) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
-    
-    try {
-        Persona persona = personaService.buscarPorDni(dni);
+        if (!esAdministrador && !esGuardia) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
+        try {
+            Persona persona = personaService.buscarPorDni(dni);
 
             System.out.println("=== DEBUG: Persona encontrada: " + (persona != null));
 
-        
-        if (persona != null) {
-            // Convertir Persona a PersonaDTO
-            PersonaDTO personaDTO = new PersonaDTO();
-            personaDTO.setDni(persona.getDni());
-            personaDTO.setNombre(persona.getNombre());
-            personaDTO.setTelefono(persona.getTelefono());
-            personaDTO.setEmail(persona.getEmail());
-            personaDTO.setCategoriaNombre(persona.getCategoria() != null ?   persona.getCategoria() : "");
-            
-            return ResponseEntity.ok(personaDTO);
-        } else {
-            return ResponseEntity.notFound().build();
+            if (persona != null) {
+                // Convertir Persona a PersonaDTO
+                PersonaDTO personaDTO = new PersonaDTO();
+                personaDTO.setDni(persona.getDni());
+                personaDTO.setNombre(persona.getNombre());
+                personaDTO.setTelefono(persona.getTelefono());
+                personaDTO.setEmail(persona.getEmail());
+                personaDTO.setCategoriaNombre(persona.getCategoria() != null ? persona.getCategoria() : "");
+
+                return ResponseEntity.ok(personaDTO);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al buscar la persona: " + e.getMessage());
         }
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error al buscar la persona: " + e.getMessage());
     }
-}
-
-
-
 
     @GetMapping("/vehiculos/editar/{patente}")
     public String mostrarFormularioEdicion(
@@ -305,9 +309,6 @@ public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession
         }
     }
 
-
-
-
     @PostMapping("/vehiculos/editar/{patenteOriginal}")
     public String editarVehiculo(
             @PathVariable String patenteOriginal,
@@ -338,6 +339,17 @@ public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession
                 model.addAttribute("patenteOriginal", patenteOriginal);
                 model.addAttribute("esAdministrador", esAdministrador);
                 return "editarvehiculo";
+            }
+
+            var vehiculoActual = vehiculoService.buscarPorPatente(patenteOriginal);
+            if (vehiculoActual == null) {
+                bindingResult.reject("vehiculo.inexistente", "El vehículo no existe");
+            } else {
+                Long dniActual = vehiculoActual.getPropietario().getDni();
+                Long dniNuevo = form.getPersona().getDni();
+                if (!java.util.Objects.equals(dniActual, dniNuevo)) {
+                    bindingResult.rejectValue("persona.dni", "dni.noeditable", "El DNI no puede modificarse");
+                }
             }
 
             if (bindingResult.hasErrors()) {
@@ -392,10 +404,11 @@ public ResponseEntity<?> buscarPersonaPorDni(@PathVariable Long dni, HttpSession
         String patente = patente1.replaceAll("[^a-zA-Z0-9]", "");
         patente = patente.toUpperCase();
         EstacionamientoDTO est1 = estacionamientoService.obtener((Long) session.getAttribute("estacionamientoId"));
-        AccionEstacionamientoResultDTO accionResult = registroestacionamientoService.procesarAccion(patente, accion, est1, 0);
-        System.out.println(""+accionResult.isResultado());
+        AccionEstacionamientoResultDTO accionResult = registroestacionamientoService.procesarAccion(patente, accion,
+                est1, 0);
+        System.out.println("" + accionResult.isResultado());
         redirectAttributes.addFlashAttribute("resultado", accionResult.isResultado());
-        System.out.println(""+accionResult.getMensaje());
+        System.out.println("" + accionResult.getMensaje());
         redirectAttributes.addFlashAttribute("mensaje", accionResult.getMensaje());
 
         return "redirect:/ieManual";

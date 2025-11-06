@@ -293,9 +293,7 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
         try {
 
            
-            List<RegistroEstacionamiento> egresos = registroRepo
-                    .findRegistrosDePatentePares(
-                            idEstacionamiento);
+            List<RegistroEstacionamiento> egresos = registroRepo.findRegistrosDeSalidasHoy(idEstacionamiento);
 
             return egresos;
 
