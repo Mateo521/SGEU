@@ -168,53 +168,53 @@
 
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr th:each="vehiculo : ${vehiculos}" class="hover:bg-gray-50">
-                                <!-- Patente -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                             
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900" th:text="${vehiculo.patente}">ABC123
                                     </div>
                                 </td>
 
-                                <!-- Modelo -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                             
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.modelo ?: '—'}">Modelo</div>
                                 </td>
 
-                                <!-- Color -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                            
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.color ?: '—'}">Color</div>
                                 </td>
 
-                                <!-- Tipo -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                               
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <span
                                         class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
                                         th:text="${vehiculo.tipo ?: 'Sin tipo'}">Tipo</span>
                                 </td>
 
-                                <!-- ✅ NUEVO: Nombre del Dueño -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                            
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900"
                                         th:text="${vehiculo.nombreDuenio ?: '—'}">—</div>
                                 </td>
 
-                                <!-- DNI del Dueño -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.dniDuenio ?: '—'}">DNI</div>
                                 </td>
 
-                                <!-- ✅ NUEVO: Teléfono del Dueño -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-900" th:text="${vehiculo.telefonoDuenio ?: '—'}">—
                                     </div>
                                 </td>
 
-                                <!-- ✅ NUEVO: Email del Dueño -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                 
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="text-sm text-gray-500" th:text="${vehiculo.emailDuenio ?: '—'}">—</div>
                                 </td>
 
                                 <!-- QR (sin cambios) -->
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-2 py-3 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
                                         <div th:if="${vehiculo.codigoQr}" class="qr-mini">
                                             <img th:src="@{'/qr-codes/qr_' + ${vehiculo.patente} + '.png'}"
@@ -270,7 +270,7 @@
                                 </td>
 
                                 <!-- Acciones (sin cambios) -->
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <td class="px-2 py-3 whitespace-nowrap text-sm font-medium">
                                     <div class="flex space-x-2">
                                         <a th:href="@{/vehiculos/editar/{patente}(patente=${vehiculo.patente})}"
                                             class="text-yellow-600 hover:text-yellow-900 p-1 rounded" title="Editar">
