@@ -19,6 +19,7 @@ public class TurnoController {
         this.service = service;
     }
 
+    //este finaliza un turno (osea le da valor a fecha fin)
     @PutMapping("/{id}/finalizar")
     public TurnoDTO finalizar(@PathVariable Long id) {
         return service.finalizar(id);
@@ -52,17 +53,18 @@ public class TurnoController {
         return service.get(id);
     }
 
+    //Este recibe el formulario de el front
     @PostMapping
     public ResponseEntity<TurnoDTO> create(@Valid @RequestBody TurnoCreateDTO dto) {
         TurnoDTO created = service.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created); // 201
     }
-
+    //este es para editar un turno existente
     @PutMapping("/{id}")
     public TurnoDTO update(@PathVariable Long id, @Valid @RequestBody TurnoCreateDTO dto) {
         return service.update(id, dto);
     }
-
+    // eliminar un turno
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
