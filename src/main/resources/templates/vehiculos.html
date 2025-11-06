@@ -32,7 +32,7 @@
                     </p>
                 </div>
                 <div class="text-right">
-                    <div class="text-2xl font-bold" th:text="${#lists.size(vehiculos)}">0</div>
+                    <div class="text-2xl font-bold" th:text="${paginaVehiculos.totalElements}">0</div>
                     <div class="text-blue-100 text-sm">Vehículos totales</div>
                 </div>
             </div>
@@ -105,7 +105,7 @@
                         </a>
                     </form>
                 </div>
-                <a href="/vehiculos/agregar"
+                <a th:href="@{/vehiculos/agregar}"
                     class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

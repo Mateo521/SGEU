@@ -1,6 +1,7 @@
 package com.unsl.sgeu.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -89,6 +90,14 @@ public class VehiculoController {
                 redirectAttributes.addFlashAttribute("error", resultado.getMensaje());
             }
 
+        } catch (DataIntegrityViolationException e) {
+
+            System.err.println("Error de integridad al eliminar vehículo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error",
+                    "No se puede eliminar el vehículo '" + patente.toUpperCase() +
+                            "' porque ya tuvo un ingreso anteriormente. " +
+                            "Debe eliminar con historial.");
+
         } catch (Exception e) {
             System.err.println("Error al eliminar vehículo: " + e.getMessage());
             e.printStackTrace();
@@ -148,21 +157,21 @@ public class VehiculoController {
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
             return "redirect:/";
         }
-//      validacion de campos con @valid y BindingResult (acumulativos)
+        // validacion de campos con @valid y BindingResult (acumulativos)
         if (bindingResult.hasErrors()) {
             StringBuilder erroresMsg = new StringBuilder("Errores de validación:\n");
             bindingResult.getAllErrors().forEach(error -> {
                 String mensaje = error.getDefaultMessage();
                 erroresMsg.append("• ").append(mensaje).append("\n");
             });
-            //addflash para hacer redirect con errores
+            // addflash para hacer redirect con errores
             redirectAttributes.addFlashAttribute("error", erroresMsg.toString());
             redirectAttributes.addFlashAttribute("vehiculoForm", form);
             return "redirect:/vehiculos/agregar";
         }
 
         try {
-            //hago el registro del vehiculo
+            // hago el registro del vehiculo
             var resultado = vehiculoService.registrarNuevoVehiculo(form);
 
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
