@@ -24,7 +24,7 @@ public class LoginController {
 
         SessionDTO sesion = empleadoServices.autenticarYObtenerDatosSesion(nombreUsuario, contrasenia);
         if (!sesion.getLoginExitoso()) {
-            if (sesion instanceof com.unsl.sgeu.dto.SessionDTO && sesion.getMotivoFallo() != null && sesion.getMotivoFallo().equals("fuera_turno")) {
+            if (sesion.getMotivoFallo() != null && sesion.getMotivoFallo().equals("fuera_turno")) {
                 return "redirect:/sgeu/login?fuera_turno=true";
             }
             return "redirect:/sgeu/login?error=true";
