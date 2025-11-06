@@ -1,10 +1,10 @@
 package com.unsl.sgeu.servicesimpl;
 
-
 import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
 import com.unsl.sgeu.services.VehiculoService;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
+import com.unsl.sgeu.dto.PanelDTO;
 import com.unsl.sgeu.services.EstacionamientoService;
 import com.unsl.sgeu.services.EstadoVehiculo;
 import com.unsl.sgeu.services.RegistroEstacionamientoService;
@@ -38,15 +38,14 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
     @Autowired
     private EstacionamientoService estacionamientoService;
 
-
     public RegistroEstacionamiento registrarEntrada(String patente, EstacionamientoDTO est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
 
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
-         registro.setTipo("ENTRADA");
-         registro.setIdEstacionamiento(est.getId());
+        registro.setTipo("ENTRADA");
+        registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
         } else {
@@ -55,12 +54,47 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
         return registroRepo.save(registro);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PanelDTO> construirPanelesParaGuardia(Long usuarioId) {
+        List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
+        List<PanelDTO> paneles = new ArrayList<>();
+
+        for (EstacionamientoDTO est : estacionamientosGuardia) {
+            PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
+
+            try {
+                panel.setVehiculosActualmente(obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
+            } catch (Exception e) {
+    
+                panel.setVehiculosActualmente(new ArrayList<>());
+            }
+
+            try {
+                panel.setIngresosDelDia(obtenerIngresosDelDia(est.getId()));
+            } catch (Exception e) {
+                 panel.setIngresosDelDia(new ArrayList<>());
+            }
+
+            try {
+                panel.setEgresosDelDia(obtenerEgresosDelDia(est.getId()));
+            } catch (Exception e) {
+             
+                panel.setEgresosDelDia(new ArrayList<>());
+            }
+
+            paneles.add(panel);
+        }
+
+        return paneles;
+    }
+
     public RegistroEstacionamiento registrarSalida(String patente, EstacionamientoDTO est, int modo) {
         Vehiculo vehiculo = vehiculoRepo.findByPatente(patente);
         RegistroEstacionamiento registro = new RegistroEstacionamiento();
         registro.setPatente(vehiculo.getPatente());
         registro.setFechaHora(LocalDateTime.now());
-         registro.setTipo("SALIDA");
+        registro.setTipo("SALIDA");
         registro.setIdEstacionamiento(est.getId());
         if (modo == 0) {
             registro.setModo("MANUAL");
@@ -71,38 +105,35 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
         return registroRepo.save(registro);
     }
 
-
     public boolean esPar(String patente, EstacionamientoDTO est) {
-        
+
         long cantidad = registroRepo.countByPatenteAndIdEstacionamiento(patente, est.getId());
 
         return cantidad % 2 == 0;
     }
 
     public List<String> obtenerPatentesAdentroMasDeCuatroHoras(EstacionamientoDTO est) {
-         return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getId());
+        return registroRepo.findPatentesAdentroMasDeCuatroHoras(est.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void eliminarRegistrosPorPatente(String patente) {
         try {
-     
 
             long cantidadAntes = registroRepo.countByPatente(patente);
- 
+
             if (cantidadAntes > 0) {
                 int eliminados = registroRepo.deleteByPatente(patente);
- 
+
                 // Verificar que se eliminaronn
                 long cantidadDespues = registroRepo.countByPatente(patente);
- 
+
                 if (cantidadDespues > 0) {
                     throw new RuntimeException(
                             "No se pudieron eliminar todos los registros. Restantes: " + cantidadDespues);
                 }
             }
 
- 
         } catch (Exception e) {
             System.err.println("Error al eliminar registros: " + e.getMessage());
             e.printStackTrace();
@@ -110,17 +141,18 @@ public class RegistroEstacionamientoServiceImpl implements RegistroEstacionamien
         }
     }
 
-      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento, int modo) {
-        
+    public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion,
+            EstacionamientoDTO estacionamiento, int modo) {
+
         boolean exito = false;
         String mensaje = "";
 
-if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
+        if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
             if (estacionamientoIsFull(estacionamiento)) {
                 mensaje = "Estacionamiento lleno";
                 exito = false;
-                
-        return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
+
+                return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
             }
 
             else if (!vehiculoService.existePatente(patente)) {
@@ -158,7 +190,6 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
             return new AccionEstacionamientoResultDTO(exito, mensaje, patente, accion);
         }
     }
-
 
     public boolean vehiculoTieneRegistros(String patente) {
         try {
@@ -198,13 +229,13 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
 
     public EstadoVehiculo obtenerEstadoActualVehiculo(String patente) {
         try {
- 
+
             EstadoVehiculo estado = new EstadoVehiculo(patente);
 
             List<RegistroEstacionamiento> registros = registroRepo.findByPatenteOrderByFechaHoraDesc(patente);
 
             if (registros.isEmpty()) {
-                 estado.setTieneRegistros(false);
+                estado.setTieneRegistros(false);
                 estado.setEstaEstacionado(false);
                 estado.setNombreEstacionamiento("Sin registros");
                 return estado;
@@ -236,8 +267,6 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
             long cantidadLong = registroRepo.countByPatente(patente);
             estado.setCantidadRegistros((int) cantidadLong);
 
-       
-
             return estado;
 
         } catch (Exception e) {
@@ -254,11 +283,8 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
 
     public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento) {
         try {
- 
-            List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
 
-  
-             
+            List<RegistroEstacionamiento> vehiculosAdentro = new ArrayList<>();
 
             List<RegistroEstacionamiento> registrosHoy = registroRepo.findRegistrosDePatentesImpares(idEstacionamiento);
 
@@ -279,7 +305,6 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
 
             vehiculosAdentro.sort((a, b) -> b.getFechaHora().compareTo(a.getFechaHora()));
 
- 
             return vehiculosAdentro;
 
         } catch (Exception e) {
@@ -289,10 +314,9 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
         }
     }
 
-     public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
+    public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento) {
         try {
 
-           
             List<RegistroEstacionamiento> egresos = registroRepo.findRegistrosDeSalidasHoy(idEstacionamiento);
 
             return egresos;
@@ -306,7 +330,7 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
 
     public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento) {
         try {
- 
+
             LocalDateTime inicioDelDia = LocalDate.now().atStartOfDay();
             LocalDateTime finDelDia = LocalDate.now().atTime(23, 59, 59);
 
@@ -314,7 +338,7 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
                     .findByIdEstacionamientoAndTipoAndFechaHoraBetweenOrderByFechaHoraDesc(
                             idEstacionamiento, "ENTRADA", inicioDelDia, finDelDia);
 
-             return ingresos;
+            return ingresos;
 
         } catch (Exception e) {
             System.err.println(" Error obteniendo ingresos del día: " + e.getMessage());
@@ -325,7 +349,7 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
 
     public EstadoVehiculo obtenerEstadoDetallado(String patente) {
         try {
- 
+
             List<RegistroEstacionamiento> registros = registroRepo.findByPatenteOrderByFechaHoraDesc(patente);
 
             EstadoVehiculo estado = new EstadoVehiculo();
@@ -387,10 +411,10 @@ if ("ingreso".equalsIgnoreCase(accion) || "Entrada".equalsIgnoreCase(accion)) {
         }
     }
 
-   public boolean estacionamientoIsFull (EstacionamientoDTO est){
+    public boolean estacionamientoIsFull(EstacionamientoDTO est) {
 
         List<RegistroEstacionamiento> Re = registroRepo.findRegistrosDePatentesImpares(est.getId());
-         return Re.size() == est.getCapacidad();
+        return Re.size() == est.getCapacidad();
 
     }
 

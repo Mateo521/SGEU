@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.unsl.sgeu.dto.EstacionamientoDTO;
+import com.unsl.sgeu.dto.PaginaDTO;
 import com.unsl.sgeu.dto.RegistroVehiculoFormDTO;
 import com.unsl.sgeu.dto.VehiculoListadoDTO;
 import com.unsl.sgeu.dto.VehiculoRegistroResultadoDTO;
@@ -28,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 import com.unsl.sgeu.dto.VehiculoQRResponseDTO;
@@ -49,7 +51,8 @@ public class VehiculoServiceImpl implements VehiculoService {
     public VehiculoServiceImpl(
             VehiculoRepository vehiculoRepo,
             EstacionamientoService estacionamientoService,
-            @Lazy RegistroEstacionamientoService registroEstacionamientoService, // @Lazy para romper dependencia, evita ciclo 
+            @Lazy RegistroEstacionamientoService registroEstacionamientoService, // @Lazy para romper dependencia, evita
+                                                                                 // ciclo
 
             PersonaService personaService,
             QRCodeService qrCodeService) {
@@ -85,19 +88,19 @@ public class VehiculoServiceImpl implements VehiculoService {
             if (tipoId == null) {
                 throw new VehiculoOperacionException("Tipo de vehículo inválido");
             }
-// guardo o actualizo persona
+            // guardo o actualizo persona
             Long dni = personaForm.getDni();
             Persona persona = personaService.existePersona(dni)
                     ? personaService.buscarPorDni(dni)
                     : new Persona();
 
-            persona.setDni(dni);//tiene que ser el mismo siempre
+            persona.setDni(dni);// tiene que ser el mismo siempre
             persona.setNombre(personaForm.getNombre());
             persona.setTelefono(personaForm.getTelefono());
             persona.setEmail(personaForm.getEmail());
             persona.setIdCategoria(categoriaId);
             persona.setCategoria(personaForm.getCategoriaNombre());
-            //insert o update automatico
+            // insert o update automatico
             personaService.guardarPersona(persona);
 
             String codigoQr = generarCodigoQR(patente);
@@ -116,20 +119,20 @@ public class VehiculoServiceImpl implements VehiculoService {
 
             String rutaArchivoQR = null;
             try {
-                //genero imagen QR hasheada
+                // genero imagen QR hasheada
                 rutaArchivoQR = qrCodeService.generarImagenQR(
                         vehiculoGuardado.getCodigoQr(),
                         vehiculoGuardado.getPatente());
             } catch (Exception e) {
                 System.err.println("Error guardando archivo QR (no crítico): " + e.getMessage());
             }
-//obtengo ruta imagen qr o pongo ruta por defecto
+            // obtengo ruta imagen qr o pongo ruta por defecto
             String rutaImagenQR = (rutaArchivoQR != null)
                     ? rutaArchivoQR
                     : "/sgeu/qr-codes/qr_" + vehiculoGuardado.getPatente() + ".png";
 
             String vehiculoInfo = crearInfoVehiculo(form, persona);
-//devuelvo el resultado del registro
+            // devuelvo el resultado del registro
             return new VehiculoRegistroResultadoDTO(
                     vehiculoGuardado.getPatente(),
                     vehiculoGuardado.getCodigoQr(),
@@ -263,6 +266,66 @@ public class VehiculoServiceImpl implements VehiculoService {
         return vehiculos.stream()
                 .map(v -> new VehiculoListadoDTO(v, personasPorDni.get(v.getDniDuenio())))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaginaDTO<VehiculoListadoDTO> listarVehiculosConDuenioPaginado(String buscar, int page, int size) {
+        List<VehiculoListadoDTO> todosLosVehiculos;
+
+        if (buscar != null && !buscar.trim().isEmpty()) {
+            todosLosVehiculos = buscarVehiculosConDuenio(buscar.trim());
+        } else {
+            todosLosVehiculos = obtenerTodosConDuenio();
+        }
+
+        int total = todosLosVehiculos.size();
+        int start = page * size;
+        int end = Math.min(start + size, total);
+
+        List<VehiculoListadoDTO> paginados = (start < total)
+                ? todosLosVehiculos.subList(start, end)
+                : new ArrayList<>();
+
+        return new PaginaDTO<>(paginados, page, size, total);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<String, String> obtenerEstacionamientosOrigenBatch(java.util.List<String> patentes,
+            Long guardiaId) {
+        java.util.Map<String, String> resultado = new java.util.HashMap<>();
+        if (patentes == null || patentes.isEmpty())
+            return resultado;
+
+        try {
+            List<Long> idsEst = estacionamientoService.obtenerIdsPorEmpleado(guardiaId);
+            if (idsEst == null || idsEst.isEmpty()) {
+                // Si no tiene estacionamientos asignados
+                for (String p : patentes)
+                    resultado.put(p, "Desconocido");
+                return resultado;
+            }
+
+            // Simple: loop con el repo existente (puede ser N+1, pero es la versión simple
+            // solicitada)
+            for (String patente : patentes) {
+                try {
+                    String nombre = vehiculoRepo.findEstacionamientoOrigenByPatente(patente, idsEst);
+                    resultado.put(patente, nombre != null ? nombre : "Desconocido");
+                } catch (Exception ex) {
+                    System.err.println("Error obteniendo origen para " + patente + ": " + ex.getMessage());
+                    resultado.put(patente, "Desconocido");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error en obtenerEstacionamientosOrigenBatch: " + e.getMessage());
+            // fallback
+            for (String p : patentes)
+                resultado.put(p, "Desconocido");
+        }
+
+        return resultado;
     }
 
     private Integer mapearCategoriaAId(String categoria) {
@@ -538,7 +601,7 @@ public class VehiculoServiceImpl implements VehiculoService {
         long timestamp = System.currentTimeMillis();
         // combino patente + timestamp + salt
         String datos = patente + timestamp + secretSalt;
-     
+
         String hash = hashSha256(datos);
         return "qr-" + hash;
     }

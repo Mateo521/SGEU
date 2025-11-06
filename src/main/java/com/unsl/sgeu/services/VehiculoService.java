@@ -44,6 +44,10 @@ public interface VehiculoService {
 
     List<VehiculoListadoDTO> buscarVehiculosConDuenio(String buscar);
 
+    PaginaDTO<VehiculoListadoDTO> listarVehiculosConDuenioPaginado(String buscar, int page, int size);
+
+    java.util.Map<String, String> obtenerEstacionamientosOrigenBatch(java.util.List<String> patentes, Long guardiaId);
+
     // Eliminacion
     ResultadoEliminacion eliminarVehiculo(String patente);
 

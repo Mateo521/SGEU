@@ -48,8 +48,7 @@ public class PrincipalController {
     public String index(HttpSession session, Model model,
             @RequestParam(value = "buscar", required = false) String buscar,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            HttpServletRequest request) {
+            @RequestParam(value = "size", defaultValue = "10") int size) {
 
         if (session.getAttribute("user") == null) {
             return "redirect:/login";
@@ -59,34 +58,19 @@ public class PrincipalController {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         String nombreCompleto = (String) session.getAttribute("nombreCompleto");
 
-        boolean esAdministrador = "ADMINISTRADOR".equals(rol) || "Administrador".equals(rol);
-        boolean esGuardia = "GUARDIA".equals(rol) || "Guardia".equals(rol);
-        // control de acceso
+        boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol) || "Administrador".equalsIgnoreCase(rol);
+        boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol) || "Guardia".equalsIgnoreCase(rol);
+
         if (!esAdministrador && !esGuardia) {
             model.addAttribute("error", "No tiene permisos para acceder a esta sección");
             return "error";
         }
 
-        // creo paneles en caso de agregar mas funciones a vista principal
+        // paneles (solo guardia) 
         List<PanelDTO> paneles = new ArrayList<>();
-
-        // solo guardia ve el panel de control de estacionamiento
         if (esGuardia) {
             try {
-
-                List<EstacionamientoDTO> estacionamientosGuardia = estacionamientoService.obtenerPorEmpleado(usuarioId);
-                // actualmente es uno solo pero a futuro se puede escalar
-                for (EstacionamientoDTO est : estacionamientosGuardia) {
-                    PanelDTO panel = new PanelDTO(est.getId(), est.getNombre());
-
-                    panel.setVehiculosActualmente(
-                            registroEstacionamientoService.obtenerVehiculosActualmenteEnEstacionamiento(est.getId()));
-                    panel.setIngresosDelDia(registroEstacionamientoService.obtenerIngresosDelDia(est.getId()));
-                    panel.setEgresosDelDia(registroEstacionamientoService.obtenerEgresosDelDia(est.getId()));
-
-                    paneles.add(panel);
-                }
-
+                paneles = registroEstacionamientoService.construirPanelesParaGuardia(usuarioId);
             } catch (Exception e) {
                 System.err.println("Error generando panel: " + e.getMessage());
                 e.printStackTrace();
@@ -94,51 +78,20 @@ public class PrincipalController {
         }
 
         try {
+            //  paginacion
+            PaginaDTO<VehiculoListadoDTO> paginaVehiculos = vehiculoService.listarVehiculosConDuenioPaginado(
+                    (buscar != null ? buscar.trim() : null), page, size);
 
-            List<VehiculoListadoDTO> todosLosVehiculos;
-
-            // en caso de buscar con formulario get
-            if (buscar != null && !buscar.trim().isEmpty()) {
-                todosLosVehiculos = vehiculoService.buscarVehiculosConDuenio(buscar.trim());
-            } else {
-                todosLosVehiculos = vehiculoService.obtenerTodosConDuenio();
-            }
-
-            if (esGuardia) {
-
-            }
-
-            // todos los vehiculos
-            int totalVehiculos = todosLosVehiculos.size(); // 25
-            int start = page * size; // page=2, size=10 => start = 20
-            int end = Math.min(start + size, totalVehiculos); //
-            // paginacion manual
-            List<VehiculoListadoDTO> vehiculosPaginados = (start < totalVehiculos)
-                    ? todosLosVehiculos.subList(start, end) // sublist (20,25)
-                    : new ArrayList<>();
-
-            PaginaDTO<VehiculoListadoDTO> paginaVehiculos = new PaginaDTO<>(
-                    vehiculosPaginados,
-                    page,
-                    size,
-                    totalVehiculos);
-            // deshabilitado actulamente (sin campo de estacionamiento de origen)
+           
             Map<String, String> estacionamientosOrigen = new HashMap<>();
-            if (esGuardia) {
-                for (VehiculoListadoDTO vehiculo : vehiculosPaginados) {
-                    try {
-                        String estacionamientoOrigen = vehiculoService
-                                .obtenerEstacionamientoOrigenVehiculo(vehiculo.getPatente(), usuarioId);
-                        estacionamientosOrigen.put(vehiculo.getPatente(), estacionamientoOrigen);
-                    } catch (Exception e) {
-                        System.err.println("Error obteniendo estacionamiento origen para " + vehiculo.getPatente()
-                                + ": " + e.getMessage());
-                        estacionamientosOrigen.put(vehiculo.getPatente(), "Desconocido");
-                    }
-                }
+            if (esGuardia && !paginaVehiculos.getContent().isEmpty()) {
+                List<String> patentes = paginaVehiculos.getContent().stream()
+                        .map(VehiculoListadoDTO::getPatente)
+                        .toList();
+                estacionamientosOrigen = vehiculoService.obtenerEstacionamientosOrigenBatch(patentes, usuarioId);
             }
 
-            model.addAttribute("vehiculos", vehiculosPaginados);
+            model.addAttribute("vehiculos", paginaVehiculos.getContent());
             model.addAttribute("paginaVehiculos", paginaVehiculos);
             model.addAttribute("estacionamientosOrigen", estacionamientosOrigen);
 
@@ -148,6 +101,7 @@ public class PrincipalController {
             PaginaDTO<VehiculoListadoDTO> paginaVacia = new PaginaDTO<>(new ArrayList<>(), page, size, 0);
             model.addAttribute("vehiculos", new ArrayList<>());
             model.addAttribute("paginaVehiculos", paginaVacia);
+            model.addAttribute("estacionamientosOrigen", new HashMap<>());
             model.addAttribute("error", "Error al cargar vehículos: " + e.getMessage());
         }
 

@@ -4,6 +4,7 @@ import com.unsl.sgeu.repositories.RegistroEstacionamientoRepository;
 import com.unsl.sgeu.repositories.VehiculoRepository;
 import com.unsl.sgeu.services.VehiculoService;
 import com.unsl.sgeu.dto.EstacionamientoDTO;
+import com.unsl.sgeu.dto.PanelDTO;
 import com.unsl.sgeu.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,42 +24,39 @@ import java.util.Map;
 @Service
 public interface RegistroEstacionamientoService {
 
-  
+  public RegistroEstacionamiento registrarEntrada(String patente, EstacionamientoDTO est, int modo);
 
-    public RegistroEstacionamiento registrarEntrada(String patente, EstacionamientoDTO est, int modo);
+  public RegistroEstacionamiento registrarSalida(String patente, EstacionamientoDTO est, int modo);
 
-    public RegistroEstacionamiento registrarSalida(String patente, EstacionamientoDTO est, int modo) ;
+  public boolean esPar(String patente, EstacionamientoDTO est);
 
+  public List<String> obtenerPatentesAdentroMasDeCuatroHoras(EstacionamientoDTO est);
 
-    public boolean esPar(String patente, EstacionamientoDTO est) ;
+  List<PanelDTO> construirPanelesParaGuardia(Long usuarioId);
 
-    public List<String> obtenerPatentesAdentroMasDeCuatroHoras(EstacionamientoDTO est) ;
+  public void eliminarRegistrosPorPatente(String patente);
 
-   
-    
-    public void eliminarRegistrosPorPatente(String patente);
+  public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion,
+      EstacionamientoDTO estacionamiento, int modo);
 
-      public AccionEstacionamientoResultDTO procesarAccion(String patente, String accion, EstacionamientoDTO estacionamiento, int modo) ;
+  public boolean vehiculoTieneRegistros(String patente);
 
+  public boolean vehiculoEstaEstacionado(String patente);
 
-    public boolean vehiculoTieneRegistros(String patente);
+  public long contarRegistrosPorPatente(String patente);
 
-    public boolean vehiculoEstaEstacionado(String patente);
+  public EstadoVehiculo obtenerEstadoActualVehiculo(String patente);
 
-    public long contarRegistrosPorPatente(String patente);
+  public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento);
 
-    public EstadoVehiculo obtenerEstadoActualVehiculo(String patente);
+  public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento);
 
-    public List<RegistroEstacionamiento> obtenerVehiculosActualmenteEnEstacionamiento(Long idEstacionamiento);
+  public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento);
 
-     public List<RegistroEstacionamiento> obtenerEgresosDelDia(Long idEstacionamiento);
+  public EstadoVehiculo obtenerEstadoDetallado(String patente);
 
-    public List<RegistroEstacionamiento> obtenerIngresosDelDia(Long idEstacionamiento);
+  public String generarMensajeError(String patente);
 
-    public EstadoVehiculo obtenerEstadoDetallado(String patente);
-
-    public String generarMensajeError(String patente);
-
-   public boolean estacionamientoIsFull (EstacionamientoDTO est);
+  public boolean estacionamientoIsFull(EstacionamientoDTO est);
 
 }
