@@ -45,6 +45,10 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
     // Internamente ejecuta:
     // SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM empleado e WHERE nombre_usuario = :nombreUsuario
 
+    boolean existsByCorreo(String correo);
+    // Consulta sobre existencia por correo:
+    // SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END FROM empleado e WHERE correo = :correo
+
     Optional<Empleado> findByCorreoIgnoreCase(String correo);
     // Consulta case-insensitive sobre el correo:
     // SELECT * FROM empleado WHERE LOWER(correo) = LOWER(:correo)

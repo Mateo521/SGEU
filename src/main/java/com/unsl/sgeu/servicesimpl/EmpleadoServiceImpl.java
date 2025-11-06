@@ -35,18 +35,15 @@ public class EmpleadoServiceImpl implements EmpleadoServices {
     /* ===================== AUTH ===================== */
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public SessionDTO autenticarYObtenerDatosSesion(String nombreUsuario, String contrasenia) {
-        // 1) Verificar credenciales
         Optional<Empleado> opt = empleadoRepository.findByNombreUsuarioIgnoreCase(nombreUsuario);
         if (opt.isEmpty() || !passwordEncoder.matches(contrasenia, opt.get().getContrasenia())) {
             return SessionDTO.loginFallido();
         }
 
-        // 2) Obtener datos del empleado
         Empleado empleado = opt.get();
 
-        // 3) Si es guardia, validar turno activo y horario
         if (empleado.getRol() == Rol.Guardia) {
             var turnoOpt = turnoRepository.findByEmpleadoIdAndFechaFinIsNull(empleado.getId());
             if (turnoOpt.isEmpty()) {
@@ -59,10 +56,8 @@ public class EmpleadoServiceImpl implements EmpleadoServices {
             }
         }
 
-        // 4) Obtener estacionamiento activo
         Estacionamiento estacionamiento = turnoRepository.findEstacionamientoActivoByEmpleadoUsuario(nombreUsuario);
 
-        // 5) Construir DTO de sesión
         return SessionDTO.loginExitoso(
                 empleado.getId(),
                 empleado.getNombreUsuario(),
@@ -83,7 +78,7 @@ public class EmpleadoServiceImpl implements EmpleadoServices {
                             String contrasenia,
                             String correo,
                             Rol rol) {
-        if (empleadoRepository.existsByNombreUsuario(nombreUsuario)) {
+        if (empleadoRepository.existsByNombreUsuario(nombreUsuario) || empleadoRepository.existsByCorreo(correo)) {
             return false; // usuario ya existe
         }
         Empleado nuevo = new Empleado();
@@ -106,6 +101,21 @@ public class EmpleadoServiceImpl implements EmpleadoServices {
                             String contrasenia,
                             String correo,
                             String cargoStr) {
+        if (nombre == null || nombre.isBlank() ||
+            apellido == null || apellido.isBlank() ||
+            nombreUsuario == null || nombreUsuario.isBlank() ||
+            contrasenia == null || contrasenia.isBlank() ||
+            correo == null || correo.isBlank()) {
+            return false;
+        }
+
+        if (!correo.matches("^[^@]+@[^@]+\\.[a-zA-Z]{2,}$")) {
+            return false;
+        }
+
+        if (contrasenia.length() < 8) {
+            return false;
+        }
         Rol rol = ("Administrador".equalsIgnoreCase(cargoStr)) ? Rol.Administrador : Rol.Guardia;
         return register(nombre, apellido, nombreUsuario, contrasenia, correo, rol);
     }
