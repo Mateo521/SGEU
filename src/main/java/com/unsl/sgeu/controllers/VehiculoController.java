@@ -135,7 +135,7 @@ public class VehiculoController {
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes,
             HttpSession session) {
-
+        // verifica si hay usuario en sesion
         if (session.getAttribute("user") == null) {
             return "redirect:/login";
         }
@@ -143,25 +143,26 @@ public class VehiculoController {
         String rol = (String) session.getAttribute("rol");
         boolean esAdministrador = "ADMINISTRADOR".equalsIgnoreCase(rol);
         boolean esGuardia = "GUARDIA".equalsIgnoreCase(rol);
-
+        // obtengo los roles de guardia o administrador y filtro
         if (!esAdministrador && !esGuardia) {
             redirectAttributes.addFlashAttribute("error", "No tiene permisos para agregar vehículos");
             return "redirect:/";
         }
-
+//      validacion de campos con @valid y BindingResult (acumulativos)
         if (bindingResult.hasErrors()) {
             StringBuilder erroresMsg = new StringBuilder("Errores de validación:\n");
             bindingResult.getAllErrors().forEach(error -> {
                 String mensaje = error.getDefaultMessage();
                 erroresMsg.append("• ").append(mensaje).append("\n");
             });
-
+            //addflash para hacer redirect con errores
             redirectAttributes.addFlashAttribute("error", erroresMsg.toString());
             redirectAttributes.addFlashAttribute("vehiculoForm", form);
             return "redirect:/vehiculos/agregar";
         }
 
         try {
+            //hago el registro del vehiculo
             var resultado = vehiculoService.registrarNuevoVehiculo(form);
 
             redirectAttributes.addFlashAttribute("success", "Vehículo agregado exitosamente");
